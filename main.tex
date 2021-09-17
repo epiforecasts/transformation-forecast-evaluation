@@ -1,0 +1,183 @@
+\documentclass{article}
+\usepackage[]{graphicx}
+\usepackage[]{xcolor}
+\usepackage{alltt}
+\usepackage[left=2.3cm,right=2.8cm, top = 2.2cm, bottom = 3cm]{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{natbib}
+\PassOptionsToPackage{hyphens}{url}
+\usepackage{url}
+\usepackage[disable]{todonotes}
+\usepackage{multicol}
+\usepackage{rotating}
+\usepackage{booktabs}
+\usepackage[colorlinks=false]{hyperref} 
+\urlstyle{same}
+\usepackage{lineno}
+\linenumbers
+
+
+% to handle authorship footnotes as numbers:
+\makeatletter
+\let\@fnsymbol\@arabic
+\makeatother
+
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+\newcommand{\changed}[1]{#1}
+
+
+\begin{document}
+
+
+\title{To log or not to log}
+  \author{Anonymous Alpaca\thanks{All Alpaca friends} $^{,}$\thanks{The Zoo} $^{ , *}$}
+
+\maketitle
+
+\begin{abstract}
+In the abstract, this article is a very good one. 
+\end{abstract}
+
+\bigskip
+
+{\footnotesize $^*$ Correspondence to: Anonymous Alpaca (\url{anonymous@alpaca.com}))}
+
+
+
+\newpage
+
+% General thought: maybe easier to do with WIS rather than CRPS? 
+
+\section{Introduction}
+
+\paragraph{Context about scoring}
+
+\begin{itemize}
+    \item what is a probabilistic forecast and a proper scoring rule, what are scores used for
+    \item CRPS generalisation of absolute error
+    \item idea of scores on logged data: interpretation as a measure of relative improvement, just as when you log the absolute error
+\end{itemize}
+
+\paragraph{What's there in the literature}
+
+\paragraph{Current problems / questions about scoring an epidemiological setting}
+%probably narrow down to the ones we really want to discuss%
+There are limitations with what we can do with scores on a natural scale and open questions whether we can do these things on a log-scale and also whether a log-scale might be inherently more appropriate
+\begin{itemize}
+    \item can't really compare quantities on different orders of magnitudes
+    \item Can't really model score on a natural scale as errors are heavily skewed. Is there a way to model scores to get insight about different factors that systematically influence scores
+    \item Maybe epidemiological forecasts are inherently better suited to be scored on an absolute scale due to the multiplicative nature of processes (related to over-prediction > under-prediction)? Does the log-scale imply we are scoring the growth rate? 
+    \item unclear what trade-offs of logging / not logging are
+    \item what score (log, not log) matches closest what our intuition (or policymakers) think is good? 
+    \item are we better at forecasting deaths than cases? --> relative measure would help
+    \item There exists confusion about what can be done to a score in general (e.g. people want to take the median, which they shouldn't) %maybe don't add as an extra point
+\end{itemize}
+
+\paragraph{Outline of what we do}
+
+\begin{enumerate}
+    \item Effects / Interpretation of scoring on a log scale
+    \item Appropriate scales for epidemiological (and possibly other) processes
+    \item Modelling log scores
+\end{enumerate}
+
+
+\section{Effects / Interpretation of scoring on a log scale}
+
+\paragraph{How to log and what happens}
+\begin{itemize}
+    \item take log of (observation or truth + 1) 
+    \item discuss how equations change for CRPS, WIS
+    \item Optional: What happens to the decomposition of the WIS if we log?
+    \item Optional: Discussion of parallels to point forecasts \\
+\end{itemize}
+
+
+\paragraph{What happens to the WIS / CRPS when you log it?}
+Discuss Johannes' Figure from the WIS paper and what changes when you go from natural to log \\
+
+\paragraph{Interpretation of scores on log-scale}
+
+\begin{itemize}
+    \item We can interpret as a relative measure
+    \item scale-free
+\end{itemize}
+
+\paragraph{Practical considerations / limitations}
+
+\begin{itemize}
+    \item Before: lot of weight to scores of targets that are large
+    \item Now: Potentially a lot of weight to things that are small
+    \item Relative weight depends on the relation between mean and variance of the thing we analyse. If variance grows quicker / slower than the mean, than we give more / less relative weight to large things
+\end{itemize}
+
+\paragraph{Option: empirical analysis} 
+Score different things from the European / US Forecast Hub and plot the relationship between mean and variance. Plot log-scale scores for different things and see which of these influence average scores most \\
+What happens to the decomposition of the WIS if we log? 
+
+
+
+\section{Appropriate scales for epidemiological processes}
+%Could also make this more general and compare any additive, multiplicative or even other processes and state which scale would be appropriate. 
+
+\paragraph{Scoring epidemiological processes}
+Epidemiological processes are generally multiplicative, others may be additive or even something else. We want to explore whether epidemiological processes should in principle be scored on a log scale. Also: are there any processes which shouldn't be scored on a log scale? 
+
+\paragraph{What is the interpretation of logging in an epidemiological setting and is it appropriate?}
+
+\paragraph{Over- and under-prediction}
+If we want to keep this in, we could: 
+\begin{itemize}
+    \item Check whether there is actually a problem with over-prediction and under-prediction in the Hub. This could be the case because we are most interested in certain scenarios in which this might arise. 
+    \item Discuss this in light of Johannes' analysis of how the decomposition of WIS values differs if the data are skewed
+    \item compare this to the PIT-value-like relative bias scores we used for the German / Polish paper, which capture a relative tendency to over- or under-predict, rather than absolute penalties. 
+\end{itemize}
+
+\paragraph{Toy example: simulate an epidemic and apply 3 different modelse} Compare scores for these three models on the natural scale and the log scale
+
+\paragraph{Optional: Empirical differences when going from natural to log-scale} 
+We could score a lot of forecasts of the European Hub and show plots about how scores differs when going from natural to log-scale
+
+
+\section{Modelling scores}
+\paragraph{Motivation} Alternative is to use summary measures or pairwise comparison, which becomes cumbersome for many dimensions. 
+
+\paragraph{caveats, practical limitations}
+\begin{itemize}
+    \item What kind of transformations can we do? Propose random effect models
+    \item is there anything we can't do? 
+    \item How does logging change the error distribution? On the natural scale, you have huge outliers. What's the appropriate error distribution to use? confidence intervals. Maybe we can only say something about the effects
+\end{itemize}
+
+
+\paragraph{Optional: Application to data from the Euro-Hub}
+Also: what, empirically is the distribution of errors? 
+
+\section{Other ideas}
+\begin{itemize}
+    \item Compare different predictive distributions and the score as a function of an outcome.
+    \item ...
+\end{itemize}
+
+
+
+
+\section{Discussion}
+
+\paragraph{summary of what we did}
+
+\paragraph{context, implications, limitations}
+
+\paragraph{outlook, future work}
+
+
+ 
+
+
+
+
+\newpage
+
+
+\end{document}

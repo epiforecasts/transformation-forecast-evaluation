@@ -31,6 +31,8 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
         languageserver \
         httpgd \
         tinytex \
+        jsonlite \
+        rlang \
     && rm -rf /tmp/downloaded_packages
 
 # VSCode R Debugger dependency, install the latest release version from GitHub.

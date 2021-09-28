@@ -1,5 +1,10 @@
 list(
   tar_target(
+    toy_forecasts_csv, 
+    save_csv(toy_forecasts, here("output/data/toy_forecasts.csv")),
+    format = "file"
+  ),
+  tar_target(
     toy_scores_csv, 
     save_csv(toy_all_scores, here("output/data/toy_all_scores.csv")),
     format = "file"

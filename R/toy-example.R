@@ -34,6 +34,10 @@ plot_toy_forecasts <- function(forecasts, growth = 0.01, samples = 10,
     geom_line(alpha = alpha) +
     theme_bw() +
     theme(legend.position = "bottom") +
+    labs(x = "Forecast horizon", y = "Simulated value",
+         caption = "Points represent simulated true values whilst each line
+                    represents a sample forecast with some error. The plot is
+                    stratified by growth rate and additive error.") +
     facet_grid(vars(additive_error), vars(r_error))
 }
 
@@ -47,10 +51,15 @@ plot_toy_scores_by_horizon <- function(scores) {
     ungroup() |>
     ggplot() +
     aes(y = relative_crps, x = time, col = r_error, group = r_error) +
-    geom_point(alpha = 0.8) +
-    geom_line(alpha = 0.8) +
+    geom_point(alpha = 0.6) +
+    geom_line(alpha = 0.4) +
+    scale_color_viridis_c() +
     theme_bw() +
     theme(legend.position = "bottom") +
+    labs(x = "Forecast horizon", y = "CRPS relative to maximum panel value",
+         col = "Growth rate error",
+         caption = "The plot is stratified by true growth rate and additive
+                    error with growth rate error included in each panel.") +
     facet_grid(vars(additive_error), vars(r))
 }
 
@@ -69,7 +78,13 @@ plot_toy_scores_by_scale <- function(scores) {
     aes(y = log, x = natural, col = r_error, group = r_error) +
     geom_abline(intercept = 0, slope = 1, linetype = 2) +
     geom_point(alpha = 0.8) +
+    scale_color_viridis_c() +
     theme_bw() +
     theme(legend.position = "bottom") +
+    labs(x = "Natural scale CRPS relative to maximum panel value",
+         y = "Log scale CRPS relative to maximum panel value",
+         col = "Growth rate error",
+         caption = "The plot is stratified by true growth rate and additive
+                    error with growth rate error included in each panel.") +
     facet_grid(vars(additive_error), vars(r))
 }

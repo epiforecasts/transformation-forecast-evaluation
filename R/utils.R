@@ -1,7 +1,7 @@
 #' Save a plot and return the ppath for targets
 #' @importFrom ggplot2 ggsave
 save_plot <- function(plot, filename, ...) {
-  ggplot2::ggsave(filename, plot, height = 8, width = 8)
+  ggplot2::ggsave(filename, plot, height = 9, width = 9)
   return(filename)
 }
 

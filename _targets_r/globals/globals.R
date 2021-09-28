@@ -8,5 +8,5 @@ walk(functions, source)
 tar_option_set(
   packages = c("tibble", "tidyr", "dplyr", "scoringutils", "ggplot2", "purrr",
                "readr"),
-  error = "workspace"
+  error = "continue"
 )

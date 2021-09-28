@@ -1,24 +1,23 @@
 #' Simulate Count data using an underlying exponential process and a Poisson
 #' Observation model.
 #' @importFrom tibble tibble
-#' @importFrom purrr map
+#' @importFrom purrr map map_dbl
 #' @importFrom tidyr unnest
 simulate_exp_poisson <- function(init = 100, time = 10, growth = 0,
                                  additive_error = 0, sims = 1) {
   y <- init * exp(cumsum(rep(growth, time)))
   y <- y + cumsum(rep(additive_error, time))
-  y <- max(0, y)
+  y <- purrr::map_dbl(y, ~ max(., 0))
   obs <- tibble::tibble(
     sim = list(1:sims),
     time = 1:time,
     y = y,
     obs = purrr::map(y, function(lambda) {
-      set.seed(runif(1, 0, 100) + lambda)
-      rpois(sims, lambda)
+        rpois(sims, lambda)
       }
     )
   )
-  obs <- tidyr::unnest(obs, cols = c(obs, sim))
+  obs <- tidyr::unnest(obs, c(obs, sim))
   return(obs)
 }
 

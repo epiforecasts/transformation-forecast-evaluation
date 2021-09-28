@@ -14,6 +14,7 @@ Set up the workflow pipeline and options. We first load the `targets` package an
 
 ```{r}
 library(targets)
+library(tarchetypes)
 library(tibble)
 library(tidyr)
 library(dplyr)
@@ -31,10 +32,14 @@ We now define shared global options across our workflow and load R functions fro
 options(tidyverse.quiet = TRUE)
 library(purrr)
 library(here)
+library(tibble)
+library(tarchetypes)
 functions <- list.files(here("R"), full.names = TRUE)
 walk(functions, source)
 tar_option_set(
-  packages = c("tibble", "tidyr", "dplyr", "scoringutils", "ggplot2", "purrr")
+  packages = c("tibble", "tidyr", "dplyr", "scoringutils", "ggplot2", "purrr",
+               "readr"),
+  error = "workspace"
 )
 ```
 
@@ -42,12 +47,18 @@ tar_option_set(
 
 As a toy example we simulate a grid of data with varying exponential growth rates and a Poisson observation model. As example forecasts we use the same simulation model but add error to either the growth rate or the mean of observations. We do this using the following steps,
 
-- Define a grid of scenarios including the true values (zero growth rate or cumulative linear error).
+- Define a set of growth rates to explore.
+
+```{targets toy_globals, tar_globals = TRUE}
+toy_growth_rates <- tibble(r = c(0, 0.01, 0.1, -0.01, -0.1))
+```
+
+- Define a grid of scenarios including the true values (zero growth rate and cumulative linear error) for this set of growth rates.
 
 ```{targets toy_scenarios, tar_simple = TRUE}
 expand_grid(
   init = c(100),
-  r = c(0, 0.01, 0.1, -0.01, -0.1),
+  r = toy_growth_rates$r,
   r_error = c(0, 0.01, 0.025, 0.05, 0.1, -0.01, -0.025, -0.05, -0.1),
   additive_error = c(0, 1, 10, -1, -10)
 ) |> 
@@ -79,10 +90,30 @@ toy_simulations |>
 
 ```{targets toy_forecasts, tar_simple = TRUE}
 toy_simulations |>
-  filter(!(r_error == 0 & additive_error == 0)) |>
   select(init, r, r_error, additive_error, time, sample = sim,
          prediction = obs) |>
   left_join(toy_truth, by = c("init", "r", "time"))
+```
+
+- Plot simulated observations and forecasts for each growth rate stratified by assumed growth rate and additive error.
+
+```{targets plot_toy_forecasts, tar_interactive = FALSE}
+tar_map(
+  toy_growth_rates,
+  tar_target(
+    toy_forecasts_plot,
+    plot_toy_forecasts(toy_forecasts, growth = r[[1]],
+                       alpha = 0.2, samples = 10)
+  ),
+  tar_target(
+    plot_toy_forecasts_file,
+    save_plot(
+      toy_forecasts_plot, 
+      here("output", "figures", 
+           paste0("plot_toy_forecasts_", r[[1]], ".png"))
+    ),
+    format = "file")
+)
 ```
 
 - Score example forecasts and summarise by growth rate, growth rate error, additive error, and forecast horizon.
@@ -119,26 +150,26 @@ toy_log_scores |>
 
 - Plot natural scale scores by horizon.
 
-```{targets plot_toy_scores_by_horizon, tar_simple = TRUE}
+```{targets toy_scores_by_horizon_plot, tar_simple = TRUE}
 toy_scores |>
   filter(time <= 4) |>
-  plot_scores_by_horizon()
+  plot_toy_scores_by_horizon()
 ```
 
 - Plot log scale scores by horizon.
 
-```{targets plot_toy_log_scores_by_horizon, tar_simple = TRUE}
+```{targets toy_log_scores_by_horizon_plot, tar_simple = TRUE}
 toy_log_scores |>
   filter(time <= 4) |>
-  plot_scores_by_horizon()
+  plot_toy_scores_by_horizon()
 ```
 
 - Plot log and natural scale scores for the 4 week horizon.
 
-```{targets plot_toy_scores_by_scale, tar_simple = TRUE}
+```{targets toy_scores_by_scale_plot, tar_simple = TRUE}
 toy_all_scores |>
   filter(time == 4) |>
-  plot_scores_by_scale()
+  plot_toy_scores_by_scale()
 ```
 
 - Save output for external use.
@@ -152,19 +183,19 @@ list(
   ),
   tar_target(
     toy_scores_by_scale_file, 
-    save_plot(plot_toy_scores_by_scale, 
+    save_plot(toy_scores_by_scale_plot, 
               here("output", "figures", "toy_scores_by_scale.png"),
     format = "file")
             ),
   tar_target(
     toy_scores_by_horizon_file, 
-    save_plot(plot_toy_scores_by_horizon, 
+    save_plot(toy_scores_by_horizon_plot, 
               here("output", "figures", "toy_scores_by_horizon.png"),
     format = "file")
             ),
   tar_target(
     toy_log_scores_by_horizon_file, 
-    save_plot(plot_toy_log_scores_by_horizon, 
+    save_plot(toy_log_scores_by_horizon_plot, 
               here("output", "figures", "toy_log_scores_by_horizon.png"),
     format = "file")
             )

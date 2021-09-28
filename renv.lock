@@ -58,6 +58,20 @@
       "Repository": "RSPM",
       "Hash": "543776ae6848fde2f48ff3816d0628bc"
     },
+    "bit": {
+      "Package": "bit",
+      "Version": "4.0.4",
+      "Source": "Repository",
+      "Repository": "RSPM",
+      "Hash": "f36715f14d94678eea9933af927bc15d"
+    },
+    "bit64": {
+      "Package": "bit64",
+      "Version": "4.0.5",
+      "Source": "Repository",
+      "Repository": "RSPM",
+      "Hash": "9fe98599ca456d6552421db0d6772d8f"
+    },
     "callr": {
       "Package": "callr",
       "Version": "3.7.0",
@@ -71,6 +85,13 @@
       "Source": "Repository",
       "Repository": "RSPM",
       "Hash": "e3ae5d68dea0c55a12ea12a9fda02e61"
+    },
+    "clipr": {
+      "Package": "clipr",
+      "Version": "0.7.1",
+      "Source": "Repository",
+      "Repository": "RSPM",
+      "Hash": "ebaa97ac99cc2daf04e77eecc7b781d7"
     },
     "codetools": {
       "Package": "codetools",
@@ -212,6 +233,13 @@
       "Repository": "RSPM",
       "Hash": "8eb36c8125038e648e5d111c0d7b2ed4"
     },
+    "hms": {
+      "Package": "hms",
+      "Version": "1.1.0",
+      "Source": "Repository",
+      "Repository": "RSPM",
+      "Hash": "e4bf161ccb74a2c1c0e8ac63bbe332b4"
+    },
     "htmltools": {
       "Package": "htmltools",
       "Version": "0.5.2",
@@ -317,12 +345,26 @@
       "Repository": "RSPM",
       "Hash": "01f28d4278f15c76cddbea05899c5d6f"
     },
+    "prettyunits": {
+      "Package": "prettyunits",
+      "Version": "1.1.1",
+      "Source": "Repository",
+      "Repository": "RSPM",
+      "Hash": "95ef9167b75dde9d2ccc3c7528393e7e"
+    },
     "processx": {
       "Package": "processx",
       "Version": "3.5.2",
       "Source": "Repository",
       "Repository": "RSPM",
       "Hash": "0cbca2bc4d16525d009c4dbba156b37c"
+    },
+    "progress": {
+      "Package": "progress",
+      "Version": "1.2.2",
+      "Source": "Repository",
+      "Repository": "RSPM",
+      "Hash": "14dc9f7a3c91ebb14ec5bb9208a07061"
     },
     "ps": {
       "Package": "ps",
@@ -337,6 +379,13 @@
       "Source": "Repository",
       "Repository": "RSPM",
       "Hash": "97def703420c8ab10d8f0e6c72101e02"
+    },
+    "readr": {
+      "Package": "readr",
+      "Version": "2.0.1",
+      "Source": "Repository",
+      "Repository": "RSPM",
+      "Hash": "34807ea4fb5900386ddef904eef8bdb8"
     },
     "renv": {
       "Package": "renv",
@@ -436,6 +485,13 @@
       "Repository": "RSPM",
       "Hash": "6e0ad90ac5669e35d5456cb61b295acb"
     },
+    "tzdb": {
+      "Package": "tzdb",
+      "Version": "0.1.2",
+      "Source": "Repository",
+      "Repository": "RSPM",
+      "Hash": "fb2b801053decce71295bb8cb04d438b"
+    },
     "utf8": {
       "Package": "utf8",
       "Version": "1.2.2",
@@ -456,6 +512,13 @@
       "Source": "Repository",
       "Repository": "RSPM",
       "Hash": "55e157e2aa88161bdb0754218470d204"
+    },
+    "vroom": {
+      "Package": "vroom",
+      "Version": "1.5.5",
+      "Source": "Repository",
+      "Repository": "RSPM",
+      "Hash": "9c3b3a3f947c7936cea7485349247e5b"
     },
     "withr": {
       "Package": "withr",

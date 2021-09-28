@@ -604,201 +604,249 @@ body {
 <h1 id="setup">Setup</h1>
 <p>Set up the workflow pipeline and options. We first load the <code>targets</code> package and remove the potentially outdated workflow.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1"><span class="kw">library</span>(targets)</a>
-<a class="sourceLine" id="cb1-2" title="2"><span class="kw">library</span>(tibble)</a>
-<a class="sourceLine" id="cb1-3" title="3"><span class="kw">library</span>(tidyr)</a>
-<a class="sourceLine" id="cb1-4" title="4"><span class="kw">library</span>(dplyr)</a>
-<a class="sourceLine" id="cb1-5" title="5"><span class="kw">library</span>(scoringutils)</a>
-<a class="sourceLine" id="cb1-6" title="6"><span class="kw">library</span>(ggplot2)</a>
-<a class="sourceLine" id="cb1-7" title="7"><span class="kw">library</span>(purrr)</a>
-<a class="sourceLine" id="cb1-8" title="8"><span class="kw">library</span>(here)</a>
-<a class="sourceLine" id="cb1-9" title="9"><span class="kw">tar_unscript</span>()</a></code></pre></div>
+<a class="sourceLine" id="cb1-2" title="2"><span class="kw">library</span>(tarchetypes)</a>
+<a class="sourceLine" id="cb1-3" title="3"><span class="kw">library</span>(tibble)</a>
+<a class="sourceLine" id="cb1-4" title="4"><span class="kw">library</span>(tidyr)</a>
+<a class="sourceLine" id="cb1-5" title="5"><span class="kw">library</span>(dplyr)</a>
+<a class="sourceLine" id="cb1-6" title="6"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb1-7" title="7"><span class="co">#&gt; Attaching package: &#39;dplyr&#39;</span></a>
+<a class="sourceLine" id="cb1-8" title="8"><span class="co">#&gt; The following objects are masked from &#39;package:stats&#39;:</span></a>
+<a class="sourceLine" id="cb1-9" title="9"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb1-10" title="10"><span class="co">#&gt;     filter, lag</span></a>
+<a class="sourceLine" id="cb1-11" title="11"><span class="co">#&gt; The following objects are masked from &#39;package:base&#39;:</span></a>
+<a class="sourceLine" id="cb1-12" title="12"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb1-13" title="13"><span class="co">#&gt;     intersect, setdiff, setequal, union</span></a>
+<a class="sourceLine" id="cb1-14" title="14"><span class="kw">library</span>(scoringutils)</a>
+<a class="sourceLine" id="cb1-15" title="15"><span class="co">#&gt; Note: The definition of the weighted interval score has slightly changed in version 0.1.5. If you want to use the old definition, use the argument `count_median_twice = TRUE` in the function `eval_forecasts()`</span></a>
+<a class="sourceLine" id="cb1-16" title="16"><span class="kw">library</span>(ggplot2)</a>
+<a class="sourceLine" id="cb1-17" title="17"><span class="kw">library</span>(purrr)</a>
+<a class="sourceLine" id="cb1-18" title="18"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb1-19" title="19"><span class="co">#&gt; Attaching package: &#39;purrr&#39;</span></a>
+<a class="sourceLine" id="cb1-20" title="20"><span class="co">#&gt; The following object is masked from &#39;package:scoringutils&#39;:</span></a>
+<a class="sourceLine" id="cb1-21" title="21"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb1-22" title="22"><span class="co">#&gt;     update_list</span></a>
+<a class="sourceLine" id="cb1-23" title="23"><span class="kw">library</span>(here)</a>
+<a class="sourceLine" id="cb1-24" title="24"><span class="co">#&gt; here() starts at /workspaces/log-or-not</span></a>
+<a class="sourceLine" id="cb1-25" title="25"><span class="kw">tar_unscript</span>()</a></code></pre></div>
 <p>We now define shared global options across our workflow and load R functions from the <code>R</code> folder.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1"><span class="kw">options</span>(<span class="dt">tidyverse.quiet =</span> <span class="ot">TRUE</span>)</a>
 <a class="sourceLine" id="cb2-2" title="2"><span class="kw">library</span>(purrr)</a>
 <a class="sourceLine" id="cb2-3" title="3"><span class="kw">library</span>(here)</a>
-<a class="sourceLine" id="cb2-4" title="4">functions &lt;-<span class="st"> </span><span class="kw">list.files</span>(<span class="kw">here</span>(<span class="st">&quot;R&quot;</span>), <span class="dt">full.names =</span> <span class="ot">TRUE</span>)</a>
-<a class="sourceLine" id="cb2-5" title="5"><span class="kw">walk</span>(functions, source)</a>
-<a class="sourceLine" id="cb2-6" title="6"><span class="kw">tar_option_set</span>(</a>
-<a class="sourceLine" id="cb2-7" title="7">  <span class="dt">packages =</span> <span class="kw">c</span>(<span class="st">&quot;tibble&quot;</span>, <span class="st">&quot;tidyr&quot;</span>, <span class="st">&quot;dplyr&quot;</span>, <span class="st">&quot;scoringutils&quot;</span>, <span class="st">&quot;ggplot2&quot;</span>, <span class="st">&quot;purrr&quot;</span>)</a>
-<a class="sourceLine" id="cb2-8" title="8">)</a>
-<a class="sourceLine" id="cb2-9" title="9"><span class="co">#&gt; Establish _targets.R and _targets_r/globals/globals.R.</span></a></code></pre></div>
+<a class="sourceLine" id="cb2-4" title="4"><span class="kw">library</span>(tibble)</a>
+<a class="sourceLine" id="cb2-5" title="5"><span class="kw">library</span>(tarchetypes)</a>
+<a class="sourceLine" id="cb2-6" title="6">functions &lt;-<span class="st"> </span><span class="kw">list.files</span>(<span class="kw">here</span>(<span class="st">&quot;R&quot;</span>), <span class="dt">full.names =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb2-7" title="7"><span class="kw">walk</span>(functions, source)</a>
+<a class="sourceLine" id="cb2-8" title="8"><span class="kw">tar_option_set</span>(</a>
+<a class="sourceLine" id="cb2-9" title="9">  <span class="dt">packages =</span> <span class="kw">c</span>(<span class="st">&quot;tibble&quot;</span>, <span class="st">&quot;tidyr&quot;</span>, <span class="st">&quot;dplyr&quot;</span>, <span class="st">&quot;scoringutils&quot;</span>, <span class="st">&quot;ggplot2&quot;</span>, <span class="st">&quot;purrr&quot;</span>,</a>
+<a class="sourceLine" id="cb2-10" title="10">               <span class="st">&quot;readr&quot;</span>),</a>
+<a class="sourceLine" id="cb2-11" title="11">  <span class="dt">error =</span> <span class="st">&quot;workspace&quot;</span></a>
+<a class="sourceLine" id="cb2-12" title="12">)</a>
+<a class="sourceLine" id="cb2-13" title="13"><span class="co">#&gt; Establish _targets.R and _targets_r/globals/globals.R.</span></a></code></pre></div>
 <h1 id="toy-example">Toy example</h1>
 <p>As a toy example we simulate a grid of data with varying exponential growth rates and a Poisson observation model. As example forecasts we use the same simulation model but add error to either the growth rate or the mean of observations. We do this using the following steps,</p>
 <ul>
-<li>Define a grid of scenarios including the true values (zero growth rate or cumulative linear error).</li>
+<li>Define a set of growth rates to explore.</li>
 </ul>
 <!-- end list -->
 
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1"><span class="kw">tar_target</span>(toy_scenarios, {</a>
-<a class="sourceLine" id="cb3-2" title="2">  <span class="kw">expand_grid</span>(</a>
-<a class="sourceLine" id="cb3-3" title="3">    <span class="dt">init =</span> <span class="kw">c</span>(<span class="dv">100</span>),</a>
-<a class="sourceLine" id="cb3-4" title="4">    <span class="dt">r =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="fl">0.01</span>, <span class="fl">0.1</span>, <span class="fl">-0.01</span>, <span class="fl">-0.1</span>),</a>
-<a class="sourceLine" id="cb3-5" title="5">    <span class="dt">r_error =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="fl">0.01</span>, <span class="fl">0.025</span>, <span class="fl">0.05</span>, <span class="fl">0.1</span>, <span class="fl">-0.01</span>, <span class="fl">-0.025</span>, <span class="fl">-0.05</span>, <span class="fl">-0.1</span>),</a>
-<a class="sourceLine" id="cb3-6" title="6">    <span class="dt">additive_error =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">10</span>, <span class="dv">-1</span>, <span class="dv">-10</span>)</a>
-<a class="sourceLine" id="cb3-7" title="7">  ) <span class="op">|</span><span class="er">&gt;</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb3-8" title="8"><span class="st">    </span><span class="kw">mutate</span>(<span class="dt">id =</span> <span class="dv">1</span><span class="op">:</span><span class="kw">n</span>())</a>
-<a class="sourceLine" id="cb3-9" title="9">})</a>
-<a class="sourceLine" id="cb3-10" title="10"><span class="co">#&gt; Define target toy_scenarios from chunk code.</span></a>
-<a class="sourceLine" id="cb3-11" title="11"><span class="co">#&gt; Establish _targets.R and _targets_r/targets/toy_scenarios.R.</span></a></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1">toy_growth_rates &lt;-<span class="st"> </span><span class="kw">tibble</span>(<span class="dt">r =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="fl">0.01</span>, <span class="fl">0.1</span>, <span class="fl">-0.01</span>, <span class="fl">-0.1</span>))</a>
+<a class="sourceLine" id="cb3-2" title="2"><span class="co">#&gt; Establish _targets.R and _targets_r/globals/toy_globals.R.</span></a></code></pre></div>
+<ul>
+<li>Define a grid of scenarios including the true values (zero growth rate and cumulative linear error) for this set of growth rates.</li>
+</ul>
+<!-- end list -->
+
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1"><span class="kw">tar_target</span>(toy_scenarios, {</a>
+<a class="sourceLine" id="cb4-2" title="2">  <span class="kw">expand_grid</span>(</a>
+<a class="sourceLine" id="cb4-3" title="3">    <span class="dt">init =</span> <span class="kw">c</span>(<span class="dv">100</span>),</a>
+<a class="sourceLine" id="cb4-4" title="4">    <span class="dt">r =</span> toy_growth_rates<span class="op">$</span>r,</a>
+<a class="sourceLine" id="cb4-5" title="5">    <span class="dt">r_error =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="fl">0.01</span>, <span class="fl">0.025</span>, <span class="fl">0.05</span>, <span class="fl">0.1</span>, <span class="fl">-0.01</span>, <span class="fl">-0.025</span>, <span class="fl">-0.05</span>, <span class="fl">-0.1</span>),</a>
+<a class="sourceLine" id="cb4-6" title="6">    <span class="dt">additive_error =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">10</span>, <span class="dv">-1</span>, <span class="dv">-10</span>)</a>
+<a class="sourceLine" id="cb4-7" title="7">  ) <span class="op">|</span><span class="er">&gt;</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb4-8" title="8"><span class="st">    </span><span class="kw">mutate</span>(<span class="dt">id =</span> <span class="dv">1</span><span class="op">:</span><span class="kw">n</span>())</a>
+<a class="sourceLine" id="cb4-9" title="9">})</a>
+<a class="sourceLine" id="cb4-10" title="10"><span class="co">#&gt; Define target toy_scenarios from chunk code.</span></a>
+<a class="sourceLine" id="cb4-11" title="11"><span class="co">#&gt; Establish _targets.R and _targets_r/targets/toy_scenarios.R.</span></a></code></pre></div>
 <ul>
 <li>Simulate each scenario a 1000 times.</li>
 </ul>
 <!-- end list -->
 
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1"><span class="kw">tar_target</span>(toy_simulations, {</a>
-<a class="sourceLine" id="cb4-2" title="2">  toy_scenarios <span class="op">|</span><span class="er">&gt;</span></a>
-<a class="sourceLine" id="cb4-3" title="3"><span class="st">    </span><span class="kw">rowwise</span>() <span class="op">|</span><span class="er">&gt;</span></a>
-<a class="sourceLine" id="cb4-4" title="4"><span class="st">    </span><span class="kw">mutate</span>(<span class="dt">y =</span> <span class="kw">list</span>(</a>
-<a class="sourceLine" id="cb4-5" title="5">      <span class="kw">simulate_exp_poisson</span>(<span class="dt">init =</span> init, <span class="dt">time =</span> <span class="dv">4</span>, <span class="dt">growth =</span> r <span class="op">+</span><span class="st"> </span>r_error,</a>
-<a class="sourceLine" id="cb4-6" title="6">                           <span class="dt">additive_error =</span> additive_error, <span class="dt">sims =</span> <span class="dv">1000</span>)</a>
-<a class="sourceLine" id="cb4-7" title="7">      )</a>
-<a class="sourceLine" id="cb4-8" title="8">    ) <span class="op">|</span><span class="er">&gt;</span></a>
-<a class="sourceLine" id="cb4-9" title="9"><span class="st">    </span><span class="kw">unnest</span>(<span class="dt">cols =</span> <span class="kw">c</span>(y))</a>
-<a class="sourceLine" id="cb4-10" title="10">})</a>
-<a class="sourceLine" id="cb4-11" title="11"><span class="co">#&gt; Define target toy_simulations from chunk code.</span></a>
-<a class="sourceLine" id="cb4-12" title="12"><span class="co">#&gt; Establish _targets.R and _targets_r/targets/toy_simulations.R.</span></a></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1"><span class="kw">tar_target</span>(toy_simulations, {</a>
+<a class="sourceLine" id="cb5-2" title="2">  toy_scenarios <span class="op">|</span><span class="er">&gt;</span></a>
+<a class="sourceLine" id="cb5-3" title="3"><span class="st">    </span><span class="kw">rowwise</span>() <span class="op">|</span><span class="er">&gt;</span></a>
+<a class="sourceLine" id="cb5-4" title="4"><span class="st">    </span><span class="kw">mutate</span>(<span class="dt">y =</span> <span class="kw">list</span>(</a>
+<a class="sourceLine" id="cb5-5" title="5">      <span class="kw">simulate_exp_poisson</span>(<span class="dt">init =</span> init, <span class="dt">time =</span> <span class="dv">4</span>, <span class="dt">growth =</span> r <span class="op">+</span><span class="st"> </span>r_error,</a>
+<a class="sourceLine" id="cb5-6" title="6">                           <span class="dt">additive_error =</span> additive_error, <span class="dt">sims =</span> <span class="dv">1000</span>)</a>
+<a class="sourceLine" id="cb5-7" title="7">      )</a>
+<a class="sourceLine" id="cb5-8" title="8">    ) <span class="op">|</span><span class="er">&gt;</span></a>
+<a class="sourceLine" id="cb5-9" title="9"><span class="st">    </span><span class="kw">unnest</span>(<span class="dt">cols =</span> <span class="kw">c</span>(y))</a>
+<a class="sourceLine" id="cb5-10" title="10">})</a>
+<a class="sourceLine" id="cb5-11" title="11"><span class="co">#&gt; Define target toy_simulations from chunk code.</span></a>
+<a class="sourceLine" id="cb5-12" title="12"><span class="co">#&gt; Establish _targets.R and _targets_r/targets/toy_simulations.R.</span></a></code></pre></div>
 <ul>
 <li>Filter for the “truth” scenario and keep only the first simulation.</li>
 </ul>
 <!-- end list -->
 
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1"><span class="kw">tar_target</span>(toy_truth, {</a>
-<a class="sourceLine" id="cb5-2" title="2">  toy_simulations <span class="op">|</span><span class="er">&gt;</span></a>
-<a class="sourceLine" id="cb5-3" title="3"><span class="st">    </span><span class="kw">filter</span>(r_error <span class="op">==</span><span class="st"> </span><span class="dv">0</span>, additive_error <span class="op">==</span><span class="st"> </span><span class="dv">0</span>, sim <span class="op">==</span><span class="st"> </span><span class="dv">1</span>) <span class="op">|</span><span class="er">&gt;</span></a>
-<a class="sourceLine" id="cb5-4" title="4"><span class="st">    </span><span class="kw">select</span>(init, r, time, <span class="dt">true_value =</span> obs)</a>
-<a class="sourceLine" id="cb5-5" title="5">})</a>
-<a class="sourceLine" id="cb5-6" title="6"><span class="co">#&gt; Define target toy_truth from chunk code.</span></a>
-<a class="sourceLine" id="cb5-7" title="7"><span class="co">#&gt; Establish _targets.R and _targets_r/targets/toy_truth.R.</span></a></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" title="1"><span class="kw">tar_target</span>(toy_truth, {</a>
+<a class="sourceLine" id="cb6-2" title="2">  toy_simulations <span class="op">|</span><span class="er">&gt;</span></a>
+<a class="sourceLine" id="cb6-3" title="3"><span class="st">    </span><span class="kw">filter</span>(r_error <span class="op">==</span><span class="st"> </span><span class="dv">0</span>, additive_error <span class="op">==</span><span class="st"> </span><span class="dv">0</span>, sim <span class="op">==</span><span class="st"> </span><span class="dv">1</span>) <span class="op">|</span><span class="er">&gt;</span></a>
+<a class="sourceLine" id="cb6-4" title="4"><span class="st">    </span><span class="kw">select</span>(init, r, time, <span class="dt">true_value =</span> obs)</a>
+<a class="sourceLine" id="cb6-5" title="5">})</a>
+<a class="sourceLine" id="cb6-6" title="6"><span class="co">#&gt; Define target toy_truth from chunk code.</span></a>
+<a class="sourceLine" id="cb6-7" title="7"><span class="co">#&gt; Establish _targets.R and _targets_r/targets/toy_truth.R.</span></a></code></pre></div>
 <ul>
 <li>Filter for all other scenarios.</li>
 </ul>
 <!-- end list -->
 
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" title="1"><span class="kw">tar_target</span>(toy_forecasts, {</a>
-<a class="sourceLine" id="cb6-2" title="2">  toy_simulations <span class="op">|</span><span class="er">&gt;</span></a>
-<a class="sourceLine" id="cb6-3" title="3"><span class="st">    </span><span class="kw">filter</span>(<span class="op">!</span>(r_error <span class="op">==</span><span class="st"> </span><span class="dv">0</span> <span class="op">&amp;</span><span class="st"> </span>additive_error <span class="op">==</span><span class="st"> </span><span class="dv">0</span>)) <span class="op">|</span><span class="er">&gt;</span></a>
-<a class="sourceLine" id="cb6-4" title="4"><span class="st">    </span><span class="kw">select</span>(init, r, r_error, additive_error, time, <span class="dt">sample =</span> sim,</a>
-<a class="sourceLine" id="cb6-5" title="5">           <span class="dt">prediction =</span> obs) <span class="op">|</span><span class="er">&gt;</span></a>
-<a class="sourceLine" id="cb6-6" title="6"><span class="st">    </span><span class="kw">left_join</span>(toy_truth, <span class="dt">by =</span> <span class="kw">c</span>(<span class="st">&quot;init&quot;</span>, <span class="st">&quot;r&quot;</span>, <span class="st">&quot;time&quot;</span>))</a>
-<a class="sourceLine" id="cb6-7" title="7">})</a>
-<a class="sourceLine" id="cb6-8" title="8"><span class="co">#&gt; Define target toy_forecasts from chunk code.</span></a>
-<a class="sourceLine" id="cb6-9" title="9"><span class="co">#&gt; Establish _targets.R and _targets_r/targets/toy_forecasts.R.</span></a></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1"><span class="kw">tar_target</span>(toy_forecasts, {</a>
+<a class="sourceLine" id="cb7-2" title="2">  toy_simulations <span class="op">|</span><span class="er">&gt;</span></a>
+<a class="sourceLine" id="cb7-3" title="3"><span class="st">    </span><span class="kw">select</span>(init, r, r_error, additive_error, time, <span class="dt">sample =</span> sim,</a>
+<a class="sourceLine" id="cb7-4" title="4">           <span class="dt">prediction =</span> obs) <span class="op">|</span><span class="er">&gt;</span></a>
+<a class="sourceLine" id="cb7-5" title="5"><span class="st">    </span><span class="kw">left_join</span>(toy_truth, <span class="dt">by =</span> <span class="kw">c</span>(<span class="st">&quot;init&quot;</span>, <span class="st">&quot;r&quot;</span>, <span class="st">&quot;time&quot;</span>))</a>
+<a class="sourceLine" id="cb7-6" title="6">})</a>
+<a class="sourceLine" id="cb7-7" title="7"><span class="co">#&gt; Define target toy_forecasts from chunk code.</span></a>
+<a class="sourceLine" id="cb7-8" title="8"><span class="co">#&gt; Establish _targets.R and _targets_r/targets/toy_forecasts.R.</span></a></code></pre></div>
+<ul>
+<li>Plot simulated observations and forecasts for each growth rate stratified by assumed growth rate and additive error.</li>
+</ul>
+<!-- end list -->
+
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" title="1"><span class="kw">tar_map</span>(</a>
+<a class="sourceLine" id="cb8-2" title="2">  toy_growth_rates,</a>
+<a class="sourceLine" id="cb8-3" title="3">  <span class="kw">tar_target</span>(</a>
+<a class="sourceLine" id="cb8-4" title="4">    toy_forecasts_plot,</a>
+<a class="sourceLine" id="cb8-5" title="5">    <span class="kw">plot_toy_forecasts</span>(toy_forecasts, <span class="dt">growth =</span> r[[<span class="dv">1</span>]],</a>
+<a class="sourceLine" id="cb8-6" title="6">                       <span class="dt">alpha =</span> <span class="fl">0.2</span>, <span class="dt">samples =</span> <span class="dv">10</span>)</a>
+<a class="sourceLine" id="cb8-7" title="7">  ),</a>
+<a class="sourceLine" id="cb8-8" title="8">  <span class="kw">tar_target</span>(</a>
+<a class="sourceLine" id="cb8-9" title="9">    plot_toy_forecasts_file,</a>
+<a class="sourceLine" id="cb8-10" title="10">    <span class="kw">save_plot</span>(</a>
+<a class="sourceLine" id="cb8-11" title="11">      toy_forecasts_plot, </a>
+<a class="sourceLine" id="cb8-12" title="12">      <span class="kw">here</span>(<span class="st">&quot;output&quot;</span>, <span class="st">&quot;figures&quot;</span>, </a>
+<a class="sourceLine" id="cb8-13" title="13">           <span class="kw">paste0</span>(<span class="st">&quot;plot_toy_forecasts_&quot;</span>, r[[<span class="dv">1</span>]], <span class="st">&quot;.png&quot;</span>))</a>
+<a class="sourceLine" id="cb8-14" title="14">    ),</a>
+<a class="sourceLine" id="cb8-15" title="15">    <span class="dt">format =</span> <span class="st">&quot;file&quot;</span>)</a>
+<a class="sourceLine" id="cb8-16" title="16">)</a>
+<a class="sourceLine" id="cb8-17" title="17"><span class="co">#&gt; Establish _targets.R and _targets_r/targets/plot_toy_forecasts.R.</span></a></code></pre></div>
 <ul>
 <li>Score example forecasts and summarise by growth rate, growth rate error, additive error, and forecast horizon.</li>
 </ul>
 <!-- end list -->
 
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1"><span class="kw">tar_target</span>(toy_scores, {</a>
-<a class="sourceLine" id="cb7-2" title="2">  toy_forecasts <span class="op">|</span><span class="er">&gt;</span></a>
-<a class="sourceLine" id="cb7-3" title="3"><span class="st">    </span><span class="kw">eval_forecasts</span>(</a>
-<a class="sourceLine" id="cb7-4" title="4">      <span class="dt">summarise_by =</span> <span class="kw">c</span>(<span class="st">&quot;init&quot;</span>, <span class="st">&quot;r&quot;</span>, <span class="st">&quot;r_error&quot;</span>, <span class="st">&quot;additive_error&quot;</span>, <span class="st">&quot;time&quot;</span>),</a>
-<a class="sourceLine" id="cb7-5" title="5">      <span class="dt">metrics =</span> <span class="kw">c</span>(<span class="st">&quot;crps&quot;</span>)</a>
-<a class="sourceLine" id="cb7-6" title="6">    )</a>
-<a class="sourceLine" id="cb7-7" title="7">})</a>
-<a class="sourceLine" id="cb7-8" title="8"><span class="co">#&gt; Define target toy_scores from chunk code.</span></a>
-<a class="sourceLine" id="cb7-9" title="9"><span class="co">#&gt; Establish _targets.R and _targets_r/targets/toy_scores.R.</span></a></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" title="1"><span class="kw">tar_target</span>(toy_scores, {</a>
+<a class="sourceLine" id="cb9-2" title="2">  toy_forecasts <span class="op">|</span><span class="er">&gt;</span></a>
+<a class="sourceLine" id="cb9-3" title="3"><span class="st">    </span><span class="kw">eval_forecasts</span>(</a>
+<a class="sourceLine" id="cb9-4" title="4">      <span class="dt">summarise_by =</span> <span class="kw">c</span>(<span class="st">&quot;init&quot;</span>, <span class="st">&quot;r&quot;</span>, <span class="st">&quot;r_error&quot;</span>, <span class="st">&quot;additive_error&quot;</span>, <span class="st">&quot;time&quot;</span>),</a>
+<a class="sourceLine" id="cb9-5" title="5">      <span class="dt">metrics =</span> <span class="kw">c</span>(<span class="st">&quot;crps&quot;</span>)</a>
+<a class="sourceLine" id="cb9-6" title="6">    )</a>
+<a class="sourceLine" id="cb9-7" title="7">})</a>
+<a class="sourceLine" id="cb9-8" title="8"><span class="co">#&gt; Define target toy_scores from chunk code.</span></a>
+<a class="sourceLine" id="cb9-9" title="9"><span class="co">#&gt; Establish _targets.R and _targets_r/targets/toy_scores.R.</span></a></code></pre></div>
 <ul>
 <li>Repeat the scoring process but on the log scale.</li>
 </ul>
 <!-- end list -->
 
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" title="1"><span class="kw">tar_target</span>(toy_log_scores, {</a>
-<a class="sourceLine" id="cb8-2" title="2">  toy_forecasts <span class="op">|</span><span class="er">&gt;</span></a>
-<a class="sourceLine" id="cb8-3" title="3"><span class="st">    </span><span class="kw">mutate</span>(<span class="kw">across</span>(<span class="dt">.cols =</span> <span class="kw">c</span>(<span class="st">&quot;true_value&quot;</span>, <span class="st">&quot;prediction&quot;</span>), <span class="op">~</span><span class="st"> </span><span class="kw">log</span>(.x))) <span class="op">|</span><span class="er">&gt;</span></a>
-<a class="sourceLine" id="cb8-4" title="4"><span class="st">    </span><span class="kw">eval_forecasts</span>(</a>
-<a class="sourceLine" id="cb8-5" title="5">      <span class="dt">summarise_by =</span> <span class="kw">c</span>(<span class="st">&quot;init&quot;</span>, <span class="st">&quot;r&quot;</span>, <span class="st">&quot;r_error&quot;</span>, <span class="st">&quot;additive_error&quot;</span>, <span class="st">&quot;time&quot;</span>),</a>
-<a class="sourceLine" id="cb8-6" title="6">      <span class="dt">metrics =</span> <span class="kw">c</span>(<span class="st">&quot;crps&quot;</span>)</a>
-<a class="sourceLine" id="cb8-7" title="7">    )</a>
-<a class="sourceLine" id="cb8-8" title="8">})</a>
-<a class="sourceLine" id="cb8-9" title="9"><span class="co">#&gt; Define target toy_log_scores from chunk code.</span></a>
-<a class="sourceLine" id="cb8-10" title="10"><span class="co">#&gt; Establish _targets.R and _targets_r/targets/toy_log_scores.R.</span></a></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" title="1"><span class="kw">tar_target</span>(toy_log_scores, {</a>
+<a class="sourceLine" id="cb10-2" title="2">  toy_forecasts <span class="op">|</span><span class="er">&gt;</span></a>
+<a class="sourceLine" id="cb10-3" title="3"><span class="st">    </span><span class="kw">mutate</span>(<span class="kw">across</span>(<span class="dt">.cols =</span> <span class="kw">c</span>(<span class="st">&quot;true_value&quot;</span>, <span class="st">&quot;prediction&quot;</span>), <span class="op">~</span><span class="st"> </span><span class="kw">log</span>(.x))) <span class="op">|</span><span class="er">&gt;</span></a>
+<a class="sourceLine" id="cb10-4" title="4"><span class="st">    </span><span class="kw">eval_forecasts</span>(</a>
+<a class="sourceLine" id="cb10-5" title="5">      <span class="dt">summarise_by =</span> <span class="kw">c</span>(<span class="st">&quot;init&quot;</span>, <span class="st">&quot;r&quot;</span>, <span class="st">&quot;r_error&quot;</span>, <span class="st">&quot;additive_error&quot;</span>, <span class="st">&quot;time&quot;</span>),</a>
+<a class="sourceLine" id="cb10-6" title="6">      <span class="dt">metrics =</span> <span class="kw">c</span>(<span class="st">&quot;crps&quot;</span>)</a>
+<a class="sourceLine" id="cb10-7" title="7">    )</a>
+<a class="sourceLine" id="cb10-8" title="8">})</a>
+<a class="sourceLine" id="cb10-9" title="9"><span class="co">#&gt; Define target toy_log_scores from chunk code.</span></a>
+<a class="sourceLine" id="cb10-10" title="10"><span class="co">#&gt; Establish _targets.R and _targets_r/targets/toy_log_scores.R.</span></a></code></pre></div>
 <ul>
 <li>Join log and natural scale scores.</li>
 </ul>
 <!-- end list -->
 
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" title="1"><span class="kw">tar_target</span>(toy_all_scores, {</a>
-<a class="sourceLine" id="cb9-2" title="2">  toy_log_scores <span class="op">|</span><span class="er">&gt;</span></a>
-<a class="sourceLine" id="cb9-3" title="3"><span class="st">    </span><span class="kw">mutate</span>(<span class="dt">scale =</span> <span class="st">&quot;log&quot;</span>) <span class="op">|</span><span class="er">&gt;</span></a>
-<a class="sourceLine" id="cb9-4" title="4"><span class="st">    </span><span class="kw">bind_rows</span>(</a>
-<a class="sourceLine" id="cb9-5" title="5">      toy_scores <span class="op">|</span><span class="er">&gt;</span></a>
-<a class="sourceLine" id="cb9-6" title="6"><span class="st">        </span><span class="kw">mutate</span>(<span class="dt">scale =</span> <span class="st">&quot;natural&quot;</span>)</a>
-<a class="sourceLine" id="cb9-7" title="7">    )</a>
-<a class="sourceLine" id="cb9-8" title="8">})</a>
-<a class="sourceLine" id="cb9-9" title="9"><span class="co">#&gt; Define target toy_all_scores from chunk code.</span></a>
-<a class="sourceLine" id="cb9-10" title="10"><span class="co">#&gt; Establish _targets.R and _targets_r/targets/toy_all_scores.R.</span></a></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" title="1"><span class="kw">tar_target</span>(toy_all_scores, {</a>
+<a class="sourceLine" id="cb11-2" title="2">  toy_log_scores <span class="op">|</span><span class="er">&gt;</span></a>
+<a class="sourceLine" id="cb11-3" title="3"><span class="st">    </span><span class="kw">mutate</span>(<span class="dt">scale =</span> <span class="st">&quot;log&quot;</span>) <span class="op">|</span><span class="er">&gt;</span></a>
+<a class="sourceLine" id="cb11-4" title="4"><span class="st">    </span><span class="kw">bind_rows</span>(</a>
+<a class="sourceLine" id="cb11-5" title="5">      toy_scores <span class="op">|</span><span class="er">&gt;</span></a>
+<a class="sourceLine" id="cb11-6" title="6"><span class="st">        </span><span class="kw">mutate</span>(<span class="dt">scale =</span> <span class="st">&quot;natural&quot;</span>)</a>
+<a class="sourceLine" id="cb11-7" title="7">    )</a>
+<a class="sourceLine" id="cb11-8" title="8">})</a>
+<a class="sourceLine" id="cb11-9" title="9"><span class="co">#&gt; Define target toy_all_scores from chunk code.</span></a>
+<a class="sourceLine" id="cb11-10" title="10"><span class="co">#&gt; Establish _targets.R and _targets_r/targets/toy_all_scores.R.</span></a></code></pre></div>
 <ul>
 <li>Plot natural scale scores by horizon.</li>
 </ul>
 <!-- end list -->
 
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" title="1"><span class="kw">tar_target</span>(plot_toy_scores_by_horizon, {</a>
-<a class="sourceLine" id="cb10-2" title="2">  toy_scores <span class="op">|</span><span class="er">&gt;</span></a>
-<a class="sourceLine" id="cb10-3" title="3"><span class="st">    </span><span class="kw">filter</span>(time <span class="op">&lt;=</span><span class="st"> </span><span class="dv">4</span>) <span class="op">|</span><span class="er">&gt;</span></a>
-<a class="sourceLine" id="cb10-4" title="4"><span class="st">    </span><span class="kw">plot_scores_by_horizon</span>()</a>
-<a class="sourceLine" id="cb10-5" title="5">})</a>
-<a class="sourceLine" id="cb10-6" title="6"><span class="co">#&gt; Define target plot_toy_scores_by_horizon from chunk code.</span></a>
-<a class="sourceLine" id="cb10-7" title="7"><span class="co">#&gt; Establish _targets.R and _targets_r/targets/plot_toy_scores_by_horizon.R.</span></a></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" title="1"><span class="kw">tar_target</span>(toy_scores_by_horizon_plot, {</a>
+<a class="sourceLine" id="cb12-2" title="2">  toy_scores <span class="op">|</span><span class="er">&gt;</span></a>
+<a class="sourceLine" id="cb12-3" title="3"><span class="st">    </span><span class="kw">filter</span>(time <span class="op">&lt;=</span><span class="st"> </span><span class="dv">4</span>) <span class="op">|</span><span class="er">&gt;</span></a>
+<a class="sourceLine" id="cb12-4" title="4"><span class="st">    </span><span class="kw">plot_toy_scores_by_horizon</span>()</a>
+<a class="sourceLine" id="cb12-5" title="5">})</a>
+<a class="sourceLine" id="cb12-6" title="6"><span class="co">#&gt; Define target toy_scores_by_horizon_plot from chunk code.</span></a>
+<a class="sourceLine" id="cb12-7" title="7"><span class="co">#&gt; Establish _targets.R and _targets_r/targets/toy_scores_by_horizon_plot.R.</span></a></code></pre></div>
 <ul>
 <li>Plot log scale scores by horizon.</li>
 </ul>
 <!-- end list -->
 
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" title="1"><span class="kw">tar_target</span>(plot_toy_log_scores_by_horizon, {</a>
-<a class="sourceLine" id="cb11-2" title="2">  toy_log_scores <span class="op">|</span><span class="er">&gt;</span></a>
-<a class="sourceLine" id="cb11-3" title="3"><span class="st">    </span><span class="kw">filter</span>(time <span class="op">&lt;=</span><span class="st"> </span><span class="dv">4</span>) <span class="op">|</span><span class="er">&gt;</span></a>
-<a class="sourceLine" id="cb11-4" title="4"><span class="st">    </span><span class="kw">plot_scores_by_horizon</span>()</a>
-<a class="sourceLine" id="cb11-5" title="5">})</a>
-<a class="sourceLine" id="cb11-6" title="6"><span class="co">#&gt; Define target plot_toy_log_scores_by_horizon from chunk code.</span></a>
-<a class="sourceLine" id="cb11-7" title="7"><span class="co">#&gt; Establish _targets.R and _targets_r/targets/plot_toy_log_scores_by_horizon.R.</span></a></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" title="1"><span class="kw">tar_target</span>(toy_log_scores_by_horizon_plot, {</a>
+<a class="sourceLine" id="cb13-2" title="2">  toy_log_scores <span class="op">|</span><span class="er">&gt;</span></a>
+<a class="sourceLine" id="cb13-3" title="3"><span class="st">    </span><span class="kw">filter</span>(time <span class="op">&lt;=</span><span class="st"> </span><span class="dv">4</span>) <span class="op">|</span><span class="er">&gt;</span></a>
+<a class="sourceLine" id="cb13-4" title="4"><span class="st">    </span><span class="kw">plot_toy_scores_by_horizon</span>()</a>
+<a class="sourceLine" id="cb13-5" title="5">})</a>
+<a class="sourceLine" id="cb13-6" title="6"><span class="co">#&gt; Define target toy_log_scores_by_horizon_plot from chunk code.</span></a>
+<a class="sourceLine" id="cb13-7" title="7"><span class="co">#&gt; Establish _targets.R and _targets_r/targets/toy_log_scores_by_horizon_plot.R.</span></a></code></pre></div>
 <ul>
 <li>Plot log and natural scale scores for the 4 week horizon.</li>
 </ul>
 <!-- end list -->
 
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" title="1"><span class="kw">tar_target</span>(plot_toy_scores_by_scale, {</a>
-<a class="sourceLine" id="cb12-2" title="2">  toy_all_scores <span class="op">|</span><span class="er">&gt;</span></a>
-<a class="sourceLine" id="cb12-3" title="3"><span class="st">    </span><span class="kw">filter</span>(time <span class="op">==</span><span class="st"> </span><span class="dv">4</span>) <span class="op">|</span><span class="er">&gt;</span></a>
-<a class="sourceLine" id="cb12-4" title="4"><span class="st">    </span><span class="kw">plot_scores_by_scale</span>()</a>
-<a class="sourceLine" id="cb12-5" title="5">})</a>
-<a class="sourceLine" id="cb12-6" title="6"><span class="co">#&gt; Define target plot_toy_scores_by_scale from chunk code.</span></a>
-<a class="sourceLine" id="cb12-7" title="7"><span class="co">#&gt; Establish _targets.R and _targets_r/targets/plot_toy_scores_by_scale.R.</span></a></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" title="1"><span class="kw">tar_target</span>(toy_scores_by_scale_plot, {</a>
+<a class="sourceLine" id="cb14-2" title="2">  toy_all_scores <span class="op">|</span><span class="er">&gt;</span></a>
+<a class="sourceLine" id="cb14-3" title="3"><span class="st">    </span><span class="kw">filter</span>(time <span class="op">==</span><span class="st"> </span><span class="dv">4</span>) <span class="op">|</span><span class="er">&gt;</span></a>
+<a class="sourceLine" id="cb14-4" title="4"><span class="st">    </span><span class="kw">plot_toy_scores_by_scale</span>()</a>
+<a class="sourceLine" id="cb14-5" title="5">})</a>
+<a class="sourceLine" id="cb14-6" title="6"><span class="co">#&gt; Define target toy_scores_by_scale_plot from chunk code.</span></a>
+<a class="sourceLine" id="cb14-7" title="7"><span class="co">#&gt; Establish _targets.R and _targets_r/targets/toy_scores_by_scale_plot.R.</span></a></code></pre></div>
 <ul>
 <li>Save output for external use.</li>
 </ul>
 <!-- end list -->
 
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" title="1"><span class="kw">list</span>(</a>
-<a class="sourceLine" id="cb13-2" title="2">  <span class="kw">tar_target</span>(</a>
-<a class="sourceLine" id="cb13-3" title="3">    toy_scores_csv, </a>
-<a class="sourceLine" id="cb13-4" title="4">    <span class="kw">save_csv</span>(toy_all_scores, <span class="kw">here</span>(<span class="st">&quot;output/data/toy_all_scores.csv&quot;</span>)),</a>
-<a class="sourceLine" id="cb13-5" title="5">    <span class="dt">format =</span> <span class="st">&quot;file&quot;</span></a>
-<a class="sourceLine" id="cb13-6" title="6">  ),</a>
-<a class="sourceLine" id="cb13-7" title="7">  <span class="kw">tar_target</span>(</a>
-<a class="sourceLine" id="cb13-8" title="8">    toy_scores_by_scale_file, </a>
-<a class="sourceLine" id="cb13-9" title="9">    <span class="kw">save_plot</span>(plot_toy_scores_by_scale, </a>
-<a class="sourceLine" id="cb13-10" title="10">              <span class="kw">here</span>(<span class="st">&quot;output&quot;</span>, <span class="st">&quot;figures&quot;</span>, <span class="st">&quot;toy_scores_by_scale.png&quot;</span>),</a>
-<a class="sourceLine" id="cb13-11" title="11">    <span class="dt">format =</span> <span class="st">&quot;file&quot;</span>)</a>
-<a class="sourceLine" id="cb13-12" title="12">            ),</a>
-<a class="sourceLine" id="cb13-13" title="13">  <span class="kw">tar_target</span>(</a>
-<a class="sourceLine" id="cb13-14" title="14">    toy_scores_by_horizon_file, </a>
-<a class="sourceLine" id="cb13-15" title="15">    <span class="kw">save_plot</span>(plot_toy_scores_by_horizon, </a>
-<a class="sourceLine" id="cb13-16" title="16">              <span class="kw">here</span>(<span class="st">&quot;output&quot;</span>, <span class="st">&quot;figures&quot;</span>, <span class="st">&quot;toy_scores_by_horizon.png&quot;</span>),</a>
-<a class="sourceLine" id="cb13-17" title="17">    <span class="dt">format =</span> <span class="st">&quot;file&quot;</span>)</a>
-<a class="sourceLine" id="cb13-18" title="18">            ),</a>
-<a class="sourceLine" id="cb13-19" title="19">  <span class="kw">tar_target</span>(</a>
-<a class="sourceLine" id="cb13-20" title="20">    toy_log_scores_by_horizon_file, </a>
-<a class="sourceLine" id="cb13-21" title="21">    <span class="kw">save_plot</span>(plot_toy_log_scores_by_horizon, </a>
-<a class="sourceLine" id="cb13-22" title="22">              <span class="kw">here</span>(<span class="st">&quot;output&quot;</span>, <span class="st">&quot;figures&quot;</span>, <span class="st">&quot;toy_log_scores_by_horizon.png&quot;</span>),</a>
-<a class="sourceLine" id="cb13-23" title="23">    <span class="dt">format =</span> <span class="st">&quot;file&quot;</span>)</a>
-<a class="sourceLine" id="cb13-24" title="24">            )</a>
-<a class="sourceLine" id="cb13-25" title="25">)</a>
-<a class="sourceLine" id="cb13-26" title="26"><span class="co">#&gt; Establish _targets.R and _targets_r/targets/save_toy_output.R.</span></a></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" title="1"><span class="kw">list</span>(</a>
+<a class="sourceLine" id="cb15-2" title="2">  <span class="kw">tar_target</span>(</a>
+<a class="sourceLine" id="cb15-3" title="3">    toy_scores_csv, </a>
+<a class="sourceLine" id="cb15-4" title="4">    <span class="kw">save_csv</span>(toy_all_scores, <span class="kw">here</span>(<span class="st">&quot;output/data/toy_all_scores.csv&quot;</span>)),</a>
+<a class="sourceLine" id="cb15-5" title="5">    <span class="dt">format =</span> <span class="st">&quot;file&quot;</span></a>
+<a class="sourceLine" id="cb15-6" title="6">  ),</a>
+<a class="sourceLine" id="cb15-7" title="7">  <span class="kw">tar_target</span>(</a>
+<a class="sourceLine" id="cb15-8" title="8">    toy_scores_by_scale_file, </a>
+<a class="sourceLine" id="cb15-9" title="9">    <span class="kw">save_plot</span>(toy_scores_by_scale_plot, </a>
+<a class="sourceLine" id="cb15-10" title="10">              <span class="kw">here</span>(<span class="st">&quot;output&quot;</span>, <span class="st">&quot;figures&quot;</span>, <span class="st">&quot;toy_scores_by_scale.png&quot;</span>),</a>
+<a class="sourceLine" id="cb15-11" title="11">    <span class="dt">format =</span> <span class="st">&quot;file&quot;</span>)</a>
+<a class="sourceLine" id="cb15-12" title="12">            ),</a>
+<a class="sourceLine" id="cb15-13" title="13">  <span class="kw">tar_target</span>(</a>
+<a class="sourceLine" id="cb15-14" title="14">    toy_scores_by_horizon_file, </a>
+<a class="sourceLine" id="cb15-15" title="15">    <span class="kw">save_plot</span>(toy_scores_by_horizon_plot, </a>
+<a class="sourceLine" id="cb15-16" title="16">              <span class="kw">here</span>(<span class="st">&quot;output&quot;</span>, <span class="st">&quot;figures&quot;</span>, <span class="st">&quot;toy_scores_by_horizon.png&quot;</span>),</a>
+<a class="sourceLine" id="cb15-17" title="17">    <span class="dt">format =</span> <span class="st">&quot;file&quot;</span>)</a>
+<a class="sourceLine" id="cb15-18" title="18">            ),</a>
+<a class="sourceLine" id="cb15-19" title="19">  <span class="kw">tar_target</span>(</a>
+<a class="sourceLine" id="cb15-20" title="20">    toy_log_scores_by_horizon_file, </a>
+<a class="sourceLine" id="cb15-21" title="21">    <span class="kw">save_plot</span>(toy_log_scores_by_horizon_plot, </a>
+<a class="sourceLine" id="cb15-22" title="22">              <span class="kw">here</span>(<span class="st">&quot;output&quot;</span>, <span class="st">&quot;figures&quot;</span>, <span class="st">&quot;toy_log_scores_by_horizon.png&quot;</span>),</a>
+<a class="sourceLine" id="cb15-23" title="23">    <span class="dt">format =</span> <span class="st">&quot;file&quot;</span>)</a>
+<a class="sourceLine" id="cb15-24" title="24">            )</a>
+<a class="sourceLine" id="cb15-25" title="25">)</a>
+<a class="sourceLine" id="cb15-26" title="26"><span class="co">#&gt; Establish _targets.R and _targets_r/targets/save_toy_output.R.</span></a></code></pre></div>
 <h1 id="pipeline">Pipeline</h1>
 <p>If all<code>{targets}</code> were run in non-interactive mode, then the pipeline is ready to run using the following,</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" title="1"><span class="kw">tar_make</span>()</a></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb16-1" title="1"><span class="kw">tar_make</span>()</a></code></pre></div>
 <p>The complete pipeline can be visualised using,</p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" title="1"><span class="kw">tar_visnetwork</span>()</a></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb17-1" title="1"><span class="kw">tar_visnetwork</span>()</a></code></pre></div>
 
 </body>
 </html>

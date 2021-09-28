@@ -22,10 +22,26 @@ simulate_exp_poisson <- function(init = 100, time = 10, growth = 0,
   return(obs)
 }
 
+#' Plot simulated observations and forecasts
+#' @import ggplot2
+#' @importFrom dplyr filter
+plot_toy_forecasts <- function(forecasts, growth = 0.01, samples = 10,
+                               alpha = 0.2) {
+  forecasts |>
+    filter(sample <= samples, r == growth) |>
+    ggplot() +
+    aes(x = time, y = prediction, group = sample) +
+    geom_point(aes(y = true_value), alpha = 0.9, size = 1.1) +
+    geom_line(alpha = alpha) +
+    theme_bw() +
+    theme(legend.position = "bottom") +
+    facet_grid(vars(additive_error), vars(r_error))
+}
+
 #' Plot scores by horizon
 #' @import ggplot2
 #' @importFrom dplyr group_by mutate
-plot_scores_by_horizon <- function(scores) {
+plot_toy_scores_by_horizon <- function(scores) {
   scores |>
     group_by(additive_error, r) |>
     mutate(relative_crps = crps / max(crps)) |>
@@ -43,7 +59,7 @@ plot_scores_by_horizon <- function(scores) {
 #' @import ggplot2
 #' @importFrom dplyr group_by mutate
 #' @importFrom tidyr pivot_wider
-plot_scores_by_scale <- function(scores) {
+plot_toy_scores_by_scale <- function(scores) {
   scores |>
     group_by(additive_error, r, scale) |>
     mutate(relative_crps = crps / max(crps)) |>

@@ -2,3 +2,5 @@ _targets
 Rplots.pdf
 *.html
 .DS_Store
+.Rproj.user
+*.Rproj

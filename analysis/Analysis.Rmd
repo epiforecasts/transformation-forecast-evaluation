@@ -1,0 +1,369 @@
+---
+title: "Log or not"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE,
+                      message = FALSE, 
+                      warning = FALSE)
+
+library(scoringutils)
+library(purrr)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(patchwork)
+library(stringr)
+library(here)
+
+n <- 100
+quantiles <- c(0.01, 0.025, seq(0.05, 0.95, by = 0.05), 0.975, 0.99)
+
+```
+
+Define a scenario grid with two data-generating distributions and two corresponding predictive distributions. For the predictive distributions one parameter is set equal to the true parameter, while the other is varied either in a multiplicative or an additive way. 
+
+```{r}
+truth_mean_equal <- c(FALSE, TRUE)
+truth_var_equal <- c(FALSE, TRUE)
+error_var <- c("mu", "sigma")
+error_type <- c("multiplicative", "additive")
+
+scenarios <- expand_grid(truth_mean_equal, 
+                         truth_var_equal, 
+                         error_var, 
+                         error_type)
+
+grid_sigma_mult <- seq(0.5, 2.5, by = 0.1)
+grid_mu_mult <- seq(0.5, 2.5, by = 0.1)
+grid_sigma_add <- seq(0, 100, by = 5)
+grid_mu_add <- seq(0, 1000, by = 50)
+
+grids <- tibble(error_var = 
+                  c("sigma", "mu", "sigma", "mu"),  
+                error_type = 
+                  c("multiplicative", "multiplicative", 
+                    "additive", "additive"), 
+                grid = list(grid_sigma_mult, 
+                            grid_mu_mult, 
+                            grid_sigma_add, 
+                            grid_mu_add))
+
+sigma <- 10
+mu <- 1000
+
+scenarios <- scenarios |>
+  inner_join(grids) |>
+  mutate(name = paste0(error_type, "_error_", error_var,  
+                       ifelse(equal_mean, "_equal_mean_", "_unequal_mean_"), 
+                       ifelse(equal_var, "equal_var", "unequal_var"))) 
+
+```
+
+
+```{r}
+# helper functions
+# ----------------
+
+# function to generate a quantile forecast with a given error
+create_forecast <- function(grid, sigma_true, mu_true,
+                            var = "sigma", type = "multiplicative") {
+  
+  mu <- function(.x, v = var, t = type) {
+    if (v == "mu") {
+      if (t == "multiplicative") {
+        return(mu_true * .x)
+      } else if (t == "additive") {
+        return(mu_true + .x)
+      }
+    } else if (var == "sigma") {
+      return(mu_true)
+    }
+  }
+  
+  sigma <- function(.x, v = var, t = type) {
+    if (var == "sigma") {
+      if (t == "multiplicative") {
+        return(sigma_true * .x)
+      } else if (t == "additive") {
+        return(sigma_true + .x)
+      }
+    } else if (var == "mu") {
+      return(sigma_true)
+    }
+  }
+  
+  map_dfr(.x = grid, 
+      .f = function(.x) {
+        data.frame(prediction = 
+                     qnorm(p = quantiles, 
+                           mean = mu(.x), 
+                           sd = sigma(.x)), 
+                   quantile = quantiles, 
+                   sigma_hat = sigma(.x), 
+                   sigma_true = sigma_true,
+                   mu_hat = mu(.x), 
+                   mu_true = mu_true,
+                   error = .x, 
+                   error_type = type, 
+                   error_var = var)
+      }
+  ) |>
+  rowwise() |>
+  mutate(n = list(1:n)) |>
+  ungroup() |>
+  unnest(cols = c(n))
+}
+
+# helper function to log predictions and true values
+create_log_data <- function(data) {
+  data |>
+  mutate(prediction = log(prediction + 1), 
+         true_value = log(true_value + 1))
+}
+
+# helper function to score forecasts
+score_forecasts <- function(data) {
+  eval_forecasts(data = data, 
+                 metrics = c("interval_score"),
+                 summarise_by = c("mu_true", "sigma_true", "error", 
+                                  "error_var", "error_type")) 
+}
+
+# helper function to join the score data 
+join_scores <- function(scores_1, scores_2, scale = "natural") {
+  full_join(scores_1 |>
+             select(error, sigma_true, mu_true, error_var, error_type, interval_score), 
+           scores_2 |>
+             select(error, sigma_true, mu_true, error_var, error_type, interval_score)
+           ) |>
+    mutate(scale = scale)
+}
+
+# helper function to plot scores
+plot_scores <- function(scores) {
+  scores |>
+    mutate("True parameters" = 
+             paste0("mean: ", mu_true, ", sd: ", sigma_true)) |>
+    ggplot(aes(x = error, y = interval_score, 
+               colour = `True parameters`, group = `True parameters`)) + 
+    geom_line() + 
+    scale_color_brewer(palette = "Set1", name = "True parameters: ") + 
+    facet_wrap(~ scale, scale = "free") + 
+    theme_minimal() + 
+    theme(legend.position = "bottom") 
+}
+
+```
+
+
+```{r}
+i = 1
+equal_mean <- scenarios[i, ]$truth_mean_equal
+equal_var <- scenarios[i, ]$truth_var_equal
+grid <- unlist(scenarios[i, ]$grid)
+error_var <- scenarios[i, ]$error_var
+error_type <- scenarios[i, ]$error_type
+scenario_name <- scenarios[i, ]$name
+
+sigma_true <- c(sigma, sigma + (as.numeric(!equal_var) * 10))
+mu_true <- c(mu, mu + as.numeric(!equal_mean) * 1000)
+
+true_values_1 <- 
+  data.frame(
+    true_value = rnorm(n = n, mean = mu_true[1], sd = sigma_true[1]),
+    n = 1:n,
+    sigma_true = sigma_true[1]
+  )
+
+true_values_2 <- 
+  data.frame(
+    true_value = rnorm(n = n, mean = mu_true[2], sd = sigma_true[2]),
+    n = 1:n,
+    sigma_true = sigma_true[2]
+  )
+
+forecasts_1 <- create_forecast(grid, 
+                              sigma_true = sigma_true[1],
+                              mu_true = mu_true[1], 
+                              var = error_var, 
+                              type = error_type)
+
+forecasts_2 <- create_forecast(grid, 
+                              sigma_true = sigma_true[2],
+                              mu_true = mu_true[2], 
+                              var = error_var, 
+                              type = error_type)
+
+
+data_1 <- inner_join(forecasts_1, true_values_1)
+data_2 <- inner_join(forecasts_2, true_values_2)
+log_data_1 <- create_log_data(data_1)
+log_data_2 <- create_log_data(data_2)
+
+scores_1 <- score_forecasts(data_1)
+scores_2 <- score_forecasts(data_2)
+log_scores_1 <- score_forecasts(log_data_1)
+log_scores_2 <- score_forecasts(log_data_2)
+
+joined_scores <- join_scores(scores_1, scores_2)
+joined_log_scores <- join_scores(log_scores_1, log_scores_2, scale = "log")
+combined_scores <- rbind(joined_scores, joined_log_scores)
+
+title <- paste(error_type, "error of", error_var, "for two variables with", 
+               ifelse(equal_mean, "equal", "unequal"), 
+               "mean and", 
+               ifelse(equal_var, "equal", "unequal"), "variance") |>
+    str_to_sentence()
+
+xlab <- paste(error_type, "error on", error_var) |> str_to_sentence()
+
+plot_scores(combined_scores) + 
+  ggtitle(title) + 
+  labs(y = "Interval Score", 
+       x = xlab)
+
+
+ggsave(here("output", "figures", paste0(scenario_name, ".png")))
+```
+
+
+
+
+Simulate data from two normal distributions with $\mu_{1,2} = 1000$ and $\sigma_1 = 0.1$ and $\sigma_2 = 1$. 
+
+```{r}
+sigma <- c(1, 100)
+mu_true <- c(1000, 2000)
+
+true_values_1 <- 
+  data.frame(
+    true_value = rnorm(n = n, mean = mu_true[1], sd = sigma[1]),
+    n = 1:n,
+    sigma_true = sigma[1]
+  )
+
+true_values_2 <- 
+  data.frame(
+    true_value = rnorm(n = n, mean = mu_true[1], sd = sigma[2]),
+    n = 1:n,
+    sigma_true = sigma[2]
+  )
+
+```
+
+Define different predictive distributions with mean 1000 and standard deviations between 0 and 10. 
+
+```{r}
+mu_hat <- 1000
+
+
+
+
+forecasts_1 <- create_forecast(grid_sigma_mult, sigma_true = sigma[1]) 
+forecasts_2 <- create_forecast(grid_sigma_mult, sigma_true = sigma[2])
+  
+forecasts_mu_1 <- create_forecast(grid_mu_mult, sigma_true = sigma[1], 
+                                 mu_true = 1000, var = "mu") 
+forecasts_mu_2 <- create_forecast(grid_mu_mult, sigma_true = sigma[2], 
+                                 mu_true = 1000, var = "mu") 
+```
+
+Join these and create a version with predictions and true values logged. 
+```{r}
+data_1 <- inner_join(forecasts_1, true_values_1)
+data_2 <- inner_join(forecasts_2, true_values_2)
+
+data_mu_1 <- inner_join(forecasts_mu_1, true_values_1)
+data_mu_2 <- inner_join(forecasts_mu_2, true_values_2)
+
+log_data_1 <- create_log_data(data_1)
+log_data_2 <- create_log_data(data_2)
+
+log_data_mu_1 <- create_log_data(data_mu_1)
+log_data_mu_2 <- create_log_data(data_mu_2)
+```
+
+
+Score forecasts. 
+
+```{r}
+scores_1 <- score_forecasts(data_1)
+scores_2 <- score_forecasts(data_2)
+
+log_scores_1 <- score_forecasts(log_data_1)
+log_scores_2 <- score_forecasts(log_data_2)
+
+scores_mu_1 <- score_forecasts(data_mu_1)
+scores_mu_2 <- score_forecasts(data_mu_2)
+
+log_scores_mu_1 <- score_forecasts(log_data_mu_1)
+log_scores_mu_2 <- score_forecasts(log_data_mu_2)
+
+
+joined_scores <- join_scores(scores_1, scores_2)
+joined_log_scores <- join_scores(log_scores_1, log_scores_2, scale = "log")
+combined_scores <- rbind(joined_scores, joined_log_scores)
+
+
+joined_scores_mu <- join_scores(scores_mu_1, scores_mu_2)
+joined_log_scores_mu <- join_scores(log_scores_mu_1, log_scores_mu_2, scale = "log")
+combined_scores_mu <- rbind(joined_scores_mu, joined_log_scores_mu)
+
+```
+
+Create a plot for data on log scale and natural scale. 
+
+```{r}
+
+```
+
+## Scenario: Multiplicative error on the standard deviation - identical means
+
+```{r}
+plot_scores(combined_scores) +
+    labs(y = "WIS", x = "sd of predictive distribution / sd of data distribution") 
+```
+
+*Plot shows forecasts where the mean of the forecast distribution is equal to the mean of the data-generating distribution. The variance of the forecast distribution is multiplied by an error factor between 0.5 and 10.*
+
+Same plot with y axis on a log scale
+```{r}
+plot_scores(combined_scores) +
+    labs(y = "WIS", x = "sd of predictive distribution / sd of data distribution") + 
+  ggplot2::scale_y_continuous(trans = "log10")
+```
+
+What we learn from these plots: 
+
+- A perfect forecast that gets the mean as well as the variance right will incur higher scores if the true variance is higher. 
+- getting the variance wrong (in multiplicative terms) is equally costly regardless of what the true variance is (curves look identical on a log scale plot)
+- Those two effects are exactly the same on the linear as on the log scale? Not sure I understand this
+
+
+## Multiplicative error on the mean - identical means
+
+```{r}
+plot_scores(combined_scores_mu) +
+    labs(y = "WIS", x = "mu of predictive distribution / mu of data distribution")
+```
+
+*Plot shows forecasts where the standard deviation of the forecast distribution is equal to the standard deviation of the data-generating distribution. The mean of the forecast distribution is multiplied by an error factor between 0.5 and 10.*
+
+What we learn from this plot: 
+
+- with a multiplicative error in the mean and the correct standard deviation, the standard deviation of the underlying data makes some difference, but not that much
+- multiplicative errors in the mean get punished much more harshly when scoring on the natural scale compared to scoring on the log scale
+
+```{r}
+combined_scores_mu |>
+  group_by(error, scale) |>
+  summarise(mean_score = mean(interval_score))
+```
+
+
+
+
+
+

@@ -19,6 +19,7 @@ library(here)
 
 n <- 100
 quantiles <- c(0.01, 0.025, seq(0.05, 0.95, by = 0.05), 0.975, 0.99)
+rerun_simulation <- FALSE
 
 ```
 
@@ -56,13 +57,21 @@ mu <- 1000
 scenarios <- scenarios |>
   inner_join(grids) |>
   mutate(name = paste0(error_type, "_error_", error_var,  
-                       ifelse(equal_mean, "_equal_mean_", "_unequal_mean_"), 
-                       ifelse(equal_var, "equal_var", "unequal_var"))) 
+                       ifelse(truth_mean_equal, "_equal_mean_", "_unequal_mean_"), 
+                       ifelse(truth_var_equal, "equal_var", "unequal_var")), 
+         title = paste(error_type, "error of", error_var, "for two variables with", 
+                       ifelse(truth_mean_equal, "equal", "unequal"), 
+                       "mean and", 
+                       ifelse(truth_var_equal, "equal", "unequal"), "variance") |>
+           str_to_sentence()) 
+
+scenarios |>
+  select(truth_mean_equal, truth_var_equal, error_var, error_type)
 
 ```
 
 
-```{r}
+```{r, eval = rerun_simulation}
 # helper functions
 # ----------------
 
@@ -141,11 +150,19 @@ join_scores <- function(scores_1, scores_2, scale = "natural") {
     mutate(scale = scale)
 }
 
+# helper function to wrap a long title
+wrap_title <- function(x, ...) {
+  paste(strwrap(x, ...), collapse = "\n")
+}
+
+
 # helper function to plot scores
 plot_scores <- function(scores) {
   scores |>
     mutate("True parameters" = 
              paste0("mean: ", mu_true, ", sd: ", sigma_true)) |>
+    group_by(`True parameters`, error, scale) |>
+    summarise(interval_score = mean(interval_score)) |>
     ggplot(aes(x = error, y = interval_score, 
                colour = `True parameters`, group = `True parameters`)) + 
     geom_line() + 
@@ -158,212 +175,221 @@ plot_scores <- function(scores) {
 ```
 
 
+```{r eval = rerun_simulation}
+for (i in 1:nrow(scenarios)) {
+  equal_mean <- scenarios[i, ]$truth_mean_equal
+  equal_var <- scenarios[i, ]$truth_var_equal
+  grid <- unlist(scenarios[i, ]$grid)
+  error_var <- scenarios[i, ]$error_var
+  error_type <- scenarios[i, ]$error_type
+  scenario_name <- scenarios[i, ]$name
+  scenario_title <- scenarios[i, ]$title
+  
+  sigma_true <- c(sigma, sigma + (as.numeric(!equal_var) * 90))
+  mu_true <- c(mu, mu + as.numeric(!equal_mean) * 1000)
+  
+  true_values_1 <- 
+    data.frame(
+      true_value = rnorm(n = n, mean = mu_true[1], sd = sigma_true[1]),
+      n = 1:n,
+      sigma_true = sigma_true[1]
+    )
+  
+  true_values_2 <- 
+    data.frame(
+      true_value = rnorm(n = n, mean = mu_true[2], sd = sigma_true[2]),
+      n = 1:n,
+      sigma_true = sigma_true[2]
+    )
+  
+  forecasts_1 <- create_forecast(grid, 
+                                 sigma_true = sigma_true[1],
+                                 mu_true = mu_true[1], 
+                                 var = error_var, 
+                                 type = error_type)
+  
+  forecasts_2 <- create_forecast(grid, 
+                                 sigma_true = sigma_true[2],
+                                 mu_true = mu_true[2], 
+                                 var = error_var, 
+                                 type = error_type)
+  
+  
+  data_1 <- inner_join(forecasts_1, true_values_1)
+  data_2 <- inner_join(forecasts_2, true_values_2)
+  log_data_1 <- create_log_data(data_1)
+  log_data_2 <- create_log_data(data_2)
+  
+  scores_1 <- score_forecasts(data_1)
+  scores_2 <- score_forecasts(data_2)
+  log_scores_1 <- score_forecasts(log_data_1)
+  log_scores_2 <- score_forecasts(log_data_2)
+  
+  joined_scores <- join_scores(scores_1, scores_2)
+  joined_log_scores <- join_scores(log_scores_1, log_scores_2, scale = "log")
+  combined_scores <- rbind(joined_scores, joined_log_scores)
+  
+  plot_scores(combined_scores) + 
+    ggtitle(wrap_title(scenario_title, width = 60)) + 
+    labs(y = "Interval Score", 
+         x = paste(error_type, "error on", error_var) |> 
+           str_to_sentence())
+  
+  ggsave(here("output", "figures", paste0(scenario_name, ".png")))
+}
+
+```
+
+
+---
+
 ```{r}
 i = 1
-equal_mean <- scenarios[i, ]$truth_mean_equal
-equal_var <- scenarios[i, ]$truth_var_equal
-grid <- unlist(scenarios[i, ]$grid)
-error_var <- scenarios[i, ]$error_var
-error_type <- scenarios[i, ]$error_type
-scenario_name <- scenarios[i, ]$name
-
-sigma_true <- c(sigma, sigma + (as.numeric(!equal_var) * 10))
-mu_true <- c(mu, mu + as.numeric(!equal_mean) * 1000)
-
-true_values_1 <- 
-  data.frame(
-    true_value = rnorm(n = n, mean = mu_true[1], sd = sigma_true[1]),
-    n = 1:n,
-    sigma_true = sigma_true[1]
-  )
-
-true_values_2 <- 
-  data.frame(
-    true_value = rnorm(n = n, mean = mu_true[2], sd = sigma_true[2]),
-    n = 1:n,
-    sigma_true = sigma_true[2]
-  )
-
-forecasts_1 <- create_forecast(grid, 
-                              sigma_true = sigma_true[1],
-                              mu_true = mu_true[1], 
-                              var = error_var, 
-                              type = error_type)
-
-forecasts_2 <- create_forecast(grid, 
-                              sigma_true = sigma_true[2],
-                              mu_true = mu_true[2], 
-                              var = error_var, 
-                              type = error_type)
-
-
-data_1 <- inner_join(forecasts_1, true_values_1)
-data_2 <- inner_join(forecasts_2, true_values_2)
-log_data_1 <- create_log_data(data_1)
-log_data_2 <- create_log_data(data_2)
-
-scores_1 <- score_forecasts(data_1)
-scores_2 <- score_forecasts(data_2)
-log_scores_1 <- score_forecasts(log_data_1)
-log_scores_2 <- score_forecasts(log_data_2)
-
-joined_scores <- join_scores(scores_1, scores_2)
-joined_log_scores <- join_scores(log_scores_1, log_scores_2, scale = "log")
-combined_scores <- rbind(joined_scores, joined_log_scores)
-
-title <- paste(error_type, "error of", error_var, "for two variables with", 
-               ifelse(equal_mean, "equal", "unequal"), 
-               "mean and", 
-               ifelse(equal_var, "equal", "unequal"), "variance") |>
-    str_to_sentence()
-
-xlab <- paste(error_type, "error on", error_var) |> str_to_sentence()
-
-plot_scores(combined_scores) + 
-  ggtitle(title) + 
-  labs(y = "Interval Score", 
-       x = xlab)
-
-
-ggsave(here("output", "figures", paste0(scenario_name, ".png")))
+file_name <- paste0(scenarios$name[i], ".png")
+knitr::include_graphics(here("output", "figures", file_name))
 ```
 
 
-
-
-Simulate data from two normal distributions with $\mu_{1,2} = 1000$ and $\sigma_1 = 0.1$ and $\sigma_2 = 1$. 
+---
 
 ```{r}
-sigma <- c(1, 100)
-mu_true <- c(1000, 2000)
-
-true_values_1 <- 
-  data.frame(
-    true_value = rnorm(n = n, mean = mu_true[1], sd = sigma[1]),
-    n = 1:n,
-    sigma_true = sigma[1]
-  )
-
-true_values_2 <- 
-  data.frame(
-    true_value = rnorm(n = n, mean = mu_true[1], sd = sigma[2]),
-    n = 1:n,
-    sigma_true = sigma[2]
-  )
-
+i = 2
+file_name <- paste0(scenarios$name[i], ".png")
+knitr::include_graphics(here("output", "figures", file_name))
 ```
 
-Define different predictive distributions with mean 1000 and standard deviations between 0 and 10. 
+
+---
 
 ```{r}
-mu_hat <- 1000
-
-
-
-
-forecasts_1 <- create_forecast(grid_sigma_mult, sigma_true = sigma[1]) 
-forecasts_2 <- create_forecast(grid_sigma_mult, sigma_true = sigma[2])
-  
-forecasts_mu_1 <- create_forecast(grid_mu_mult, sigma_true = sigma[1], 
-                                 mu_true = 1000, var = "mu") 
-forecasts_mu_2 <- create_forecast(grid_mu_mult, sigma_true = sigma[2], 
-                                 mu_true = 1000, var = "mu") 
-```
-
-Join these and create a version with predictions and true values logged. 
-```{r}
-data_1 <- inner_join(forecasts_1, true_values_1)
-data_2 <- inner_join(forecasts_2, true_values_2)
-
-data_mu_1 <- inner_join(forecasts_mu_1, true_values_1)
-data_mu_2 <- inner_join(forecasts_mu_2, true_values_2)
-
-log_data_1 <- create_log_data(data_1)
-log_data_2 <- create_log_data(data_2)
-
-log_data_mu_1 <- create_log_data(data_mu_1)
-log_data_mu_2 <- create_log_data(data_mu_2)
+i = 3
+file_name <- paste0(scenarios$name[i], ".png")
+knitr::include_graphics(here("output", "figures", file_name))
 ```
 
 
-Score forecasts. 
+---
 
 ```{r}
-scores_1 <- score_forecasts(data_1)
-scores_2 <- score_forecasts(data_2)
-
-log_scores_1 <- score_forecasts(log_data_1)
-log_scores_2 <- score_forecasts(log_data_2)
-
-scores_mu_1 <- score_forecasts(data_mu_1)
-scores_mu_2 <- score_forecasts(data_mu_2)
-
-log_scores_mu_1 <- score_forecasts(log_data_mu_1)
-log_scores_mu_2 <- score_forecasts(log_data_mu_2)
-
-
-joined_scores <- join_scores(scores_1, scores_2)
-joined_log_scores <- join_scores(log_scores_1, log_scores_2, scale = "log")
-combined_scores <- rbind(joined_scores, joined_log_scores)
-
-
-joined_scores_mu <- join_scores(scores_mu_1, scores_mu_2)
-joined_log_scores_mu <- join_scores(log_scores_mu_1, log_scores_mu_2, scale = "log")
-combined_scores_mu <- rbind(joined_scores_mu, joined_log_scores_mu)
-
+i = 4
+file_name <- paste0(scenarios$name[i], ".png")
+knitr::include_graphics(here("output", "figures", file_name))
 ```
 
-Create a plot for data on log scale and natural scale. 
+
+---
 
 ```{r}
-
+i = 5
+file_name <- paste0(scenarios$name[i], ".png")
+knitr::include_graphics(here("output", "figures", file_name))
 ```
 
-## Scenario: Multiplicative error on the standard deviation - identical means
+
+---
 
 ```{r}
-plot_scores(combined_scores) +
-    labs(y = "WIS", x = "sd of predictive distribution / sd of data distribution") 
+i = 6
+file_name <- paste0(scenarios$name[i], ".png")
+knitr::include_graphics(here("output", "figures", file_name))
 ```
 
-*Plot shows forecasts where the mean of the forecast distribution is equal to the mean of the data-generating distribution. The variance of the forecast distribution is multiplied by an error factor between 0.5 and 10.*
 
-Same plot with y axis on a log scale
-```{r}
-plot_scores(combined_scores) +
-    labs(y = "WIS", x = "sd of predictive distribution / sd of data distribution") + 
-  ggplot2::scale_y_continuous(trans = "log10")
-```
-
-What we learn from these plots: 
-
-- A perfect forecast that gets the mean as well as the variance right will incur higher scores if the true variance is higher. 
-- getting the variance wrong (in multiplicative terms) is equally costly regardless of what the true variance is (curves look identical on a log scale plot)
-- Those two effects are exactly the same on the linear as on the log scale? Not sure I understand this
-
-
-## Multiplicative error on the mean - identical means
+---
 
 ```{r}
-plot_scores(combined_scores_mu) +
-    labs(y = "WIS", x = "mu of predictive distribution / mu of data distribution")
+i = 7
+file_name <- paste0(scenarios$name[i], ".png")
+knitr::include_graphics(here("output", "figures", file_name))
 ```
 
-*Plot shows forecasts where the standard deviation of the forecast distribution is equal to the standard deviation of the data-generating distribution. The mean of the forecast distribution is multiplied by an error factor between 0.5 and 10.*
+
+---
+
+```{r}
+i = 8
+file_name <- paste0(scenarios$name[i], ".png")
+knitr::include_graphics(here("output", "figures", file_name))
+```
+
+
+---
+
+```{r}
+i = 9
+file_name <- paste0(scenarios$name[i], ".png")
+knitr::include_graphics(here("output", "figures", file_name))
+
+```
 
 What we learn from this plot: 
 
 - with a multiplicative error in the mean and the correct standard deviation, the standard deviation of the underlying data makes some difference, but not that much
 - multiplicative errors in the mean get punished much more harshly when scoring on the natural scale compared to scoring on the log scale
 
+
+---
+
 ```{r}
-combined_scores_mu |>
-  group_by(error, scale) |>
-  summarise(mean_score = mean(interval_score))
+i = 10
+file_name <- paste0(scenarios$name[i], ".png")
+knitr::include_graphics(here("output", "figures", file_name))
+```
+
+---
+
+```{r}
+i = 11
+file_name <- paste0(scenarios$name[i], ".png")
+knitr::include_graphics(here("output", "figures", file_name))
 ```
 
 
+What we learn from this plot: 
+
+- A perfect forecast that gets the mean as well as the variance right will incur higher scores if the true variance is higher. 
+- getting the variance wrong (in multiplicative terms) is equally costly regardless of what the true variance is (curves look identical on a log scale plot, I checked that previously)
+- Those two effects are exactly the same on the linear as on the log scale? Not sure I understand this
 
 
+---
 
+```{r}
+i = 12
+file_name <- paste0(scenarios$name[i], ".png")
+knitr::include_graphics(here("output", "figures", file_name))
+```
+
+---
+
+```{r}
+i = 13
+file_name <- paste0(scenarios$name[i], ".png")
+knitr::include_graphics(here("output", "figures", file_name))
+```
+
+
+---
+
+```{r}
+i = 14
+file_name <- paste0(scenarios$name[i], ".png")
+knitr::include_graphics(here("output", "figures", file_name))
+```
+
+---
+
+```{r}
+i = 15
+file_name <- paste0(scenarios$name[i], ".png")
+knitr::include_graphics(here("output", "figures", file_name))
+```
+
+---
+
+```{r}
+i = 16
+file_name <- paste0(scenarios$name[i], ".png")
+knitr::include_graphics(here("output", "figures", file_name))
+```
 

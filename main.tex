@@ -82,12 +82,40 @@ There are limitations with what we can do with scores on a natural scale and ope
     \item Modelling log scores
 \end{enumerate}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Formulas for the scores}
+\textbf{Move to introduction probably}
 
+\subsection{CRPS}
+The CRPS is a proper scoring rule that generalises the absolute error to probabilistic forecasts. It measures the 'distance' of the predictive distribution to the observed data-generating distribution. The CRPS is given as 
+$$\text{CRPS}(F, y) = \int_{-\infty}^\infty \left( F(x) - 1(x \geq y) \right)^2 dx,$$
+where y is the true observed value and F the CDF of predictive distribution. Often An alternative representation is used:
+$$ \text{CRPS}(F, y) = \frac{1}{2} \mathbb{E}_{F} |X - X'| - \mathbb{E}_P |X - y|,$$ where $X$ and $X'$ are independent realisations from the predictive distributions $F$ with finite first moment and $y$ is the true value. In this represenation we can simply replace $X$ and $X'$ by samples sum over all possible combinations to obtain the CRPS.  
+For integer-valued forecasts, the RPS is given as 
+$$ \text{RPS}(F, y) = \sum_{x = 0}^\infty (F(x) - 1(x \geq y))^2. $$
+
+\subsection{WIS}
+\textbf{maybe replace by formulas from WIS paper, maybe use quantile version as well}
+
+The (weighted) interval score is a proper scoring rule for quantile forecasts that converges to the crps for an increasing number of intervals. The score can be decomposed into a dispersion component and penalties for over- and under-prediction. For a single interval, the score is computed as 
+$$IS_\alpha(F,y) = (u-l) + \frac{2}{\alpha} \cdot (l-y) \cdot 1(y \leq l) + \frac{2}{\alpha} \cdot (y-u) \cdot 1(y \geq u), $$ 
+where $1()$ is the indicator function, $y$ is the true value, and $l$ and $u$ are the $\frac{\alpha}{2}$ and $1 - \frac{\alpha}{2}$ quantiles of the predictive distribution $F$, i.e. the lower and upper bound of a single prediction interval. For a set of $K$ prediction intervals and the median $m$, the score is computed as a weighted sum, 
+$$WIS = \frac{1}{K + 0.5} \cdot (w_0 \cdot |y - m| + \sum_{k = 1}^{K} w_k \cdot IS_{\alpha}(F, y)),$$ 
+where $w_k$ is a weight for every interval. Usually, $w_k = \frac{\alpha_k}{2}$ and $w_0 = 0.5$
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Effects / Interpretation of scoring on a log scale}
 
 \paragraph{How to log and what happens}
 \begin{itemize}
-    \item take log of (observation or truth + 1) 
+    \item why you can't just log CRPS / WIS (simulation that Johannes did)
+    \item what to do instead: take log of (observation or truth + 1) 
+    \item What about happens when either the observation or the forecast is 0?
+\end{itemize}
+
+\paragraph{what does logging mean}
+\begin{itemize}
     \item discuss how equations change for CRPS, WIS
     \item Optional: What happens to the decomposition of the WIS if we log?
     \item Optional: Discussion of parallels to point forecasts \\
@@ -134,7 +162,7 @@ If we want to keep this in, we could:
     \item compare this to the PIT-value-like relative bias scores we used for the German / Polish paper, which capture a relative tendency to over- or under-predict, rather than absolute penalties. 
 \end{itemize}
 
-\paragraph{Toy example: simulate an epidemic and apply 3 different modelse} Compare scores for these three models on the natural scale and the log scale
+\paragraph{Toy example: simulate an epidemic and apply 3 different models} Compare scores for these three models on the natural scale and the log scale
 
 \paragraph{Optional: Empirical differences when going from natural to log-scale} 
 We could score a lot of forecasts of the European Hub and show plots about how scores differs when going from natural to log-scale

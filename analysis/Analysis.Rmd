@@ -34,12 +34,12 @@ error_type <- c("multiplicative", "additive")
 scenarios <- expand_grid(truth_mean_equal, 
                          truth_var_equal, 
                          error_var, 
-                         error_type)
+                         error_type) 
 
-grid_sigma_mult <- seq(0.5, 2.5, by = 0.1)
-grid_mu_mult <- seq(0.5, 2.5, by = 0.1)
-grid_sigma_add <- seq(0, 100, by = 5)
-grid_mu_add <- seq(0, 1000, by = 50)
+grid_sigma_mult <- seq(0.5, 2, by = 0.1)
+grid_mu_mult <- seq(0.5, 2, by = 0.1)
+grid_sigma_add <- seq(-5, 10, by = 1)
+grid_mu_add <- seq(-500, 1000, by = 100)
 
 grids <- tibble(error_var = 
                   c("sigma", "mu", "sigma", "mu"),  
@@ -163,10 +163,14 @@ plot_scores <- function(scores) {
              paste0("mean: ", mu_true, ", sd: ", sigma_true)) |>
     group_by(`True parameters`, error, scale) |>
     summarise(interval_score = mean(interval_score)) |>
-    ggplot(aes(x = error, y = interval_score, 
+    group_by(scale) |>
+    mutate(multplicative_score = interval_score / min(interval_score)) |>
+    ggplot(aes(x = error, y = multplicative_score, 
                colour = `True parameters`, group = `True parameters`)) + 
     geom_line() + 
     scale_color_brewer(palette = "Set1", name = "True parameters: ") + 
+    scale_y_continuous(limits = c(1, NA), expand = c(1, NA)) + 
+    expand_limits(y = c(1, NA)) + 
     facet_wrap(~ scale, scale = "free") + 
     theme_minimal() + 
     theme(legend.position = "bottom") 
@@ -176,6 +180,9 @@ plot_scores <- function(scores) {
 
 
 ```{r eval = rerun_simulation}
+
+results <- list()
+
 for (i in 1:nrow(scenarios)) {
   equal_mean <- scenarios[i, ]$truth_mean_equal
   equal_var <- scenarios[i, ]$truth_var_equal
@@ -227,17 +234,105 @@ for (i in 1:nrow(scenarios)) {
   
   joined_scores <- join_scores(scores_1, scores_2)
   joined_log_scores <- join_scores(log_scores_1, log_scores_2, scale = "log")
-  combined_scores <- rbind(joined_scores, joined_log_scores)
+  combined_scores <- rbind(joined_scores, joined_log_scores) |>
+    mutate(equal_mean = equal_mean, 
+           equal_var = equal_var)
+  
+  # store all results
+  results[[scenario_name]] <- combined_scores
   
   plot_scores(combined_scores) + 
     ggtitle(wrap_title(scenario_title, width = 60)) + 
-    labs(y = "Interval Score", 
+    labs(y = "Multiplicative change in Interval Score", 
          x = paste(error_type, "error on", error_var) |> 
            str_to_sentence())
   
   ggsave(here("output", "figures", paste0(scenario_name, ".png")))
 }
 
+```
+
+
+
+```{r}
+results
+
+res <- bind_rows(results)
+
+plot_multiple <- function(res, equal_means, equal_vars) {
+  res <- res |>
+    filter(equal_mean == equal_means, 
+           equal_var == equal_vars) |>
+    mutate("True parameters" = 
+             paste0("mean: ", mu_true, ", sd: ", sigma_true)) |>
+    group_by(`True parameters`, error, error_type, error_var, scale) |>
+    summarise(interval_score = mean(interval_score)) |>
+    group_by(scale, error_var, error_type) |>
+    mutate(multplicative_score = interval_score / min(interval_score), 
+           error_title = str_to_title(
+             paste(error_type, "on", error_var))) 
+  
+  res |> 
+    ggplot(aes(x = error, y = multplicative_score, 
+               colour = `True parameters`, group = `True parameters`)) + 
+    geom_line() + 
+    scale_color_brewer(palette = "Set1", name = "True parameters: ") + 
+    # scale_y_continuous(limits = c(1, NA), expand = c(0, NA)) + 
+    expand_limits(y = c(1, NA)) + 
+    facet_wrap( ~ error_title + scale, scale = "free", nrow = 2) + 
+    theme_minimal() + 
+    theme(legend.position = "bottom") +
+    labs(y = "Multiplicative change in Interval Score", 
+         x = "Error") + 
+    geom_rect(data = subset(res, error_var == "sigma"), 
+              fill = NA, colour = "grey80", xmin = -Inf,xmax = Inf,
+              ymin = -Inf,ymax = Inf) + 
+    geom_rect(data = subset(res, error_var == "mu"), 
+              fill = NA, colour = "grey70", xmin = -Inf,xmax = Inf,
+              ymin = -Inf,ymax = Inf) 
+}
+```
+
+
+---
+
+```{r}
+p1 <- plot_multiple(res, equal_means = TRUE, equal_vars = TRUE) 
+ggsave(p1, filename = here("output", "effect_equal_mean_equal_var.png"))
+
+p1 + 
+  ggtitle("Effect of scoring on a log scale")
+```
+
+---
+
+```{r}
+p2 <- plot_multiple(res, equal_means = FALSE, equal_vars = TRUE) 
+ggsave(p2, filename = here("output", "effect_unequal_mean_equal_var.png"))
+
+p2 + 
+  ggtitle("Effect of scoring on a log scale for two variables with unequal means")
+```
+
+---
+
+```{r}
+p3 <- plot_multiple(res, equal_means = TRUE, equal_vars = FALSE) 
+ggsave(p3, filename = here("output", "effect_equal_mean_unequal_var.png"))
+
+p3 + 
+  ggtitle("Effect of scoring on a log scale for two variables with unequal variances")
+```
+
+
+
+```{r}
+p4 <- plot_multiple(res, equal_means = FALSE, equal_vars = FALSE) 
+ggsave(p4, filename = here("output", "effect_unequal_mean_unequal_var.png"))
+
+title <- "Effect of scoring on a log scale for two variables with unequal means and unequal variances"
+p4 + 
+  ggtitle(wrap_title(title, width = 80))
 ```
 
 

@@ -254,7 +254,7 @@ for (i in 1:nrow(scenarios)) {
 
 
 
-```{r}
+```{r eval=rerun_simulation}
 results
 
 res <- bind_rows(results)
@@ -291,48 +291,52 @@ plot_multiple <- function(res, equal_means, equal_vars) {
               fill = NA, colour = "grey70", xmin = -Inf,xmax = Inf,
               ymin = -Inf,ymax = Inf) 
 }
-```
 
-
----
-
-```{r}
 p1 <- plot_multiple(res, equal_means = TRUE, equal_vars = TRUE) 
 ggsave(p1, filename = here("output", "effect_equal_mean_equal_var.png"))
 
-p1 + 
-  ggtitle("Effect of scoring on a log scale")
-```
-
----
-
-```{r}
 p2 <- plot_multiple(res, equal_means = FALSE, equal_vars = TRUE) 
 ggsave(p2, filename = here("output", "effect_unequal_mean_equal_var.png"))
 
-p2 + 
-  ggtitle("Effect of scoring on a log scale for two variables with unequal means")
+p3 <- plot_multiple(res, equal_means = TRUE, equal_vars = FALSE) 
+ggsave(p3, filename = here("output", "effect_equal_mean_unequal_var.png"))
+
+p4 <- plot_multiple(res, equal_means = FALSE, equal_vars = FALSE) 
+ggsave(p4, filename = here("output", "effect_unequal_mean_unequal_var.png"))
+
+
+```
+
+
+---
+
+Effect of scoring on a log scale
+
+```{r}
+knitr::include_graphics(here("output", "effect_equal_mean_equal_var.png"))
 ```
 
 ---
 
-```{r}
-p3 <- plot_multiple(res, equal_means = TRUE, equal_vars = FALSE) 
-ggsave(p3, filename = here("output", "effect_equal_mean_unequal_var.png"))
+Effect of scoring on a log scale for two variables with unequal means
 
-p3 + 
-  ggtitle("Effect of scoring on a log scale for two variables with unequal variances")
+```{r}
+knitr::include_graphics(here("output", "effect_unequal_mean_equal_var.png"))
+```
+
+---
+
+Effect of scoring on a log scale for two variables with unequal variances
+
+```{r}
+knitr::include_graphics( here("output", "effect_equal_mean_unequal_var.png"))
 ```
 
 
+Effect of scoring on a log scale for two variables with unequal means and unequal variances
 
 ```{r}
-p4 <- plot_multiple(res, equal_means = FALSE, equal_vars = FALSE) 
-ggsave(p4, filename = here("output", "effect_unequal_mean_unequal_var.png"))
-
-title <- "Effect of scoring on a log scale for two variables with unequal means and unequal variances"
-p4 + 
-  ggtitle(wrap_title(title, width = 80))
+knitr::include_graphics(here("output", "effect_unequal_mean_unequal_var.png"))
 ```
 
 

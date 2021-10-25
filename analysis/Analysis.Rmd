@@ -17,7 +17,7 @@ library(patchwork)
 library(stringr)
 library(here)
 
-n <- 100
+n <- 10000
 quantiles <- c(0.01, 0.025, seq(0.05, 0.95, by = 0.05), 0.975, 0.99)
 rerun_simulation <- FALSE
 
@@ -293,16 +293,16 @@ plot_multiple <- function(res, equal_means, equal_vars) {
 }
 
 p1 <- plot_multiple(res, equal_means = TRUE, equal_vars = TRUE) 
-ggsave(p1, filename = here("output", "effect_equal_mean_equal_var.png"))
+ggsave(p1, filename = here("output", "figures", "effect_equal_mean_equal_var.png"))
 
 p2 <- plot_multiple(res, equal_means = FALSE, equal_vars = TRUE) 
-ggsave(p2, filename = here("output", "effect_unequal_mean_equal_var.png"))
+ggsave(p2, filename = here("output", "figures", "effect_unequal_mean_equal_var.png"))
 
 p3 <- plot_multiple(res, equal_means = TRUE, equal_vars = FALSE) 
-ggsave(p3, filename = here("output", "effect_equal_mean_unequal_var.png"))
+ggsave(p3, filename = here("output", "figures", "effect_equal_mean_unequal_var.png"))
 
 p4 <- plot_multiple(res, equal_means = FALSE, equal_vars = FALSE) 
-ggsave(p4, filename = here("output", "effect_unequal_mean_unequal_var.png"))
+ggsave(p4, filename = here("output", "figures", "effect_unequal_mean_unequal_var.png"))
 
 
 ```

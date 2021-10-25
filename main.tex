@@ -48,82 +48,106 @@ In the abstract, this article is a very good one.
 \newpage
 
 % General thought: maybe easier to do with WIS rather than CRPS? 
+% Could do WIS in the main paper and CRPS in the SI? 
 
 \section{Introduction}
 
-\paragraph{Context about scoring}
+\paragraph{Role of forecasts and problem in comparing them}
 
-\begin{itemize}
-    \item what is a probabilistic forecast and a proper scoring rule, what are scores used for
-    \item CRPS generalisation of absolute error
-    \item idea of scores on logged data: interpretation as a measure of relative improvement, just as when you log the absolute error
-\end{itemize}
+Forecasts play an important role in decision-making in many areas such as for example economics [Citations], agriculture [Citations] and epidemiology [Citations]. Forecasts are most useful if they are probabilistic in nature [Citation e.g. Held et al.], meaning that in addition to a point prediction, forecasters also provide a predictive distribution to quantify their uncertainty. Through the COVID-19 pandemic forecasts of case numbers, hospitalisations and deaths have had a strong influence on public policy and there merits and limitations have been widely discussed by politicians, experts and laypeople alike. Probabilistic COVID-19 Forecasts from different research institutions have been systematically collected and aggregated by the US Forecast Hub [Citation], the German and Polish Forecast Hub [Citation] and the European Forecast Hub [Citation]. One major challenge in comparing and evaluating these forecasts is that it is not immediately how to deal with targets on different orders of magnitudes (e.g. case numbers and hospitalisations) or how to take the exponential nature of epidemiological processes into account. In this paper we will argue that evaluating forecasts on a logarithmic, rather than a natural scale, may help alleviate some of these concerns and may be better suited to epidemiological forecasts. 
 
-\paragraph{What's there in the literature}
+%Forecasts should be well calibrated (i.e. should not systematically deviate from the observations) and subject to calibration should be as precise as possible (Cite Gneiting). 
 
-\paragraph{Current problems / questions about scoring an epidemiological setting}
-%probably narrow down to the ones we really want to discuss%
-There are limitations with what we can do with scores on a natural scale and open questions whether we can do these things on a log-scale and also whether a log-scale might be inherently more appropriate
-\begin{itemize}
-    \item can't really compare quantities on different orders of magnitudes
-    \item Can't really model score on a natural scale as errors are heavily skewed. Is there a way to model scores to get insight about different factors that systematically influence scores
-    \item Maybe epidemiological forecasts are inherently better suited to be scored on an absolute scale due to the multiplicative nature of processes (related to over-prediction > under-prediction)? Does the log-scale imply we are scoring the growth rate? 
-    \item unclear what trade-offs of logging / not logging are
-    \item what score (log, not log) matches closest what our intuition (or policymakers) think is good? 
-    \item are we better at forecasting deaths than cases? --> relative measure would help
-    \item There exists confusion about what can be done to a score in general (e.g. people want to take the median, which they shouldn't) %maybe don't add as an extra point
-\end{itemize}
+\paragraph{Context / explanation of scoring rules}
+Generally, probabilistic forecasts like those submitted to the Forecast Hubs are usually evaluated using proper scoring rules [Cite Gneiting et al. 2007]. A proper scoring rule incentivises any forecaster to state their true best belief and on average always gives the best score to the forecaster who reports a predictive distribution that is equal to the data-generating distribution. Forecasts submitted to the Forecast Hubs were required to follow a quantile-based format where forecasters would report a set of 23 quantiles (11 symmetric prediction intervals as well as a median prediction). A natural choice for quantile-based forecasts is the (weighted) interval score (WIS) [Cite Bracher et al.]. 
 
-\paragraph{Outline of what we do}
-
-\begin{enumerate}
-    \item Effects / Interpretation of scoring on a log scale
-    \item Appropriate scales for epidemiological (and possibly other) processes
-    \item Modelling log scores
-\end{enumerate}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Formulas for the scores}
-\textbf{Move to introduction probably}
-
-\subsection{CRPS}
-The CRPS is a proper scoring rule that generalises the absolute error to probabilistic forecasts. It measures the 'distance' of the predictive distribution to the observed data-generating distribution. The CRPS is given as 
-$$\text{CRPS}(F, y) = \int_{-\infty}^\infty \left( F(x) - 1(x \geq y) \right)^2 dx,$$
-where y is the true observed value and F the CDF of predictive distribution. Often An alternative representation is used:
-$$ \text{CRPS}(F, y) = \frac{1}{2} \mathbb{E}_{F} |X - X'| - \mathbb{E}_P |X - y|,$$ where $X$ and $X'$ are independent realisations from the predictive distributions $F$ with finite first moment and $y$ is the true value. In this represenation we can simply replace $X$ and $X'$ by samples sum over all possible combinations to obtain the CRPS.  
-For integer-valued forecasts, the RPS is given as 
-$$ \text{RPS}(F, y) = \sum_{x = 0}^\infty (F(x) - 1(x \geq y))^2. $$
-
-\subsection{WIS}
-\textbf{maybe replace by formulas from WIS paper, maybe use quantile version as well}
-
-The (weighted) interval score is a proper scoring rule for quantile forecasts that converges to the crps for an increasing number of intervals. The score can be decomposed into a dispersion component and penalties for over- and under-prediction. For a single interval, the score is computed as 
+The WIS (lower values are better) can be decomposed into a dispersion component and penalties for over- and under-prediction. For a single prediction interval, the interval score is computed as 
 $$IS_\alpha(F,y) = (u-l) + \frac{2}{\alpha} \cdot (l-y) \cdot 1(y \leq l) + \frac{2}{\alpha} \cdot (y-u) \cdot 1(y \geq u), $$ 
-where $1()$ is the indicator function, $y$ is the true value, and $l$ and $u$ are the $\frac{\alpha}{2}$ and $1 - \frac{\alpha}{2}$ quantiles of the predictive distribution $F$, i.e. the lower and upper bound of a single prediction interval. For a set of $K$ prediction intervals and the median $m$, the score is computed as a weighted sum, 
+where $1()$ is the indicator function, $y$ is the true value, and $l$ and $u$ are the $\frac{\alpha}{2}$ and $1 - \frac{\alpha}{2}$ quantiles of the predictive distribution $F$, i.e. the lower and upper bound of a single prediction interval. For a set of $K$ prediction intervals and the median $m$, the WIS is computed as a weighted sum, 
 $$WIS = \frac{1}{K + 0.5} \cdot (w_0 \cdot |y - m| + \sum_{k = 1}^{K} w_k \cdot IS_{\alpha}(F, y)),$$ 
 where $w_k$ is a weight for every interval. Usually, $w_k = \frac{\alpha_k}{2}$ and $w_0 = 0.5$
 
+The WIS is closely related to the continuous ranked probability score (CRPS, lower values are better) [Cite Gneiting 2007], which itself can be understood as a generalisation of the absolute error to probabilistic forecasts. For an increasing set of equally-spaced prediction intervals the WIS converges to the CRPS and shares many of its properties. The CRPS measures the 'distance' of the predictive distribution to the observed data-generating distribution as 
+$$\text{CRPS}(F, y) = \int_{-\infty}^\infty \left( F(x) - 1(x \geq y) \right)^2 dx,$$
+where y is the true observed value and F the CDF of predictive distribution. Often the following alternative representation is used
+$$ \text{CRPS}(F, y) = \frac{1}{2} \mathbb{E}_{F} |X - X'| - \mathbb{E}_P |X - y|,$$ 
+where $X$ and $X'$ are independent realisations from the predictive distributions $F$ with finite first moment and $y$ is the true value. In this representation we can simply replace $X$ and $X'$ by samples sum over all possible combinations to obtain the CRPS.  
+
+Another proper scoring rule commonly used is the log score [CITATION], which we will not discuss further in this paper.  
+
+\paragraph{Problems with the WIS and CRPS in an epidemiological setting}
+Their relation to the absolute error means that both the CRPS and the WIS scale with the prediction target. Forecasts of COVID-19 cases, for example typically have much higher scores than forecasts of hospitalisations of death. Similarly, when looking at performance across different locations or over time, average scores will be dominated by locations and times with high incidences. Single outliers also can have a disproportionate effect on aggregate scores. One can argue that this is meaningful and that we should care most about places and periods when incidences are high (maybe cite Bracher et al.). However, this may not always be true and is clearly not desirable when comparing performance of a model on different prediction targets: case numbers are not necessarily more important than hospitalisations, just because observed values tend be an order of magnitude higher. This makes forecasts often hard or impossible to compare. Distributions of forecast scores are usually highly skewed making it hard to model them using standard linear models. Researchers instead often resorted to evaluating different prediction targets or locations completely independently, a process that is often cumbersome and makes it hard to identify factors that systematically affect scores. In any epidemiological setting there is also a noticeable tension when processes (such as the spread of a disease) that are usually modelled multiplicatively are scored in terms of absolute (additive) errors. 
+
+\paragraph{Outline of what we do} 
+A natural proposition is therefore to score forecasts on a logarithmic scale, making it easier to model and compare scores across targets by alleviating concerns about skewed forecast scores and also taking into account the multiplicative nature of epidemiological processes. In this paper we will ...
+
+%\begin{enumerate}
+%    \item Effects / Interpretation of scoring on a log scale
+%    \item Appropriate scales for epidemiological (and possibly other) processes
+%    \item Modelling log scores
+%\end{enumerate}
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Effects / Interpretation of scoring on a log scale}
+\section{Scoring on a log scale}
 
-\paragraph{How to log and what happens}
-\begin{itemize}
-    \item why you can't just log CRPS / WIS (simulation that Johannes did)
-    \item what to do instead: take log of (observation or truth + 1) 
-    \item What about happens when either the observation or the forecast is 0?
-\end{itemize}
+\paragraph{What we propose}
+Proper scoring rules yield a score as a function of a forecast $x$ and a corresponding observation $y$. For epidemiological forecasts of positive quantities we propose to replace WIS and CRPS scores on the natural scale computed as 
+%
+$$S(x, y), $$
+%
+by scores computed on the logarithmic scale as 
+%
+$$S(\log{(x + 1)}, \log{(y + 1)}), $$
+where $S()$ is either the WIS or the CRPS and one is added to deal with zeros in the data. The so computed score is still proper, as for a single forecast the order between different forecasters is not affected by the monotone transformation. Differences in the ranking between forecasters only appear when averaging over multiple forecasts, as deviations from the perfect forecast get penalised differently depending on whether forecasts are scored on the log or the natural scale. Note that simply taking the log of a score computed on the natural scale, i.e. computing $\log S(x, y)$ results in an improper score and is therefore not advised. We illustrate this point in Figure \ref{fig:log-improper} in the SI. 
 
-\paragraph{what does logging mean}
-\begin{itemize}
-    \item discuss how equations change for CRPS, WIS
-    \item Optional: What happens to the decomposition of the WIS if we log?
-    \item Optional: Discussion of parallels to point forecasts \\
-\end{itemize}
+\paragraph{Scoring the log means scoring the growth rate}
+If the forecast target is an incidence (e.g. incident cases or hospitalisations), then computing a score based on the logarithm of the forecast and the observation is approximately equivalent to scoring a forecast of a multiplicative growth rate. The growth rate is defined as 
 
+$$ g_{t, t+1} = \frac{I_{t+1} - I_t}{I_t},$$
+
+where $I_{t+1}$ is the incidence we want to forecast, $I_t$ is the last known observation and $g_{t, t+1}$ is the growth rate between now ($t$) and $t+1$. This can be rewritten as 
+
+$$I_{t+1} = (1 + g_{t, t+1}) I_t.$$
+
+If we score $\log I_{t_+1}$ rather than $I_{t+1}$, this changes to 
+
+$$\log I_{t+1} = \log (1 + g_{t, t+1}) + \log I_t.$$
+
+The logarithm of today's incident value, $\log I_t$, is a known quantity that we do not need to forecast. This additive shift does not change the forecast score. For small values of g, we have 
+$$\log (1+ g_{t, t+1}) \approx g_{t, t+1}.$$
+
+When we score the logarithm of the forecast and the observations, the interval score for a single prediction interval changes as follows
+
+$$IS_\alpha(\log F, \log y) = (\log u - \log l) + \frac{2}{\alpha} \cdot (\log l - \log y) \cdot 1(\log y \leq \log l) + \frac{2}{\alpha} \cdot (\log y - \log u) \cdot 1(\log y \geq \log u), $$ 
+
+where $y = I_{t+1}$ (pick consistent notation) and the part inside the indicator functions stays the same as the logarithm is a monotonic transformation and the inequality is preserved. Per above, we can rewrite this as
+
+$$IS_\alpha(\log F, \log y) \approx (\log u - \log l) + \frac{2}{\alpha} \cdot (\log l - g_{t, t+1}) \cdot 1(g_{t, t+1} \leq \log l) + \frac{2}{\alpha} \cdot (g_{t, t+1} - \log u) \cdot 1(g_{t, t+1} \geq \log u).$$
+
+% At the moment we're just dropping the g in here. Maybe need to rewrite this to explain that u and l really are lower und upper intevals for g * It and that therefore the "+ log It" really cancels out. From the formula as is it's not immmediately obvious why the additive constant disappears
+% maybe something like $u(\hat{I}_{t+1)}, where \hat{I}_{t+1} = \hat{g}_{t, t+1} I_{t}$
+
+Conveniently, the decomposition of the WIS into dispersion, over-prediction and under-prediction is preserved. The interpretation of the components has now changed in that they now approximately represent uncertainty, over-prediction, and under-prediction with respect to the growth rate. 
+
+Note that the actual forecast and the task of the forecaster has not changed. We are merely making use of the fact that a forecast already contains several pieces of information. Any forecast makes an implicit statement about the growth rate of a process as well as about the expected absolute order of magnitude of the target. By scoring based on the log transformed forecasts and observations, we choose to evaluate the forecaster based on their ability to predict the growth rate, rather than absolute numbers. Applying the log transformation preservers propriety of the scoring rule. In both scenarios, forecasters are therefore incentivised to report their best possible forecast. Depending on the way we score the forecasts, we do however decide which types of errors (additive or multiplicative) we would like to penalise most. 
+
+%\begin{itemize}
+%    \item discuss how equations change for CRPS
+%    \item Optional: Discussion of parallels to point forecasts and the point that you're still incentivised to report the median\\
+%    \item discuss that even if both scoring rules are proper, they still penalise different things %differently. How does that change incentives for the forecaster? 
+%\end{itemize}
 
 \paragraph{What happens to the WIS / CRPS when you log it?}
-Discuss Johannes' Figure from the WIS paper and what changes when you go from natural to log \\
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.9\textwidth]{output/crps log viz.png}
+    \caption{How CRPS changes when you log the observation}
+    \label{fig:log-crps-viz}
+\end{figure}
+
+
 
 \paragraph{Interpretation of scores on log-scale}
 
@@ -137,7 +161,7 @@ Discuss Johannes' Figure from the WIS paper and what changes when you go from na
 \begin{itemize}
     \item Before: lot of weight to scores of targets that are large
     \item Now: Potentially a lot of weight to things that are small
-    \item Relative weight depends on the relation between mean and variance of the thing we analyse. If variance grows quicker / slower than the mean, than we give more / less relative weight to large things
+    \item Relative weight depends on the relation between mean and variance of the thing we analyse. If variance grows quicker / slower than the mean, than we give more / less relative weight to large things. It would be nice to have an analysis for how the average of a score changes for targets with different variances. 
 \end{itemize}
 
 \paragraph{Option: empirical analysis} 
@@ -207,5 +231,38 @@ Also: what, empirically is the distribution of errors?
 
 \newpage
 
+\appendix
+\section{Supplementary information}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.9\textwidth]{output/placeholder-image.png}
+    \caption{Illustration of the fact that taking the log of WIS or CRPS results in an improper score}
+    \label{fig:log-improper}
+\end{figure}
 
 \end{document}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Idea parking lot 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%\begin{itemize}
+%    \item idea of scores on logged data: interpretation as a measure of relative improvement, just as when you log the absolute error
+%\end{itemize}
+
+%\paragraph{What's there in the literature}
+
+%\paragraph{Current problems / questions about scoring an epidemiological setting}
+%probably narrow down to the ones we really want to discuss%
+%There are limitations with what we can do with scores on a natural scale and open questions whether we can do these things on a log-scale and also whether a log-scale might be inherently more appropriate
+%\begin{itemize}
+    %\item Can't really model score on a natural scale as errors are heavily skewed. Is there a way to model scores to get insight about different factors that systematically influence scores
+ %   \item make a plot somewhere that shows the distribution of scores
+  %  \item Maybe epidemiological forecasts are inherently better suited to be scored on an absolute scale due to the multiplicative nature of processes (related to over-prediction > under-prediction)? Does the log-scale imply we are scoring the growth rate? 
+   % \item unclear what trade-offs of logging / not logging are
+    %\item what score (log, not log) matches closest what our intuition (or policymakers) think is good? 
+    %\item are we better at forecasting deaths than cases? --> relative measure would help
+    %\item There exists confusion about what can be done to a score in general (e.g. people want to take the median, which they shouldn't) %maybe don't add as an extra point
+%\end{itemize}

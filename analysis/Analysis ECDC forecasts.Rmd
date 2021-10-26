@@ -244,14 +244,11 @@ scores |>
 
 ## Fit a model to data
 
-```{r include=TRUE}
+Check fit of the log scale model
+
+```{r echo=TRUE}
 reg_log <- scores |>
   filter(scale == "log") |>
-  glm(formula = interval_score ~ 1 + model + location + target_type + horizon, 
-      family = gaussian)
-
-reg <- scores |>
-  filter(scale == "natural") |>
   glm(formula = interval_score ~ 1 + model + location + target_type + horizon, 
       family = gaussian)
 ```

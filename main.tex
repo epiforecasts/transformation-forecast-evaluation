@@ -50,6 +50,9 @@ In the abstract, this article is a very good one.
 % General thought: maybe easier to do with WIS rather than CRPS? 
 % Could do WIS in the main paper and CRPS in the SI? 
 
+% We could look at the log growth rate
+% with any linear model, an additive effect on the log growth rate would mean a multiplicative effect on the growth rate
+
 \section{Introduction}
 
 \paragraph{Role of forecasts and problem in comparing them}
@@ -62,15 +65,29 @@ Forecasts play an important role in decision-making in many areas such as for ex
 Generally, probabilistic forecasts like those submitted to the Forecast Hubs are usually evaluated using proper scoring rules [Cite Gneiting et al. 2007]. A proper scoring rule incentivises any forecaster to state their true best belief and on average always gives the best score to the forecaster who reports a predictive distribution that is equal to the data-generating distribution. Forecasts submitted to the Forecast Hubs were required to follow a quantile-based format where forecasters would report a set of 23 quantiles (11 symmetric prediction intervals as well as a median prediction). A natural choice for quantile-based forecasts is the (weighted) interval score (WIS) [Cite Bracher et al.]. 
 
 The WIS (lower values are better) can be decomposed into a dispersion component and penalties for over- and under-prediction. For a single prediction interval, the interval score is computed as 
-$$IS_\alpha(F,y) = (u-l) + \frac{2}{\alpha} \cdot (l-y) \cdot 1(y \leq l) + \frac{2}{\alpha} \cdot (y-u) \cdot 1(y \geq u), $$ 
-where $1()$ is the indicator function, $y$ is the true value, and $l$ and $u$ are the $\frac{\alpha}{2}$ and $1 - \frac{\alpha}{2}$ quantiles of the predictive distribution $F$, i.e. the lower and upper bound of a single prediction interval. For a set of $K$ prediction intervals and the median $m$, the WIS is computed as a weighted sum, 
-$$WIS = \frac{1}{K + 0.5} \cdot (w_0 \cdot |y - m| + \sum_{k = 1}^{K} w_k \cdot IS_{\alpha}(F, y)),$$ 
+\begin{equation}
+ IS_\alpha(F,y) = (u-l) + \frac{2}{\alpha} \cdot (l-y) \cdot 1(y \leq l) + \frac{2}{\alpha} \cdot (y-u) \cdot 1(y \geq u),    
+\end{equation}
+
+where $1()$ is the indicator function, $y$ is the observed value, and $l$ and $u$ are the $\frac{\alpha}{2}$ and $1 - \frac{\alpha}{2}$ quantiles of the predictive distribution $F$, i.e. the lower and upper bound of a single central prediction interval. For a set of $K$ prediction intervals and the median $m$, the WIS is computed as a weighted sum, 
+\begin{equation}
+WIS = \frac{1}{K + 0.5} \cdot (w_0 \cdot |y - m| + \sum_{k = 1}^{K} w_k \cdot IS_{\alpha}(F, y)),    
+\end{equation} 
 where $w_k$ is a weight for every interval. Usually, $w_k = \frac{\alpha_k}{2}$ and $w_0 = 0.5$
 
 The WIS is closely related to the continuous ranked probability score (CRPS, lower values are better) [Cite Gneiting 2007], which itself can be understood as a generalisation of the absolute error to probabilistic forecasts. For an increasing set of equally-spaced prediction intervals the WIS converges to the CRPS and shares many of its properties. The CRPS measures the 'distance' of the predictive distribution to the observed data-generating distribution as 
-$$\text{CRPS}(F, y) = \int_{-\infty}^\infty \left( F(x) - 1(x \geq y) \right)^2 dx,$$
+
+
+
+\begin{equation}
+    \text{CRPS}(F, y) = \int_{-\infty}^\infty \left( F(x) - 1(x \geq y) \right)^2 dx,
+\end{equation}
+
 where y is the true observed value and F the CDF of predictive distribution. Often the following alternative representation is used
-$$ \text{CRPS}(F, y) = \frac{1}{2} \mathbb{E}_{F} |X - X'| - \mathbb{E}_P |X - y|,$$ 
+\begin{equation}
+    \text{CRPS}(F, y) = \frac{1}{2} \mathbb{E}_{F} |X - X'| - \mathbb{E}_P |X - y|,
+\end{equation}
+  
 where $X$ and $X'$ are independent realisations from the predictive distributions $F$ with finite first moment and $y$ is the true value. In this representation we can simply replace $X$ and $X'$ by samples sum over all possible combinations to obtain the CRPS.  
 
 Another proper scoring rule commonly used is the log score [CITATION], which we will not discuss further in this paper.  
@@ -95,43 +112,132 @@ A natural proposition is therefore to score forecasts on a logarithmic scale, ma
 \paragraph{What we propose}
 Proper scoring rules yield a score as a function of a forecast $x$ and a corresponding observation $y$. For epidemiological forecasts of positive quantities we propose to replace WIS and CRPS scores on the natural scale computed as 
 %
-$$S(x, y), $$
+\begin{equation}
+S(x, y),     
+\end{equation}
 %
 by scores computed on the logarithmic scale as 
 %
-$$S(\log{(x + 1)}, \log{(y + 1)}), $$
+\begin{equation}
+S(\log{(x + 1)}, \log{(y + 1)}),    
+\end{equation}
+%
 where $S()$ is either the WIS or the CRPS and one is added to deal with zeros in the data. The so computed score is still proper, as for a single forecast the order between different forecasters is not affected by the monotone transformation. Differences in the ranking between forecasters only appear when averaging over multiple forecasts, as deviations from the perfect forecast get penalised differently depending on whether forecasts are scored on the log or the natural scale. Note that simply taking the log of a score computed on the natural scale, i.e. computing $\log S(x, y)$ results in an improper score and is therefore not advised. We illustrate this point in Figure \ref{fig:log-improper} in the SI. 
 
-\paragraph{Scoring the log means scoring the growth rate}
-If the forecast target is an incidence (e.g. incident cases or hospitalisations), then computing a score based on the logarithm of the forecast and the observation is approximately equivalent to scoring a forecast of a multiplicative growth rate. The growth rate is defined as 
+\paragraph{Scoring the log means scoring the growth rate} Computing a score based on the logarithm of the forecast and the observation is approximately equivalent to scoring a forecast of a multiplicative growth rate of the forecast target. The growth rate is defined as 
+%
+\begin{equation}
+    g_{t, t+1} = \frac{y_{t+1} - y_t}{y_t},
+\end{equation}
+%
+where $y_{t+1}$ is the forecast target (e.g. reported cases of COVID-19), $y_t$ is the last known observation and $g_{t, t+1}$ is the growth rate between now ($t$) and $t+1$. This can be rewritten as 
+%
+\begin{equation}
+y_{t+1} = (1 + g_{t, t+1}) \cdot y_t.
+\end{equation}
+%
+If we score $\log y_{t_+1}$ rather than $y_{t+1}$, this changes to 
+%
+\begin{equation}
+\log y_{t+1} = \log (1 + g_{t, t+1}) + \log y_t.    
+\end{equation}
+%
+Note that $\log y_t$ is a known quantity that can be removed from both sides without changing the score. What is uncertain is $\log y_{t+1} - \log y_t = \log (1 + g_{t, t+1})$.  For small values of $g$, we lastly have 
+\begin{equation}
+    \log (1+ g_{t, t+1}) \approx g_{t, t+1}.
+\end{equation}
+%
+When we score a forecast for $y_{t+1}$ on the log scale, the interval score for a single prediction interval changes as follows
+%
+\begin{align}
+    \text{IS}_\alpha(\log F, \log y) = &(\log u - \log l) \\ 
+    &+ \frac{2}{\alpha} \cdot (\log l - \log y) \cdot 1(\log y \leq \log l) \\
+    &+ \frac{2}{\alpha} \cdot (\log y - \log u) \cdot 1(\log y \geq \log u).
+\end{align}
+%
+Note that the values of the indicator functions stay the same as the logarithm is a monotonic transformation and the inequality is preserved. 
+On the natural scale, $u$, $l$ are the lower and upper bounds of a central prediction interval for a forecast of $y_{t+1} = (1 + g_{t, t+1}) \cdot y_t$. 
+We can rewrite these as 
+\begin{equation}
+   l = l^* \cdot y_t 
+   \;\; \text{and} \;\; 
+   u = u^* \cdot y_t,  
+\end{equation}
+where $u^*$ and $l^*$ are the lower and upper bounds of a prediction interval for $(1 + g_{t, t+1})$. Consequently, 
+\begin{equation}
+  \log l = \log l^* + \log y_t
+  \;\; \text{and} \;\;
+  \log u = \log u^* + \log y_t. 
+\end{equation}
+%
+We can then rewrite the score for a forecast of $\log y_{t+1} = \log (1 + g_{t,t+1}) + \log y_t$ as
+%
+\begin{equation}
+\begin{aligned}
+IS_\alpha&(\log F_{t+1}, \log y_{t+a}) = \\
+&((\log u^* + \log y_t) - (\log l^* + \log y_t)) \\
+&+ \frac{2}{\alpha} \cdot ((\log l^* + \log y_t) - (\log (1 + g_{t, t+1}) + \log y_t)) 
+     \cdot 1((\log (1 + g_{t, t+1}) + \log y_t) \leq (\log l^* + \log y_t) \\
+&+ \frac{2}{\alpha} \cdot ((\log (1 + g_{t, t+1}) + \log y_t) - (\log u^* + \log y_t)) 
+      \cdot 1((\log (1 + g_{t, t+1}) + \log y_t) \geq (\log u^* + \log y_t),
+\end{aligned}
+\end{equation}
+%
+which simplifies to 
+%
+\begin{equation}
+\begin{aligned}
+\label{eqn:is-log}
+\text{IS}_\alpha(\log F_{t+1}, \log y_{t+a}) = &(\log u^* - \log l^*) \\
+&+ \frac{2}{\alpha} \cdot (\log l^* - \log (1 + g_{t, t+1}) 
+     \cdot 1(\log (1 + g_{t, t+1}) \leq \log l^*) \\
+&+ \frac{2}{\alpha} \cdot (\log (1 + g_{t, t+1}) - \log u^*) 
+      \cdot 1(\log (1 + g_{t, t+1}) \geq \log u^*).
+\end{aligned}
+\end{equation}
 
-$$ g_{t, t+1} = \frac{I_{t+1} - I_t}{I_t},$$
+The left-hand side of equation \ref{eqn:is-log} was left unchanged. From the right-hand side we can see that for a single prediction interval, scoring the log of a forecast ($\log F_{t+1}$) against the log observed value ($\log y_{t+1}$) is exactly equivalent to evaluating a forecast for $\log (1 + g_{t, t+1})$. With $\log (1 + g_{t, t+1} \approx g_{t, t+1}$, this is approximately a forecast for the growth rate for small values of $g_{t, t+1}$. 
+Conveniently, the decomposition of the WIS into dispersion, over-prediction and under-prediction is preserved. The interpretation of the components has now changed in that they now approximately represent uncertainty, over-prediction, and under-prediction with the growth rate. 
 
-where $I_{t+1}$ is the incidence we want to forecast, $I_t$ is the last known observation and $g_{t, t+1}$ is the growth rate between now ($t$) and $t+1$. This can be rewritten as 
+\paragraph{Additive vs. multiplicative errors}
+Of course the growth rate (and more generally the term $\log (1 + g_{t, t+1})$) would be linked multiplicatively to the observed value on the natural scale. Recall that the WIS is closely linked to the absolute error. On the natural scale, we were conceptually evaluating an absolute error of our forecast with regards to the true observed value. Simplified to the case of a point forecast $\hat{y}_{t+1}$ we could express this as measuring an absolute error $\varepsilon_{t+1}$ such that
+%
+\begin{equation}
+    \hat{y}_{t+1} = y_{t+1} + \varepsilon_{t+1}. 
+¸\end{equation}
+In the case of scoring the log forecast, where we evaluate an absolute error on $\log (1 + g_{t, t+1})$, it makes more sense to understand the error $y_{t+1}$ as being a multiplicative error $\varepsilon^*_{t+1}$ so that
+\begin{align}
+    \hat{y}_{t+1} &= y_{t+1} \cdot \varepsilon^*_{t+1} \\
+    &= y_{t} \cdot (1 + g_{t, t+1}) \cdot \varepsilon^*_{t+1},
+\end{align}
+%
+which on the log scale becomes to 
+\begin{align}
+    \hat{y}_{t+1} = \log y_{t} + \log (1 + g_{t, t+1}) + \varepsilon^*_{t+1}. 
+\end{align}
 
-$$I_{t+1} = (1 + g_{t, t+1}) I_t.$$
+The log transformation therefore changes which types of errors (additive or multiplicative) are penalised. The WIS and CRPS computed on the natural scale penalise large absolute errors, regardless of whether the error is large in relative terms. Predicting 101,000 cases instead of the true 100,000 will be treated equally to predicting 2,000 hospitalisations, rather than the 1,000 observed. The WIS and CRPS based on log-transformed values however, penalise relative errors. Forecasting 101,000 rather than 100,000 cases will be treated equally to forecasting 2,020, rather than 2,000 hospitalisations. The score is relative and therefore less dependent on the scale of the forecast quantity, making it easier to compare (relative) performance across different forecast targets, periods and locations. 
 
-If we score $\log I_{t_+1}$ rather than $I_{t+1}$, this changes to 
+\paragraph{Note on propriety and shifting the focus of the evaluation}
+Applying the log transformation preservers propriety of the scoring rule. The task of the forecaster has not changed and in both scoring scenarios, forecasters are incentivised to report their best possible forecast. Any forecast that is made already implicitly contains a statement about the growth rate of a process as well as about the expected absolute order of magnitude of the target. By scoring based on the log transformed forecasts and observations, we merely choose to shift the attention towards evaluating the forecaster based on relative errors, rather than absolute numbers. 
 
-$$\log I_{t+1} = \log (1 + g_{t, t+1}) + \log I_t.$$
+\section{What happens when you average many scores}
 
-The logarithm of today's incident value, $\log I_t$, is a known quantity that we do not need to forecast. This additive shift does not change the forecast score. For small values of g, we have 
-$$\log (1+ g_{t, t+1}) \approx g_{t, t+1}.$$
+THIS COULD INCLUDE JOHANNES EXAMPLE
 
-When we score the logarithm of the forecast and the observations, the interval score for a single prediction interval changes as follows
+COULD ALSO JUST MAKE A SIMULATION. 
+YOU TAKE 1000 little counties, combine them to 20 states with different sizes. Then you plot 
 
-$$IS_\alpha(\log F, \log y) = (\log u - \log l) + \frac{2}{\alpha} \cdot (\log l - \log y) \cdot 1(\log y \leq \log l) + \frac{2}{\alpha} \cdot (\log y - \log u) \cdot 1(\log y \geq \log u), $$ 
 
-where $y = I_{t+1}$ (pick consistent notation) and the part inside the indicator functions stays the same as the logarithm is a monotonic transformation and the inequality is preserved. Per above, we can rewrite this as
+This means the WIS and CRPS on the natural scale are dependent on the scale of the forecast target, because forecasting errors will typically be large for large quantities. 
+However, note that large relative errors will likely more often occur with small quantities (e.g. predicting 9, rather than 3 deaths), potentially giving undue weight to small quantities. Whether or not more weight is given to smaller or larger forecast quantities depends on the exact relationship between the mean and the variance of the quantity of interest. If the variance grows slower than the mean, then scores will on average be larger for small quantities than for larger ones. In practice, this can be partly mitigated by restricting the analysis to forecast targets with with higher incidences. 
+% the phrase "scores give a higher weight to a or b" could be made clearer: This is about a scenario where you average across different targets and the average score is influenced by outliers
 
-$$IS_\alpha(\log F, \log y) \approx (\log u - \log l) + \frac{2}{\alpha} \cdot (\log l - g_{t, t+1}) \cdot 1(g_{t, t+1} \leq \log l) + \frac{2}{\alpha} \cdot (g_{t, t+1} - \log u) \cdot 1(g_{t, t+1} \geq \log u).$$
 
-% At the moment we're just dropping the g in here. Maybe need to rewrite this to explain that u and l really are lower und upper intevals for g * It and that therefore the "+ log It" really cancels out. From the formula as is it's not immmediately obvious why the additive constant disappears
-% maybe something like $u(\hat{I}_{t+1)}, where \hat{I}_{t+1} = \hat{g}_{t, t+1} I_{t}$
+%COMPARISON TO SCORING THE ACTUAL GROWTH RATE - just harder to do and achieves the same thing? No objections if someone wants to? Might actually be better if there are negative values involved? 
 
-Conveniently, the decomposition of the WIS into dispersion, over-prediction and under-prediction is preserved. The interpretation of the components has now changed in that they now approximately represent uncertainty, over-prediction, and under-prediction with respect to the growth rate. 
+%What about other things like scoring the square root of the forecast?
 
-Note that the actual forecast and the task of the forecaster has not changed. We are merely making use of the fact that a forecast already contains several pieces of information. Any forecast makes an implicit statement about the growth rate of a process as well as about the expected absolute order of magnitude of the target. By scoring based on the log transformed forecasts and observations, we choose to evaluate the forecaster based on their ability to predict the growth rate, rather than absolute numbers. Applying the log transformation preservers propriety of the scoring rule. In both scenarios, forecasters are therefore incentivised to report their best possible forecast. Depending on the way we score the forecasts, we do however decide which types of errors (additive or multiplicative) we would like to penalise most. 
 
 %\begin{itemize}
 %    \item discuss how equations change for CRPS
@@ -143,26 +249,22 @@ Note that the actual forecast and the task of the forecaster has not changed. We
 \begin{figure}[h!]
     \centering
     \includegraphics[width=0.9\textwidth]{output/crps log viz.png}
-    \caption{How CRPS changes when you log the observation}
+    \caption{Figure from Johannes: How CRPS changes when you log the observation}
     \label{fig:log-crps-viz}
 \end{figure}
 
 
 
-\paragraph{Interpretation of scores on log-scale}
+% could make an analysis re outliers: how do scores change if we remove the 1 or 2 worst forecasts? The one or two best forecasts?
 
-\begin{itemize}
-    \item We can interpret as a relative measure
-    \item scale-free
-\end{itemize}
+\paragraph{detailed interpretation of plots and when you give larger scores to what}
 
-\paragraph{Practical considerations / limitations}
-
-\begin{itemize}
-    \item Before: lot of weight to scores of targets that are large
-    \item Now: Potentially a lot of weight to things that are small
-    \item Relative weight depends on the relation between mean and variance of the thing we analyse. If variance grows quicker / slower than the mean, than we give more / less relative weight to large things. It would be nice to have an analysis for how the average of a score changes for targets with different variances. 
-\end{itemize}
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.9\textwidth]{output/placeholder-image.png}
+    \caption{Plot that shows the scores for log and non log and how they change}
+    \label{fig:change-in-scores}
+\end{figure}
 
 \paragraph{Option: empirical analysis} 
 Score different things from the European / US Forecast Hub and plot the relationship between mean and variance. Plot log-scale scores for different things and see which of these influence average scores most \\

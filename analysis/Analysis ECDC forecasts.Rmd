@@ -1,0 +1,554 @@
+---
+title: "Log or not - Analysis of ECDC forecasts"
+output: html_document
+---
+  
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE,
+                      message = FALSE, 
+                      warning = FALSE)
+
+library(scoringutils)
+library(purrr)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(patchwork)
+library(stringr)
+library(here)
+library(data.table)
+library(kableExtra)
+library(performance)
+
+recompute_scores <- FALSE
+```
+
+```{r}
+# helper functions
+# ------------------------------------------------------------------------------
+
+make_table <- function(x, caption = "") {
+  x %>%
+    rename_all(gsub, pattern = "_", replacement = " ") %>%
+    rename_all(str_to_sentence) %>%
+    mutate_if(is.numeric, round, 2) %>%
+    kable(caption = caption) %>%
+    kable_styling()
+}
+
+# format plot scales
+scale_fn <- function(x) {
+  ifelse(x >= 1000000, 
+         paste0(x / 1000000, "m"), 
+         ifelse(x >= 5000,
+                paste0(x / 1000, "k"),
+                x))
+}
+
+
+
+```
+
+
+```{r}
+# load data 
+# ------------------------------------------------------------------------------
+
+hub_data <- rbindlist(list(
+  fread(here("data", "full-data-european-forecast-hub-1.csv")), 
+  fread(here("data", "full-data-european-forecast-hub-2.csv"))
+)) |>
+  unique()
+```
+
+
+```{r}
+# create version of data where the true value is the true growth rate
+# interesting question: does it make a difference, whether we transform it 
+# to be the weekly growth rate, i.e. take the n-th root, where n is the horizon? 
+
+latest_truth <- fread(here("data", "weekly-truth-Europe.csv")) |>
+  rename(last_known_true_value = true_value) |>
+  mutate(forecast_date = target_end_date + 2) |>
+  select(location, target_type, forecast_date, last_known_true_value) |>
+  unique()
+
+# unsure whether the pmax hack is the right way to do it
+growth_data <- hub_data |>
+  inner_join(latest_truth) |>
+  mutate(true_value = true_value / pmax(last_known_true_value + 1),
+         prediction = prediction / pmax(last_known_true_value + 1)) |>
+  select(-last_known_true_value)
+```
+
+
+```{r eval = recompute_scores}
+# score forecasts
+# ------------------------------------------------------------------------------
+
+# helper function
+score_forecasts <- function(data,
+                            summarise_by = c("model", "location", 
+                                             "target_end_date", "forecast_date",
+                                             "horizon", "target_type"), 
+                            scale = c("natural", "log")) {
+  if (scale[1] == "log") {
+    data <- data |>
+      mutate(prediction = log(pmax(prediction, 0) + 1), 
+             true_value = log(pmax(true_value, 0) + 1))
+  }
+  
+  data |>
+    eval_forecasts(summarise_by = summarise_by) |>
+    mutate(scale = scale[1])
+}
+
+scores_natural <- score_forecasts(hub_data)
+scores_log <- score_forecasts(hub_data, scale = "log")
+
+scores_gr_natural <- score_forecasts(growth_data)
+scores_gr_log <- score_forecasts(growth_data, scale = "log")
+
+scores <- bind_rows(scores_natural, scores_log)
+fwrite(scores, here("output", "data", "all-scores-european-hub.csv"))
+
+scores_gr <- bind_rows(scores_gr_natural, scores_gr_log)
+fwrite(scores_gr, here("output", "data", "all-scores-growth-rate-european-hub.csv"))
+```
+
+```{r}
+scores <- fread(here("output", "data", "all-scores-european-hub.csv"))
+scores[, scale := factor(scale, levels = c("natural", "log"))]
+
+scores_gr <- fread(here("output", "data", "all-scores-growth-rate-european-hub.csv"))
+scores_gr[, scale := factor(scale, levels = c("natural", "log"))]
+```
+
+General thoughts?
+
+- Focus on Hub-ensemble or average across all models? 
+- Focus on two weeks ahead? 
+
+## Scores across forecast targets
+
+This uses the Hub ensemble
+
+```{r}
+scores |> 
+  filter(model == "EuroCOVIDhub-ensemble", 
+         horizon == 2) |>
+  ggplot(aes(y = interval_score, x = target_type)) + 
+  geom_violin(aes(fill = target_type), alpha = 0.2, color = NA) + 
+  geom_boxplot(alpha = 0.5) + 
+  scale_fill_brewer(palette = "Set1", name = "Forecast target") + 
+  facet_wrap(~ scale, scale = "free") + 
+  theme_minimal() + 
+  theme(legend.position = "none") + 
+  scale_y_continuous(labels = scale_fn, trans = "log10") + 
+  labs(y = "Interval score", x = "Target type")
+
+ggsave("output/figures/HUB-average-scores.png", width = 7, height = 5)
+```
+
+*Scores are more comparable across targets*
+
+Mean scores: 
+```{r}
+scores |> 
+  filter(model == "EuroCOVIDhub-ensemble", 
+         horizon == 2) |>
+  group_by(scale, target_type) |>
+  summarise(interval_score = mean(interval_score), 
+            .groups = "drop_last") |>
+  make_table()
+```
+
+
+
+## Scores across locations
+
+--> could also do this plot with multiplicative scores, i.e. how much higher is a score than the lowest score observed
+
+```{r}
+# alternatively, we could think about just summarising across all models for these plots? 
+scores |> 
+  filter(model == "EuroCOVIDhub-ensemble", 
+         horizon == 2) |>
+  group_by(target_type, location, scale) |>
+  summarise(interval_score = mean(interval_score), 
+            .groups = "drop_last") |>
+  ggplot(aes(y = interval_score, x = reorder(location, -interval_score))) + 
+  geom_bar(stat = "identity") + 
+  scale_fill_brewer(palette = "Set1", name = "Forecast target") + 
+  facet_wrap(~ target_type + scale, scale = "free") + 
+  theme_minimal() + 
+  theme(legend.position = "none") + 
+  scale_y_continuous(labels = scale_fn) + 
+  labs(y = "Interval score", x = "Target type")
+
+ggsave("output/figures/HUB-scores-locations.png", width = 7, height = 5)
+```
+
+*We see that the scores are much more evenly distributed across locations if we log the data* 
+
+## Variance scores across locations 
+
+```{r}
+scores |> 
+  filter(model == "EuroCOVIDhub-ensemble", 
+         horizon == 2) |>
+  group_by(target_type, location, scale) |>
+  summarise(mean_wis = mean(interval_score), 
+            sd_wis = sd(interval_score), 
+            .groups = "drop_last") |>
+  ggplot(aes(y = sd_wis, x = mean_wis)) + 
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", size = 0.5) + 
+  geom_point() + 
+  facet_wrap(~ target_type + scale, scale = "free") + 
+  theme_minimal() + 
+  theme(legend.position = "none") + 
+  # scale_x_continuous(labels = scale_fn) + 
+  # scale_y_continuous(labels = scale_fn) + 
+  scale_x_continuous(labels = scale_fn, trans = "log10") +
+  scale_y_continuous(labels = scale_fn, trans = "log10") +
+  labs(x = "Mean WIS", y = "Sd of WIS") 
+
+ggsave("output/figures/HUB-sd-vs-mean-scores.png", width = 7, height = 5)
+
+```
+
+## Scores over time
+
+restrict to a few locations, e.g. GB, FR, ES (highest average scores there)
+
+```{r}
+scores |> 
+  filter(model == "EuroCOVIDhub-ensemble",
+         location %in% c("GB", "ES", "DE"),
+         horizon == 2) |>
+  rename(Location = location) |>
+  group_by(target_type, scale, Location) |>
+  mutate(multiplicative_score = interval_score / min(interval_score)) |>
+  ggplot(aes(y = multiplicative_score, x = forecast_date, colour = Location)) + 
+  geom_line() + 
+  geom_point() + 
+  facet_grid(target_type ~ scale, scale = "free_y") + 
+  theme_minimal() + 
+  labs(x = "Forecast date", y = "WIS relative to smallest observed value")
+
+ggsave("output/figures/HUB-scores-over-time.png", width = 7, height = 5)
+```
+
+*Overall it looks like there can still be substantial fluctuation in log scores, but maybe slightly less than when scored on an absolute scale. Interestingly, it seems like the smoothing effect is stronger for deaths than for cases.*
+
+
+
+
+
+
+## Change of average scores for increasing forecast horizons
+
+```{r}
+scores |> 
+  filter(model == "EuroCOVIDhub-ensemble") |>
+  group_by(scale, target_type, horizon) |>
+  summarise(interval_score = mean(interval_score), 
+            .groups = "drop_last") |>
+  mutate(multiplicative_score = interval_score / min(interval_score)) |>
+  ggplot(aes(y = multiplicative_score, x = horizon)) + 
+  geom_line() + 
+  geom_point() + 
+  facet_grid(target_type ~ scale) + 
+  theme_minimal() + 
+  labs(x = "Forecast horizon in weeks", y = "Multplicative change in interval score")
+
+ggsave("output/figures/HUB-scores-over-horizon.png", width = 7, height = 5)
+
+```
+
+*Slightly less increase on the log scale, but overall not a lot of difference*
+
+
+## Distribution of scores
+
+```{r}
+scores |>
+  ggplot(aes(x = interval_score)) + 
+  geom_density() + 
+  facet_wrap(~ target_type + scale, scale = "free") + 
+  scale_x_continuous(labels = scale_fn)
+```
+
+
+
+## Fit a model to data
+
+Check fit of the log scale model
+
+```{r echo=TRUE}
+reg_log <- scores |>
+  filter(scale == "log") |>
+  glm(formula = interval_score ~ 1 + model + location + target_type + horizon, 
+      family = gaussian)
+```
+
+
+```{r}
+# check distribution
+performance::check_distribution(reg_log) |>
+  plot()
+
+# check normality of residuals
+check_normality(reg_log) |>
+  plot(type = "qq")
+
+# heteroskedasticity of error terms - the plot takes extremly long to run
+performance::check_heteroskedasticity(reg_log)
+# performance::check_heteroskedasticity(reg_log) |>
+#   plot()
+
+# check influence of outliers - plot also takes very long to run
+performance::check_outliers(reg_log)
+# performance::check_outliers(reg_log) |>
+#   plot()
+
+```
+
+
+
+
+
+## Model rankings
+
+Still to do 
+
+- restrict to full set of observations
+- check how rankings change
+
+```{r}
+# find out which models have submitted forecasts for all locations and time points
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--- 
+
+
+# Looking at growth rates directly
+
+## Scores of the growth rate across targets
+
+This uses the Hub ensemble
+
+```{r}
+scores_gr |> 
+  filter(model == "EuroCOVIDhub-ensemble", 
+         horizon == 2) |>
+  ggplot(aes(y = interval_score, x = target_type)) + 
+  geom_violin(aes(fill = target_type), alpha = 0.2, color = NA) + 
+  geom_boxplot(alpha = 0.5) + 
+  scale_fill_brewer(palette = "Set1", name = "Forecast target") + 
+  facet_wrap(~ scale, scale = "free") + 
+  theme_minimal() + 
+  theme(legend.position = "none") + 
+  scale_y_continuous(labels = scale_fn, trans = "log10") + 
+  labs(y = "Interval score", x = "Target type")
+```
+
+*Scoring the growth rate makes things more comparable*
+
+Mean scores: 
+```{r}
+scores_gr |> 
+  filter(model == "EuroCOVIDhub-ensemble", 
+         horizon == 2) |>
+  group_by(scale, target_type) |>
+  summarise(interval_score = mean(interval_score), 
+            .groups = "drop_last") |>
+  make_table()
+```
+
+
+
+## Scores for the growth rate across locations
+
+```{r}
+scores_gr |> 
+  filter(model == "EuroCOVIDhub-ensemble", 
+         horizon == 2) |>
+  group_by(target_type, location, scale) |>
+  summarise(interval_score = mean(interval_score), 
+            .groups = "drop_last") |>
+  ggplot(aes(y = interval_score, x = reorder(location, -interval_score))) + 
+  geom_bar(stat = "identity") + 
+  scale_fill_brewer(palette = "Set1", name = "Forecast target") + 
+  facet_wrap(~ target_type + scale, scale = "free") + 
+  theme_minimal() + 
+  theme(legend.position = "none") + 
+  scale_y_continuous(labels = scale_fn) + 
+  labs(y = "Interval score", x = "Target type")
+```
+
+
+
+
+## Scores for growth rate over time
+
+restrict to a few locations, e.g. GB, FR, ES (highest average scores there)
+
+UK: 
+
+```{r}
+scores_gr |> 
+  filter(model == "EuroCOVIDhub-ensemble",
+         location == "GB",
+         horizon == 2) |>
+  group_by(target_type, scale) |>
+  mutate(multiplicative_score = interval_score / min(interval_score)) |>
+  ggplot(aes(y = multiplicative_score, x = forecast_date)) + 
+  geom_line() + 
+  geom_point() + 
+  facet_grid(target_type ~ scale, scale = "free_y") + 
+  theme_minimal() + 
+  labs(x = "Forecast date", y = "WIS relative to smallest observed value")
+```
+
+France: Looks like a data revision
+
+```{r}
+scores_gr |> 
+  filter(model == "EuroCOVIDhub-ensemble",
+         location == "FR",
+         horizon == 2) |>
+  group_by(target_type, scale) |>
+  mutate(multiplicative_score = interval_score / min(interval_score)) |>
+  ggplot(aes(y = multiplicative_score, x = forecast_date)) + 
+  geom_line() + 
+  geom_point() + 
+  facet_grid(target_type ~ scale, scale = "free_y") + 
+  theme_minimal() + 
+  labs(x = "Forecast date", y = "WIS relative to smallest observed value")
+```
+
+Spain: 
+
+```{r}
+scores_gr |> 
+  filter(model == "EuroCOVIDhub-ensemble",
+         location == "ES",
+         horizon == 2) |>
+  group_by(target_type, scale) |>
+  mutate(multiplicative_score = interval_score / min(interval_score)) |>
+  ggplot(aes(y = multiplicative_score, x = forecast_date)) + 
+  geom_line() + 
+  geom_point() + 
+  facet_grid(target_type ~ scale, scale = "free_y") + 
+  theme_minimal() + 
+  labs(x = "Forecast date", y = "WIS relative to smallest observed value")
+```
+
+
+
+
+
+
+## Change of average scores for the growth rate for increasing forecast horizons
+
+```{r}
+scores_gr |> 
+  filter(model == "EuroCOVIDhub-ensemble") |>
+  group_by(scale, target_type, horizon) |>
+  summarise(interval_score = mean(interval_score), 
+            .groups = "drop_last") |>
+  mutate(multiplicative_score = interval_score / min(interval_score)) |>
+  ggplot(aes(y = multiplicative_score, x = horizon)) + 
+  geom_line() + 
+  geom_point() + 
+  facet_grid(target_type ~ scale) + 
+  theme_minimal() + 
+  labs(x = "Forecast horizon in weeks", y = "Multplicative change in interval score")
+```
+
+
+
+
+
+
+
+## Distribution of scores growth rate
+
+```{r}
+scores_gr |>
+  ggplot(aes(x = interval_score)) + 
+  geom_density() + 
+  facet_wrap(~ target_type + scale, scale = "free") + 
+  scale_x_continuous(labels = scale_fn)
+```
+
+
+
+## Fit a model to growth rate data
+
+Check fit of the log scale model
+
+```{r echo=TRUE}
+reg_gr <- scores_gr |>
+  filter(scale == "natural") |>
+  glm(formula = interval_score ~ 1 + model + location + target_type + horizon, 
+      family = gaussian)
+
+reg_gr_log <- scores_gr |>
+  filter(scale == "log") |>
+  glm(formula = interval_score ~ 1 + model + location + target_type + horizon, 
+      family = gaussian)
+```
+
+
+
+```{r}
+# check distribution
+performance::check_distribution(reg_gr_log) |>
+  plot()
+
+# check normality of residuals
+check_normality(reg_gr_log) |>
+  plot(type = "qq")
+
+# heteroskedasticity of error terms - the plot takes extremly long to run
+performance::check_heteroskedasticity(reg_gr_log)
+# performance::check_heteroskedasticity(reg_log) |>
+#   plot()
+
+# check influence of outliers - plot also takes very long to run
+performance::check_outliers(reg_gr_log)
+# performance::check_outliers(reg_log) |>
+#   plot()
+
+```
+
+

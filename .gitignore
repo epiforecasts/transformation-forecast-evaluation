@@ -2,6 +2,6 @@ _targets
 Rplots.pdf
 *.html
 .DS_Store
+*.Rproj
 .Rhistory
 .Rpoj.user/
-*.Rproj

@@ -53,10 +53,10 @@ scale_fn <- function(x) {
 ```{r}
 # load data 
 # ------------------------------------------------------------------------------
-
 hub_data <- rbindlist(list(
   fread(here("data", "full-data-european-forecast-hub-1.csv")), 
-  fread(here("data", "full-data-european-forecast-hub-2.csv"))
+  fread(here("data", "full-data-european-forecast-hub-2.csv")),
+  fread(here("data", "full-data-european-forecast-hub-3.csv")),
 )) |>
   unique()
 ```

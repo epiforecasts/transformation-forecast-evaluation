@@ -60,8 +60,19 @@ mean_state_log2 <- scores_state_log |>
 ggsave("output/figures/SIM-mean-sd-state-size.png", width = 7, height = 4)
 
 
+# plots mean vs. sd of wis -----------------------------------------------------
+mean_wis_vs_sd <- function(scores) {
+  scores |>
+    group_by(state_size) |>
+    summarise(mean_wis = mean(interval_score), 
+              sd_wis = sd(interval_score)) |>
+    ggplot(aes(y = mean_wis, x = sd_wis)) +
+    geom_point() +  
+    labs(y = "Mean WIS", x = "Sd WIS") + 
+    theme_minimal() 
+}
 
-
+mean_wis_vs_sd(scores_state_log)
 
 
 

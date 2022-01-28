@@ -62,7 +62,7 @@ p2_log <- scores |>
   geom_line() + 
   labs(y = "WIS", x = "Observed value") + 
   scale_y_continuous(label = function(x) {paste(scale_factor2 * x)}) + 
-  scale_x_continuous(trans = "log10", 
+  scale_x_continuous(trans = "log", 
                      label = function(x) {
                        ifelse(x < 1, 
                               paste0("1/", (1 / x)), 

@@ -56,7 +56,7 @@ scale_fn <- function(x) {
 hub_data <- rbindlist(list(
   fread(here("data", "full-data-european-forecast-hub-1.csv")), 
   fread(here("data", "full-data-european-forecast-hub-2.csv")),
-  fread(here("data", "full-data-european-forecast-hub-3.csv")),
+  fread(here("data", "full-data-european-forecast-hub-3.csv"))
 )) |>
   unique()
 ```
@@ -214,6 +214,43 @@ scores |>
   labs(x = "Mean WIS", y = "Sd of WIS") 
 
 ggsave("output/figures/HUB-sd-vs-mean-scores.png", width = 7, height = 5)
+
+
+wis_vs_total <- function(scores, summary_fct = mean, fulldata = hub_data) {
+  
+  total_values <- 
+    fulldata |> 
+    filter(!is.na(prediction)) |>
+    group_by(location, target_type, target_end_date) |>
+    summarise(true_value = unique(true_value)) |>
+    group_by(location, target_type) |>
+    summarise(total = sum(true_value))
+  
+  scores |> 
+  filter(model == "EuroCOVIDhub-ensemble", 
+         horizon == 2) |>
+  group_by(target_type, location, scale) |>
+  summarise(wis = summary_fct(interval_score), 
+            .groups = "drop_last") |> 
+  inner_join(total_values) |>
+  ggplot(aes(y = wis, x = total)) + 
+  geom_point() + 
+  facet_wrap(~ target_type + scale, scale = "free") + 
+  theme_minimal() + 
+  theme(legend.position = "none") + 
+  # scale_x_continuous(labels = scale_fn) + 
+  # scale_y_continuous(labels = scale_fn) + 
+  scale_x_continuous(labels = scale_fn, trans = "log10") +
+  scale_y_continuous(labels = scale_fn, trans = "log10") +
+  labs(y = "REPLACE", x = "Total number of observed values")
+} 
+
+mean_wis_vs_total <- wis_vs_total(scores)
+ggsave("output/figures/HUB-mean-scores-vs-total.png", width = 7, height = 5)
+
+sd_wis_vs_total <- wis_vs_total(scores, summary_fct = stats::sd)
+ggsave("output/figures/HUB-sd-scores-vs-total.png", width = 7, height = 5)
+
 
 ```
 

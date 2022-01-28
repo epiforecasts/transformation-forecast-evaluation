@@ -74,6 +74,6 @@ p2_log <- scores |>
 
 p1 / p2_log
 
-ggsave("output/figures/SIM-effect-log-score.png", width = 7, 
+ggsave("output/figures/SIM-effect-log-score.png", width = 6, 
        height = 4)
 

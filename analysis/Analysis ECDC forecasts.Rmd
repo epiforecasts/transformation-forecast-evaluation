@@ -129,6 +129,46 @@ General thoughts?
 - Focus on Hub-ensemble or average across all models? 
 - Focus on two weeks ahead? 
 
+## Mean vs. sd of observed values
+
+```{r}
+
+label_fn <- function(x) {
+  ifelse(x < 1000, 
+         paste(x), 
+         ifelse(x < 1e6, 
+                paste0(x / 1000, "k"),
+                ifelse(x < 1e9, 
+                       paste0(x / 1e6, "m"), 
+                       paste0(x / 1e9, "b"))
+                )
+         )
+}
+
+hub_data |>
+  select(location, target_type, target_end_date, true_value) |>
+  unique() |>
+  group_by(location, target_type) |>
+  summarise(mean_value = mean(true_value), 
+            sd_value = sd(true_value), 
+            var_value = var(true_value)) |>
+  ggplot(aes(y = var_value, x = mean_value)) +
+  geom_point() + 
+  facet_wrap(~ target_type, scales = "free") + 
+  scale_x_continuous(trans = "log10", labels = label_fn) +
+  scale_y_continuous(trans = "log10", labels = label_fn) +
+  # scale_x_continuous(labels = label_fn) +
+  # scale_y_continuous(labels = label_fn) +
+  labs(y = "Variance observed value", x = "Mean observed value") + 
+  geom_function(fun = function(x) x^2, linetype = "dashed", size = 0.5) + 
+  theme_minimal()
+
+ggsave("output/figures/HUB-mean-var-obs.png", width = 7, height = 4)
+  
+```
+
+
+
 ## Scores across forecast targets
 
 This uses the Hub ensemble

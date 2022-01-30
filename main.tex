@@ -124,7 +124,6 @@ Their relation to the absolute error means that both the CRPS and the WIS scale 
 
 \paragraph{Outline of what we do} 
 A natural proposition is therefore to score forecasts on a logarithmic scale, making it easier to model and compare scores across targets by alleviating concerns about skewed forecast scores and also taking into account the multiplicative nature of epidemiological processes. In this paper we will ...
-
 %\begin{enumerate}
 %    \item Effects / Interpretation of scoring on a log scale
 %    \item Appropriate scales for epidemiological (and possibly other) processes
@@ -250,18 +249,47 @@ which on the log scale becomes to
     \hat{y}_{t+1} = \log y_{t} + \log (1 + g_{t, t+1}) + \varepsilon^*_{t+1}. 
 \end{align}
 
-The log transformation therefore changes which types of errors (additive or multiplicative) are penalised. The WIS and CRPS computed on the natural scale penalise large absolute errors, regardless of whether the error is large in relative terms. Predicting 101,000 cases instead of the true 100,000 will be treated equally to predicting 2,000 hospitalisations, rather than the 1,000 observed. The WIS and CRPS based on log-transformed values however, penalise relative errors. Forecasting 101,000 rather than 100,000 cases will be treated equally to forecasting 2,020, rather than 2,000 hospitalisations. The score is relative and therefore less dependent on the scale of the forecast quantity, making it easier to compare (relative) performance across different forecast targets, periods and locations. 
+The log transformation therefore changes which types of errors (additive or multiplicative) are penalised. The WIS and CRPS computed on the natural scale increase linearly with increasing absolute errors (see Figure \ref{fig:change-in-scores}A, regardless of whether the error is large in relative terms. Predicting 101,000 cases instead of the true 100,000 will be treated equally to predicting 2,000 hospitalisations, rather than the 1,000 observed. The WIS and CRPS based on log-transformed values however, penalise relative errors and increase linearly with an increase in relative errors (see Figure \ref{fig:change-in-scores}D). Forecasting 101,000 rather than 100,000 cases will be treated equally to forecasting 2,020, rather than 2,000 hospitalisations. 
+
+\paragraph{What happens to the WIS / CRPS when you log it?}
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.9\textwidth]{output/figures/SIM-effect-log-score.png}
+    \caption{Weighted interval score for a forecast distribution that is N(1, 0.2) and different observed values. Top: difference in absolute terms. Bottom: difference in relative terms. Interesting panels are top left and bottom right.}. 
+    \label{fig:log-crps-viz}
+\end{figure}
+
 
 \paragraph{Note on propriety and shifting the focus of the evaluation}
 Applying the log transformation preservers propriety of the scoring rule. The task of the forecaster has not changed and in both scoring scenarios, forecasters are incentivised to report their best possible forecast. Any forecast that is made already implicitly contains a statement about the growth rate of a process as well as about the expected absolute order of magnitude of the target. By scoring based on the log transformed forecasts and observations, we merely choose to shift the attention towards evaluating the forecaster based on relative errors, rather than absolute numbers. 
 
-\section{What happens when you average many scores}
 
-THIS COULD INCLUDE JOHANNES EXAMPLE
 
-COULD ALSO JUST MAKE A SIMULATION. 
-YOU TAKE 1000 little counties, combine them to 20 states with different sizes. Then you plot 
+\section{Apropriate scales for epidemiological processes}
 
+\paragraph{Modelling on the log scale}
+
+General point: Scores are for a) improving models, b) choosing a model for decision making. 
+At least for a): models are multiplicative, so if a model is making error, it's making a multiplicative error. We therefore should score it based on that. 
+
+
+
+
+%    - general point about how all processes are modelled %multiplicatively and therefore it might be odd to score them %based on absolute errors
+%    - Simulations Sam? 
+%    - Adding up several districts - how do scores change? %(Example Johannes) --> relationship between mean and variance %in scores
+
+%THIS COULD INCLUDE JOHANNES EXAMPLE
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.9\textwidth]{output/figures/SIM-mean-sd-state-size.png}
+    \caption{Simulation of the effect of population size with ideal forecasts of a poisson-distributed variable. For each simulated state, we drew 1,000 observations from a poisson distribution with $\lambda = 100 \cdot \text{state size}$ and computed the WIS for an ideal forecast (i.e. the predictive distribution was poisson with $\lambda$ equal to the true $\lambda$ for every state). Left: Mean WIS depending on state size, right: Mean WIS depending on state sizes when scored on a log scale. Plots for the standard deviation, rather than the mean of WIS values look almost identical.}. 
+    \label{fig:log-crps-viz}
+\end{figure}
+
+
+The score is relative and therefore less dependent on the scale of the forecast quantity, making it easier to compare (relative) performance across different forecast targets, periods and locations. 
 
 This means the WIS and CRPS on the natural scale are dependent on the scale of the forecast target, because forecasting errors will typically be large for large quantities. 
 However, note that large relative errors will likely more often occur with small quantities (e.g. predicting 9, rather than 3 deaths), potentially giving undue weight to small quantities. Whether or not more weight is given to smaller or larger forecast quantities depends on the exact relationship between the mean and the variance of the quantity of interest. If the variance grows slower than the mean, then scores will on average be larger for small quantities than for larger ones. In practice, this can be partly mitigated by restricting the analysis to forecast targets with with higher incidences. 
@@ -278,15 +306,6 @@ However, note that large relative errors will likely more often occur with small
 %    \item Optional: Discussion of parallels to point forecasts and the point that you're still incentivised to report the median\\
 %    \item discuss that even if both scoring rules are proper, they still penalise different things %differently. How does that change incentives for the forecaster? 
 %\end{itemize}
-
-\paragraph{What happens to the WIS / CRPS when you log it?}
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.9\textwidth]{output/figures/SIM-effect-log-score.png}
-    \caption{Weighted interval score for a forecast distribution that is N(1, 0.2) and different observed values. Top: difference in absolute terms. Bottom: difference in relative terms. Interesting panels are top left and bottom right.}. 
-    \label{fig:log-crps-viz}
-\end{figure}
-
 
 
 % could make an analysis re outliers: how do scores change if we remove the 1 or 2 worst forecasts? The one or two best forecasts?

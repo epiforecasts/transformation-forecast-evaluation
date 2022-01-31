@@ -183,6 +183,7 @@ hub_data |>
   geom_bar(stat = "identity") + 
   facet_wrap(~ target_type, scales = "free") + 
   theme_minimal() + 
+  scale_y_continuous(labels = label_fn) + 
   scale_x_discrete(guide = guide_axis(n.dodge=2), labels = label_fn_within) + 
   labs(y = "Mean observed value", x = "Location")
 
@@ -256,20 +257,51 @@ scores |>
 
 ```{r}
 # alternatively, we could think about just summarising across all models for these plots? 
-scores |> 
+
+# make two separate plots to keep ordering. I.e. order locations according 
+# to log scale to illustrate that the ordering changes for cases
+
+get_order <- function(df, type = "Cases") {
+  df |> 
+    filter(scale == "natural", target_type == type) |>
+    arrange(-interval_score) |>
+    pull(location)
+}
+
+plot_df <- scores |> 
   filter(model == "EuroCOVIDhub-ensemble", 
          horizon == 2) |>
   group_by(target_type, location, scale) |>
   summarise(interval_score = mean(interval_score), 
-            .groups = "drop_last") |>
-  ggplot(aes(y = interval_score, x = reorder(location, -interval_score))) + 
-  geom_bar(stat = "identity") + 
-  scale_fill_brewer(palette = "Set1", name = "Forecast target") + 
-  facet_wrap(~ target_type + scale, scale = "free") + 
-  theme_minimal() + 
-  theme(legend.position = "none") + 
-  scale_y_continuous(labels = scale_fn) + 
-  labs(y = "Interval score", x = "Target type")
+            .groups = "drop_last") 
+
+order_cases <- get_order(plot_df)
+order_deaths <- get_order(plot_df, type = "Deaths")
+
+plot <- function(plot_df, order) {
+  plot_df |>
+    mutate(location = factor(location, levels = order)) |>
+    ggplot(aes(y = interval_score, x = location)) + 
+    geom_bar(stat = "identity") + 
+    scale_fill_brewer(palette = "Set1", name = "Forecast target") + 
+    facet_wrap(~ target_type + scale, scale = "free") + 
+    theme_minimal() + 
+    theme(legend.position = "none") + 
+    scale_y_continuous(labels = scale_fn) + 
+    scale_x_discrete(guide = guide_axis(n.dodge=2)) +
+    labs(y = "Interval score", x = "Location")
+}
+
+cases <- plot_df |>
+  filter(target_type == "Cases") |>
+  plot(order = order_cases)
+
+deaths <- plot_df |>
+  filter(target_type == "Deaths") |>
+  plot(order = order_deaths)
+
+cases / 
+  deaths
 
 ggsave("output/figures/HUB-scores-locations.png", width = 7, height = 5)
 ```
@@ -323,18 +355,32 @@ wis_vs_total <- function(scores, summary_fct = mean, fulldata = hub_data) {
   facet_wrap(~ target_type + scale, scale = "free") + 
   theme_minimal() + 
   theme(legend.position = "none") + 
-  # scale_x_continuous(labels = scale_fn) + 
-  # scale_y_continuous(labels = scale_fn) + 
-  scale_x_continuous(labels = scale_fn, trans = "log10") +
-  scale_y_continuous(labels = scale_fn, trans = "log10") +
+  scale_x_continuous(labels = scale_fn) +
+  scale_y_continuous(labels = scale_fn) +
   labs(y = "REPLACE", x = "Total number of observed values")
 } 
 
-mean_wis_vs_total <- wis_vs_total(scores)
+wis_vs_total(scores) + 
+  labs(y = "Mean WIS")
 ggsave("output/figures/HUB-mean-scores-vs-total.png", width = 7, height = 5)
 
-sd_wis_vs_total <- wis_vs_total(scores, summary_fct = stats::sd)
+wis_vs_total(scores, summary_fct = stats::sd) + 
+  labs(y = "Sd WIS")
 ggsave("output/figures/HUB-sd-scores-vs-total.png", width = 7, height = 5)
+
+
+# log-log versions of that plot
+wis_vs_total(scores) + 
+  labs(y = "Mean WIS") + 
+  scale_x_continuous(labels = scale_fn, trans = "log10") +
+  scale_y_continuous(labels = scale_fn, trans = "log10") 
+ggsave("output/figures/HUB-mean-scores-vs-total-log-log.png", width = 7, height = 5)
+
+wis_vs_total(scores, summary_fct = stats::sd) + 
+  labs(y = "Sd WIS") + 
+  scale_x_continuous(labels = scale_fn, trans = "log10") +
+  scale_y_continuous(labels = scale_fn, trans = "log10") 
+ggsave("output/figures/HUB-sd-scores-vs-total-log-log.png", width = 7, height = 5)
 
 
 ```

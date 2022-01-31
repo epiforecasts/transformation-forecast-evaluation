@@ -19,8 +19,11 @@ library(here)
 library(data.table)
 library(kableExtra)
 library(performance)
+library(tidytext)
 
 recompute_scores <- FALSE
+
+# situations with negative values: France 2021-05-22, CZ 2021-08-07, ES 2021-03-06
 ```
 
 ```{r}
@@ -145,8 +148,50 @@ label_fn <- function(x) {
          )
 }
 
+
+# average number of cases and deaths
 hub_data |>
-  select(location, target_type, target_end_date, true_value) |>
+  dplyr::select(location, target_type, target_end_date, true_value) |>
+  unique() |>
+  group_by(target_type) |>
+  summarise(mean_value = mean(true_value), 
+            sd_value = sd(true_value), 
+            var_value = var(true_value))
+
+# negative binomial
+# MASS::glm.nb(true_value ~ target_type, 
+#        data = hub_data %>%
+#          mutate(true_value = pmax(true_value, 0)), 
+#        link = "identity")
+
+
+# plot with means across locations ---------------------------------------------
+label_fn_within <- function(x) {
+  x <- gsub(pattern = "___Deaths", "", x)
+  x <- gsub(pattern = "___Cases", "", x)
+  paste(x)
+}
+
+hub_data |>
+  dplyr::select(location, target_type, target_end_date, true_value) |>
+  unique() |>
+  group_by(target_type, location) |>
+  summarise(mean_value = mean(true_value), 
+            sd_value = sd(true_value), 
+            var_value = var(true_value)) |>
+  ggplot(aes(y = mean_value, x = reorder_within(location, -mean_value, target_type))) + 
+  geom_bar(stat = "identity") + 
+  facet_wrap(~ target_type, scales = "free") + 
+  theme_minimal() + 
+  scale_x_discrete(guide = guide_axis(n.dodge=2), labels = label_fn_within) + 
+  labs(y = "Mean observed value", x = "Location")
+
+ggsave("output/figures/HUB-mean-obs-location.png", width = 9, height = 4)
+
+
+# plot with mean vs. variance --------------------------------------------------
+hub_data |>
+  dplyr::select(location, target_type, target_end_date, true_value) |>
   unique() |>
   group_by(location, target_type) |>
   summarise(mean_value = mean(true_value), 

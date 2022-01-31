@@ -207,7 +207,8 @@ hub_data |>
   # scale_y_continuous(labels = label_fn) +
   labs(y = "Variance observed value", x = "Mean observed value") + 
   geom_function(fun = function(x) x^2, linetype = "dashed", size = 0.5) + 
-  theme_minimal()
+  theme_minimal() + 
+  geom_smooth(alpha = 0.2, size = 0.2)
 
 ggsave("output/figures/HUB-mean-var-obs.png", width = 7, height = 4)
   

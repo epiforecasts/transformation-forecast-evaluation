@@ -42,6 +42,9 @@ make_plot <- function(scores, summary_fct = mean) {
   p1 <- scores |>
     group_by(state_size, scale, Theta) |>
     summarise(interval_score = summary_fct(interval_score)) |>
+    group_by(Theta, scale) |>
+    mutate(interval_score = interval_score / mean(interval_score), 
+           Theta = ifelse(Theta == "1e+09", "1b", Theta)) |>
     ggplot(aes(y = interval_score, x = state_size, colour = Theta)) +
     geom_point(size = 0.4) +  
     labs(y = "WIS", x = "Size of state") + 
@@ -80,25 +83,23 @@ for (size_nbinom in sizes_nbinom) {
 }
 
 saveRDS(res, file = "output/data/simulation-negative-binom.Rda")
+res <- readRDS(file = "output/data/simulation-negative-binom.Rda")
 
-out <- rbindlist(res) |>
-  group_by(Theta, scale) |>
-  mutate(interval_score = interval_score / mean(interval_score), 
-         Theta = ifelse(Theta == "1e+09", "1b", Theta))
-
+out <- rbindlist(res) 
 
 make_plot(out, summary_fct = mean) +
   plot_layout(guides = "collect") & 
   theme(legend.position = "bottom") &
-  labs(y = "WIS relative to mean")
+  labs(y = "Relative WIS")
 
-ggsave("output/figures/SIM-mean-sd-state-size.png", width = 7, height = 4)
+ggsave("output/figures/SIM-mean-state-size.png", width = 7, height = 4)
 
+make_plot(out, summary_fct = stats::sd) +
+  plot_layout(guides = "collect") &
+  theme(legend.position = "bottom") &
+  labs(y = "Realtive WIS sd")
 
-
-
-
-
+ggsave("output/figures/SIM-sd-state-size.png", width = 7, height = 4)
 
 
 

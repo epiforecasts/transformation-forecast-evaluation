@@ -325,7 +325,7 @@ OVERALL, IT TENDS TO BE THE CASE THAT SCORING SOMETHING ON THE LOG SCALE EVENS T
 
 \section{Empirical example: the European Forecast Hub}
 
-\paragraph{Introduction to the Forecast Hub} As an empirical example for evaluating forecasts on the natural and on the log scale we use forecasts from the European Forecast Hub \citep{europeancovid-19forecasthubEuropeanCovid19Forecast2021}. Every week the European Forecast Hub collates and aggregates forecasts for different COVID-19 related targets from teams around the world. Forecasts are made one to four weeks ahead into the future and follow a quantile-based format with a set of 22 quantiles plus the median ($0.01, 0.025, 0.05, ..., 0.5, ... 0.95, 0.975, 0.99$). The forecasts for the purpose of this illustrations are forecasts made between XXX and XXX for reported cases and deaths from COVID-19 in XXX countries. 
+\paragraph{Introduction to the Forecast Hub} As an empirical example for evaluating forecasts on the natural and on the log scale we use forecasts from the European Forecast Hub \citep{europeancovid-19forecasthubEuropeanCovid19Forecast2021}. Every week the European Forecast Hub collates and aggregates forecasts for different COVID-19 related targets from teams around the world. Forecasts are made one to four weeks ahead into the future and follow a quantile-based format with a set of 22 quantiles plus the median ($0.01, 0.025, 0.05, ..., 0.5, ... 0.95, 0.975, 0.99$). The forecasts for the purpose of this illustrations are two-week-ahead forecasts made between XXX and XXX for reported cases and deaths from COVID-19 in XXX countries. 
 
 \paragraph{Describing features of the data}
 Across all time points and locations, the mean number of cases (deaths) observed was 22811 (368) with an overall standard deviation of 47135 (831). The number of observed value does not only differ by forecast target, but also shows considerable heterogeneity by location (see Figure \ref{fig:HUB-mean-locations}. Across the different locations, the variance in observed values is roughly equal to the square of the mean, suggesting that, for a given location, both cases and deaths are not poisson-distributed, but rather exhibit over-dispersion. 
@@ -339,45 +339,44 @@ MAYBE FIT A NEGATIVE BINOMIAL TO THESE OBSERVATIONS
 \end{figure}
 
 \paragraph{Features of the scores}
-
-
-NEED A TABLE WITH SCORES
+Across all time points and locations, the mean number weighted interval score on the natural scale for cases (deaths) was 8855 (59.3) with an overall standard deviation of 51274 (156). On the log scale, scores were much closer to each other (see Figure \ref{fig:HUB-average-scores}), with a mean wis for cases (deaths) of 0.507 (0.362) with an overall standard deviation of 0.745 (0.407). 
+% NEED A TABLE WITH SCORES for the Appendix
+On the natural scale, scores vary by several orders of magnitudes across locations (see \ref{fig:HUB-scores-location}), whereas variation across locations is much smaller for scores on the log scale and wis values are more evenly distributed. The ordering of scores across locations is not preserved when going from the natural to the log scale. 
+% Rather, there seems to be a slight inverse relationship that locations which previously had low scores now tend to receive higher scores. 
+The correlation between scores on the log and natural scale for different locations is XX for cases and XX for deaths. 
+%THERE SEEMS TO BE A TENDENCY FOR SMALLER 
 
 \begin{figure}[h!]
     \centering
     \includegraphics[width=0.9\textwidth]{output/figures/HUB-average-scores.png}
-    \caption{CAPTION}
+    \caption{Distribution of interval scores for two week ahead forecasts of COVID-19 cases and deaths evaluated on the natural scale (left) and on the log scale (right). }
     \label{fig:HUB-average-scores}
 \end{figure}
 
 \begin{figure}[h!]
     \centering
     \includegraphics[width=0.9\textwidth]{output/figures/HUB-scores-locations.png}
-    \caption{CAPTION}
+    \caption{Weighted interval scores across different locations for two week ahead forecasts of COVID-19 cases and deaths evaluated on the natural scale (left) and on the log scale (right). }
     \label{fig:HUB-scores-location}
 \end{figure}
+
+When evaluated on the natural scale, there is  strong relationship between the mean of the weighted interval score and the total number of observed cases (correlation: 0.913) or deaths (cor: 0.849) in a location (see Figure \ref{fig:HUB-mean-scores-total-loglog} and Figure \ref{fig:HUB-mean-scores-total} in the SI). The relationship is less pronounced for scores on the log scale (cor: -0.019 for cases, -0.395 for deaths) and negative, meaning that locations with fewer observed cases or deaths tend to receive higher scores. 
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.9\textwidth]{output/figures/HUB-mean-scores-vs-total-log-log.png}
+    \caption{Plot with Weighted interval scores against the mean number of observed cases or deaths.}
+    \label{fig:HUB-mean-scores-total-loglog}
+\end{figure}
+
+Both on the natural scale as well as on the log scale, scores increase considerably with increasing forecast horizon (see Figure \ref{fig:HUB-scores-horizon}). The increase is more pronounced for cases than for deaths and arguably represents an increase in the relative difficulty to forecast values further into the future. A similar increase both on the natural and the log scale indicates that we are able to observe the increase in difficulty regardless of how we evaluate the scores. 
 
 \begin{figure}[h!]
     \centering
     \includegraphics[width=0.9\textwidth]{output/figures/HUB-scores-over-horizon.png}
-    \caption{CAPTION}
+    \caption{Weighted interval scores across forecast horizons}
     \label{fig:HUB-scores-horizon}
 \end{figure}
-
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.9\textwidth]{output/figures/HUB-scores-over-time.png}
-    \caption{CAPTION}
-    \label{fig:HUB-scores-time}
-\end{figure}
-
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.9\textwidth]{output/figures/HUB-sd-vs-mean-scores.png}
-    \caption{CAPTION}
-    \label{fig:HUB-mean-sd-scores}
-\end{figure}
-
 
 
 
@@ -395,6 +394,8 @@ NEED A TABLE WITH SCORES
 \paragraph{summary of what we did}
 
 \paragraph{context, implications, limitations}
+
+SOME DIFFERENCES BETWEEN SCORES ARE MEANINGFUL. E.G. WE WOULDN'T WANT SCORES FOR CASES AND DEATHS TO BE COMPLETELY EQUAL, BECAUSE DEATHS ARE LIKELY EASIER TO FORECAST
 
 \paragraph{outlook, future work}
 
@@ -416,12 +417,30 @@ NEED A TABLE WITH SCORES
     \label{fig:log-improper}
 \end{figure}
 
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.9\textwidth]{output/figures/HUB-mean-scores-vs-total.png}
+    \caption{Plot with Weighted interval scores against the mean number of observed cases or deaths.}
+    \label{fig:HUB-mean-scores-total}
+\end{figure}
+
+
+
 \end{document}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Idea parking lot 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% not sure this plot is really meaningful
+%\begin{figure}[h!]
+%    \centering
+%    \includegraphics[width=0.9\textwidth]{output/figures/HUB-sd-vs-mean-scores.png}
+%    \caption{CAPTION}
+%    \label{fig:HUB-mean-sd-scores}
+%\end{figure}
 
 %\begin{itemize}
 %    \item idea of scores on logged data: interpretation as a measure of relative improvement, just as when you log the absolute error

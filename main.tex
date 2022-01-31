@@ -328,9 +328,17 @@ OVERALL, IT TENDS TO BE THE CASE THAT SCORING SOMETHING ON THE LOG SCALE EVENS T
 \paragraph{Introduction to the Forecast Hub} As an empirical example for evaluating forecasts on the natural and on the log scale we use forecasts from the European Forecast Hub \citep{europeancovid-19forecasthubEuropeanCovid19Forecast2021}. Every week the European Forecast Hub collates and aggregates forecasts for different COVID-19 related targets from teams around the world. Forecasts are made one to four weeks ahead into the future and follow a quantile-based format with a set of 22 quantiles plus the median ($0.01, 0.025, 0.05, ..., 0.5, ... 0.95, 0.975, 0.99$). The forecasts for the purpose of this illustrations are forecasts made between XXX and XXX for reported cases and deaths from COVID-19 in XXX countries. 
 
 \paragraph{Describing features of the data}
-Across all time points and locations, the mean number of cases (deaths) observed was 22811 (368) with a standard deviation of 47135 (831). 
-FIT A NEGATIVE BINOMIAL TO THESE OBSERVATIONS
+Across all time points and locations, the mean number of cases (deaths) observed was 22811 (368) with an overall standard deviation of 47135 (831). The number of observed value does not only differ by forecast target, but also shows considerable heterogeneity by location (see Figure \ref{fig:HUB-mean-locations}. Across the different locations, the variance in observed values is roughly equal to the square of the mean, suggesting that, for a given location, both cases and deaths are not poisson-distributed, but rather exhibit over-dispersion. 
+MAYBE FIT A NEGATIVE BINOMIAL TO THESE OBSERVATIONS
 
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.9\textwidth]{output/figures/HUB-mean-obs-location.png}
+    \caption{CAPTION}
+    \label{fig:HUB-mean-locations}
+\end{figure}
+
+\paragraph{Features of the scores}
 
 
 NEED A TABLE WITH SCORES

@@ -220,6 +220,14 @@ ggsave("output/figures/HUB-mean-var-obs.png", width = 7, height = 4)
 This uses the Hub ensemble
 
 ```{r}
+scores |>
+  dplyr::select(location, target_type, scale, target_end_date, interval_score) |>
+  unique() |>
+  group_by(target_type, scale) |>
+  summarise(mean_value = mean(interval_score), 
+            sd_value = sd(interval_score), 
+            var_value = var(interval_score))
+
 scores |> 
   filter(model == "EuroCOVIDhub-ensemble", 
          horizon == 2) |>
@@ -233,7 +241,7 @@ scores |>
   scale_y_continuous(labels = scale_fn, trans = "log10") + 
   labs(y = "Interval score", x = "Target type")
 
-ggsave("output/figures/HUB-average-scores.png", width = 7, height = 5)
+ggsave("output/figures/HUB-average-scores.png", width = 7, height = 3.5)
 ```
 
 *Scores are more comparable across targets*
@@ -308,6 +316,24 @@ ggsave("output/figures/HUB-scores-locations.png", width = 7, height = 5)
 
 *We see that the scores are much more evenly distributed across locations if we log the data* 
 
+## Correlation between scores
+
+```{r}
+scores |> 
+  filter(model == "EuroCOVIDhub-ensemble", 
+         horizon == 2) |>
+  group_by(target_type, location, scale) |>
+  summarise(interval_score = mean(interval_score), 
+            .groups = "drop_last") %>%
+  pivot_wider(values_from = interval_score, names_from = scale) %>%
+  group_by(target_type) %>%
+  summarise(correlation = cor(natural, log))
+```
+
+
+
+
+
 ## Variance scores across locations 
 
 ```{r}
@@ -343,21 +369,28 @@ wis_vs_total <- function(scores, summary_fct = mean, fulldata = hub_data) {
     group_by(location, target_type) |>
     summarise(total = sum(true_value))
   
-  scores |> 
-  filter(model == "EuroCOVIDhub-ensemble", 
-         horizon == 2) |>
-  group_by(target_type, location, scale) |>
-  summarise(wis = summary_fct(interval_score), 
-            .groups = "drop_last") |> 
-  inner_join(total_values) |>
-  ggplot(aes(y = wis, x = total)) + 
-  geom_point() + 
-  facet_wrap(~ target_type + scale, scale = "free") + 
-  theme_minimal() + 
-  theme(legend.position = "none") + 
-  scale_x_continuous(labels = scale_fn) +
-  scale_y_continuous(labels = scale_fn) +
-  labs(y = "REPLACE", x = "Total number of observed values")
+  plot_df <- scores |> 
+    filter(model == "EuroCOVIDhub-ensemble", 
+           horizon == 2) |>
+    group_by(target_type, location, scale) |>
+    summarise(wis = summary_fct(interval_score), 
+              .groups = "drop_last") |> 
+    inner_join(total_values) 
+  
+  plot_df |>
+    group_by(target_type, scale) |>
+    summarise(correlation = cor(wis, total)) |> 
+    print()
+  
+  plot_df |>
+    ggplot(aes(y = wis, x = total)) + 
+    geom_point() + 
+    facet_wrap(~ target_type + scale, scale = "free") + 
+    theme_minimal() + 
+    theme(legend.position = "none") + 
+    scale_x_continuous(labels = scale_fn) +
+    scale_y_continuous(labels = scale_fn) +
+    labs(y = "REPLACE", x = "Total number of observed values")
 } 
 
 wis_vs_total(scores) + 
@@ -381,6 +414,9 @@ wis_vs_total(scores, summary_fct = stats::sd) +
   scale_x_continuous(labels = scale_fn, trans = "log10") +
   scale_y_continuous(labels = scale_fn, trans = "log10") 
 ggsave("output/figures/HUB-sd-scores-vs-total-log-log.png", width = 7, height = 5)
+
+# correlation
+
 
 
 ```

@@ -3,6 +3,7 @@ library(dplyr)
 library(scoringutils)
 library(ggplot2)
 library(tidyr)
+library(patchwork)
 
 setup_df <- function(state_sizes = 10^seq(0, 2, 0.01), 
                      q = c(0.01, 0.025, seq(0.05, 0.95, 0.05), 0.975, 0.99), 
@@ -39,19 +40,72 @@ score_states <- function(df) {
 
 make_plot <- function(scores, summary_fct = mean) {
   p1 <- scores |>
-    group_by(state_size, scale) |>
+    group_by(state_size, scale, Theta) |>
     summarise(interval_score = summary_fct(interval_score)) |>
-    ggplot(aes(y = interval_score, x = state_size)) +
+    ggplot(aes(y = interval_score, x = state_size, colour = Theta)) +
     geom_point(size = 0.4) +  
     labs(y = "WIS", x = "Size of state") + 
     theme_minimal() + 
     facet_wrap(~ scale, scales = "free_y")
   
   p2 <- p1 + 
-    scale_x_continuous(trans = "log10")
+    scale_x_continuous(trans = "log10") + 
+    scale_y_continuous(trans = "log10")
   
   p1 / p2
 }
+
+
+
+
+# sample Negative Binomial -----------------------------------------------------
+# var = mu + mu^2/size --> increases a lot with mu
+# theta = size very high --> poisson distribution
+mean_county <- 100
+
+sizes_nbinom <- c(0.1, 1, 1e9)
+
+res <- list()
+for (size_nbinom in sizes_nbinom) {
+  df <- setup_df(time_points = 1000) |>
+    mutate(true_value = rnbinom(n = 1, size = size_nbinom, 
+                                mu = mean_county * state_size), 
+           prediction = qnbinom(p = quantile, size = size_nbinom, 
+                                mu = mean_county * state_size)) 
+  
+  scores <- score_states(df) |>
+    mutate(Theta = as.character(size_nbinom))
+  
+  res[[paste(size_nbinom)]] <- scores
+}
+
+saveRDS(res, file = "output/data/simulation-negative-binom.Rda")
+
+out <- rbindlist(res) |>
+  group_by(Theta, scale) |>
+  mutate(interval_score = interval_score / mean(interval_score), 
+         Theta = ifelse(Theta == "1e+09", "1b", Theta))
+
+
+make_plot(out, summary_fct = mean) +
+  plot_layout(guides = "collect") & 
+  theme(legend.position = "bottom") &
+  labs(y = "WIS relative to mean")
+
+ggsave("output/figures/SIM-mean-sd-state-size.png", width = 7, height = 4)
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -75,31 +129,6 @@ df <- setup_df() |>
 scores <- score_states(df)
 
 make_plot(scores)
-
-
-
-
-
-# sample Negative Binomial -----------------------------------------------------
-# var = mu + mu^2/size --> increases a lot with mu
-mean_county <- 100
-size_nbinom <- 0.1
-df <- setup_df() |>
-  mutate(true_value = rnbinom(n = 1, size = size_nbinom, 
-                              mu = mean_county * state_size), 
-         prediction = qnbinom(p = quantile, size = size_nbinom, 
-                              mu = mean_county * state_size)) 
-
-scores <- score_states(df)
-
-make_plot(scores, summary_fct = stats::sd)
-
-
-
-
-
-
-
 
 
 

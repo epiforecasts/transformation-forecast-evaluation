@@ -259,25 +259,40 @@ The log transformation therefore changes which types of errors (additive or mult
     \label{fig:log-crps-viz}
 \end{figure}
 
+%CHECK WHY FOR LOG SCALE THE VALUES FOR 0.2 and 5 ARE NOT EQUAL
 
 \paragraph{Note on propriety and shifting the focus of the evaluation}
 Applying the log transformation preservers propriety of the scoring rule. The task of the forecaster has not changed and in both scoring scenarios, forecasters are incentivised to report their best possible forecast. Any forecast that is made already implicitly contains a statement about the growth rate of a process as well as about the expected absolute order of magnitude of the target. By scoring based on the log transformed forecasts and observations, we merely choose to shift the attention towards evaluating the forecaster based on relative errors, rather than absolute numbers. 
 
 
 
-\section{Apropriate scales for epidemiological processes}
+\section{Appropriate scales for epidemiological processes}
 
-\paragraph{Modelling on the log scale}
+In this section we explore the rationale for and implications of scoring forecasts on the log scale in an epidemiological context. Forecast evaluation serves several purposes. It provides feedback for forecasters and researchers necessary to improve their models, and it helps decision makers with distinguishing good from bad predictions and choosing forecasts that inform future decisions. 
 
-General point: Scores are for a) improving models, b) choosing a model for decision making. 
-At least for a): models are multiplicative, so if a model is making error, it's making a multiplicative error. We therefore should score it based on that. 
+Generally, the way forecasts are evaluated should correspond to the error structure of the model and the type of errors models will usually make. In epidemiology, the spread of infectious diseases is usually modelled as a multiplicative process. COMPARTMENT MODELS. RENEWAL EQUATION. The number of infections usually grows with some exponential rate etc. The most important errors that models commonly make will therefore be multiplicative errors. It therefore makes sense to focus evaluation on these multiplicative errors. often, if the model is performing badly in multiplicative terms, this means that something with the model is wrong and needs fixing, regardless of performance in absolute terms. When selecting a model for decision-making, similar considerations apply. When a model is structured in a multiplicative way, we should base our trust in it on past relative performance, rather than absolute performance. 
 
+\paragraph{What happens when you average things}
+In order to compare model, we usually need to compare aggregate performance. In many epidemiological settings, whether we decide to evaluate relative or absolute performance has implications for how we weigh performance of models across different dimensions when we aggregate and compare scores. For example, different forecast targets like reported case numbers, hospitalisations and deaths have very different orders of magnitude and scores (even for an ideal forecaster) usually also differ by several orders of magnitude. If we aggregated scores on the natural scale across e.g. cases and deaths, in order to rank models by overall score, an equal weight on absolute performance would implicitly result in a much higher weight on performance on cases. On the log scale, we would put equal weight on the relative performance on cases and on deaths, making performance usually more easily comparable (as scores of an ideal forecaster would not differ as much as on the natural scale). 
+IS THAT TRUE? SHOULD PROBABLY PROVE THIS POINT BY SIMULATION. 
 
+While it is intuitive that performance on cases is not orders of magnitude more important than performance on deaths, the question becomes trickier if we compare across locations or across time for the same forecast target. Indeed, predictive performance of a model may be more important in locations or at times when incidence values are high, as argued by \citep{Bracher}. Whether or not we should think this way depends on certain characteristics of the models. 
 
+Let us assume that we care in particular about situations where incidence numbers are high. It could be useful to give a higher weight to these situations (by scoring on the natural scale), if we believe that certain models may indeed be inherently better in such situations where incidence numbers are high. For example, models may be better around epidemic peaks when numbers are highest, or they may be especially good at forecasting large-scale population dynamics. %(whatever that may be...) 
+Then, scoring on the natural scale will help you identify identify the models that tend to be most situations in the situations we most care about. For example, when looking at one forecast target across time, it may be reasonable to assume that the model which performed best around the peak of one wave of COVID-19 may also be the one to take most seriously in the second wave of COVID-19. If, on the other hand, we believe that good models should do consistently well and that situations with high incidences do not provide orders of magnitude more information about which models perform well or badly in the circumstances we most care about, then scoring on the log scale may be more appropriate. For example, it may be reasonable not to think that predictive performance in a country like Germany would have a hundred times more importance than performance in a country like Luxembourg when determining the best model for future decision making. Similarly, we may not necessarily believe that predictive performance during the January 2022 wave of COVID-19 should carry three times as much weight than predictive performance during the January 2021 wave, just because numbers where three times as high. 
+% Maybe make a plot with one country and scores for that one country in different waves. We could then argue that within one wave, performance of the peak is meaningful, but across different waves (with different numbers) it is unclear, whether that difference conveys meaningful information. 
 
-%    - general point about how all processes are modelled %multiplicatively and therefore it might be odd to score them %based on absolute errors
-%    - Simulations Sam? 
-%    - Adding up several districts - how do scores change? %(Example Johannes) --> relationship between mean and variance %in scores
+When scoring forecasts on a log scale, one may fall in the opposite trap of giving to much weight to situations where incidences are low, as small errors (e.g. predicting 9, rather than 3 deaths) may have a much larger effect in relative terms than in absolute terms if the quantity to forecast is very small. How much weight is given to smaller or larger forecast quantities depends on the exact relationship between the mean and the variance of the quantity of interest. If the variance grows slower than the mean, then scores will on average be larger for small quantities than for larger ones. 
+EXPLAIN FIGURE AND ALSO HUB EXAMPLE. 
+In practice, this can be partly mitigated by restricting the analysis to forecast targets with with higher incidences. 
+% the phrase "scores give a higher weight to a or b" could be made clearer: This is about a scenario where you average across different targets and the average score is influenced by outliers
+
+OVERALL, IT TENDS TO BE THE CASE THAT SCORING SOMETHING ON THE LOG SCALE EVENS THINGS OUT QUITE A BIT.
+
+%MAYBE A PARAGRAPH ABOUT OUTLIERS?
+%COULD ALSO MAKE A NICE PLOT ABOUT OUTLIERS, where we look at the effect of outliers. but maybe that is already included in the plot in Figure 1. 
+% could make an analysis re outliers: how do scores change if we remove the 1 or 2 worst forecasts? The one or two best forecasts?
+
 
 %THIS COULD INCLUDE JOHANNES EXAMPLE
 
@@ -289,11 +304,8 @@ At least for a): models are multiplicative, so if a model is making error, it's 
 \end{figure}
 
 
-The score is relative and therefore less dependent on the scale of the forecast quantity, making it easier to compare (relative) performance across different forecast targets, periods and locations. 
-
-This means the WIS and CRPS on the natural scale are dependent on the scale of the forecast target, because forecasting errors will typically be large for large quantities. 
-However, note that large relative errors will likely more often occur with small quantities (e.g. predicting 9, rather than 3 deaths), potentially giving undue weight to small quantities. Whether or not more weight is given to smaller or larger forecast quantities depends on the exact relationship between the mean and the variance of the quantity of interest. If the variance grows slower than the mean, then scores will on average be larger for small quantities than for larger ones. In practice, this can be partly mitigated by restricting the analysis to forecast targets with with higher incidences. 
-% the phrase "scores give a higher weight to a or b" could be made clearer: This is about a scenario where you average across different targets and the average score is influenced by outliers
+%Score different things from the European / US Forecast Hub and plot the relationship between mean and variance. Plot log-scale scores for different things and see which of these influence average scores most \\
+% What happens to the decomposition of the WIS if we log? 
 
 
 %COMPARISON TO SCORING THE ACTUAL GROWTH RATE - just harder to do and achieves the same thing? No objections if someone wants to? Might actually be better if there are negative values involved? 
@@ -308,48 +320,18 @@ However, note that large relative errors will likely more often occur with small
 %\end{itemize}
 
 
-% could make an analysis re outliers: how do scores change if we remove the 1 or 2 worst forecasts? The one or two best forecasts?
-
-\paragraph{detailed interpretation of plots and when you give larger scores to what}
-
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.9\textwidth]{output/placeholder-image.png}
-    \caption{Plot that shows the scores for log and non log and how they change}
-    \label{fig:change-in-scores}
-\end{figure}
-
-\paragraph{Option: empirical analysis} 
-Score different things from the European / US Forecast Hub and plot the relationship between mean and variance. Plot log-scale scores for different things and see which of these influence average scores most \\
-What happens to the decomposition of the WIS if we log? 
-
-
-
-\section{Appropriate scales for epidemiological processes}
-%Could also make this more general and compare any additive, multiplicative or even other processes and state which scale would be appropriate. 
-
-\paragraph{Scoring epidemiological processes}
-Epidemiological processes are generally multiplicative, others may be additive or even something else. We want to explore whether epidemiological processes should in principle be scored on a log scale. Also: are there any processes which shouldn't be scored on a log scale? 
-
-\paragraph{What is the interpretation of logging in an epidemiological setting and is it appropriate?}
-
-\paragraph{Over- and under-prediction}
-If we want to keep this in, we could: 
-\begin{itemize}
-    \item Check whether there is actually a problem with over-prediction and under-prediction in the Hub. This could be the case because we are most interested in certain scenarios in which this might arise. 
-    \item Discuss this in light of Johannes' analysis of how the decomposition of WIS values differs if the data are skewed
-    \item compare this to the PIT-value-like relative bias scores we used for the German / Polish paper, which capture a relative tendency to over- or under-predict, rather than absolute penalties. 
-\end{itemize}
-
 \paragraph{Toy example: simulate an epidemic and apply 3 different models} Compare scores for these three models on the natural scale and the log scale
-
-\paragraph{Optional: Empirical differences when going from natural to log-scale} 
-We could score a lot of forecasts of the European Hub and show plots about how scores differs when going from natural to log-scale
 
 
 \section{Empirical example: the European Forecast Hub}
 
-\paragraph{Introduction to the Forecast Hub}
+\paragraph{Introduction to the Forecast Hub} As an empirical example for evaluating forecasts on the natural and on the log scale we use forecasts from the European Forecast Hub \citep{europeancovid-19forecasthubEuropeanCovid19Forecast2021}. Every week the European Forecast Hub collates and aggregates forecasts for different COVID-19 related targets from teams around the world. Forecasts are made one to four weeks ahead into the future and follow a quantile-based format with a set of 22 quantiles plus the median ($0.01, 0.025, 0.05, ..., 0.5, ... 0.95, 0.975, 0.99$). The forecasts for the purpose of this illustrations are forecasts made between XXX and XXX for reported cases and deaths from COVID-19 in XXX countries. 
+
+\paragraph{Describing features of the data}
+Across all time points and locations, the mean number of cases (deaths) observed was 22811 (368) with a standard deviation of 47135 (831). 
+FIT A NEGATIVE BINOMIAL TO THESE OBSERVATIONS
+
+
 
 NEED A TABLE WITH SCORES
 
@@ -389,19 +371,7 @@ NEED A TABLE WITH SCORES
 \end{figure}
 
 
-\section{Modelling scores}
-\paragraph{Motivation} Alternative is to use summary measures or pairwise comparison, which becomes cumbersome for many dimensions. 
 
-\paragraph{caveats, practical limitations}
-\begin{itemize}
-    \item What kind of transformations can we do? Propose random effect models
-    \item is there anything we can't do? 
-    \item How does logging change the error distribution? On the natural scale, you have huge outliers. What's the appropriate error distribution to use? confidence intervals. Maybe we can only say something about the effects
-\end{itemize}
-
-
-\paragraph{Optional: Application to data from the Euro-Hub}
-Also: what, empirically is the distribution of errors? 
 
 \section{Other ideas}
 \begin{itemize}
@@ -463,3 +433,27 @@ Also: what, empirically is the distribution of errors?
     %\item are we better at forecasting deaths than cases? --> relative measure would help
     %\item There exists confusion about what can be done to a score in general (e.g. people want to take the median, which they shouldn't) %maybe don't add as an extra point
 %\end{itemize}
+
+
+%\paragraph{Over- and under-prediction}
+%If we want to keep this in, we could: 
+%\begin{itemize}
+%    \item Check whether there is actually a problem with over-prediction and under-prediction in the Hub. This could be the case because we are most interested in certain scenarios in which this might arise. 
+%    \item Discuss this in light of Johannes' analysis of how the decomposition of WIS values differs if the data are skewed
+%    \item compare this to the PIT-value-like relative bias scores we used for the German / Polish paper, which capture a relative tendency to over- or under-predict, rather than absolute penalties. 
+%\end{itemize}
+
+
+%\section{Modelling scores}
+%\paragraph{Motivation} Alternative is to use summary measures or pairwise comparison, which becomes cumbersome for many dimensions. 
+
+%\paragraph{caveats, practical limitations}
+%\begin{itemize}
+%    \item What kind of transformations can we do? Propose random effect models
+%    \item is there anything we can't do? 
+%    \item How does logging change the error distribution? On the natural scale, you have huge outliers. What's the appropriate error distribution to use? confidence intervals. Maybe we can only say something about the effects
+%\end{itemize}
+
+
+%\paragraph{Optional: Application to data from the Euro-Hub}
+%Also: what, empirically is the distribution of errors? 

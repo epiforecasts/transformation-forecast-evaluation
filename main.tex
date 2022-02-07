@@ -49,42 +49,13 @@ In the abstract, this article is a very good one.
 
 \newpage
 
-% General thought: maybe easier to do with WIS rather than CRPS? 
-% Could do WIS in the main paper and CRPS in the SI? 
-
-% We could look at the log growth rate
-% with any linear model, an additive effect on the log growth rate would mean a multiplicative effect on the growth rate
-
-% Introduction
-%    - Role of forecasts and problems in comparing them
-%    - Introduction to scoring rules, WIS, CRPS
-%    - outline of the paper
-%Scoring on a log scale
-%    - what we propose
-%    - we approximately score the growth rate
-%    - focus is shifted from additive to multiplicative error
-%    - Interpretation: 
-%        - How do forecast weights change: what gets high and %what gets low scores? 
-%        - - Figure from Johannes: How CRPS changes when you log %the observation
-%
-%Appropriate scales for epidemiological processes
-%    - general point about how all processes are modelled %multiplicatively and therefore it might be odd to score them %based on absolute errors
-%    - Simulations Sam? 
-%    - Adding up several districts - how do scores change? %(Example Johannes) --> relationship between mean and variance %in scores
-%
-%Example: European Forecast Hub: 
-%    - paragraph introduction to the Forecast Hub
-%    - How does the distribution of scores change
-%        - target types, locations, over time
-%    - relationship between mean and sd of WIS
-    
 
 % ===========================================================
 \section{Introduction}
 
 \paragraph{Role of forecasts and problem in comparing them}
 
-Forecasts play an important role in decision-making in many areas such as for example economics [Citations], agriculture [Citations] and epidemiology [Citations]. Forecasts are most useful if they are probabilistic in nature [Citation e.g. Held et al.], meaning that in addition to a point prediction, forecasters also provide a predictive distribution to quantify their uncertainty. Through the COVID-19 pandemic forecasts of case numbers, hospitalisations and deaths have had a strong influence on public policy and there merits and limitations have been widely discussed by politicians, experts and laypeople alike. Probabilistic COVID-19 Forecasts from different research institutions have been systematically collected and aggregated by the US Forecast Hub [Citation], the German and Polish Forecast Hub [Citation] and the European Forecast Hub [Citation]. One major challenge in comparing and evaluating these forecasts is that it is not immediately how to deal with targets on different orders of magnitudes (e.g. case numbers and hospitalisations) or how to take the exponential nature of epidemiological processes into account. In this paper we will argue that evaluating forecasts on a logarithmic, rather than a natural scale, may help alleviate some of these concerns and may be better suited to epidemiological forecasts. 
+Forecasts play an important role in decision-making in many areas such as for example economics [Citations], agriculture [Citations] and epidemiology [Citations]. Forecasts are most useful if they are probabilistic in nature [Citation e.g. Held et al.], meaning that in addition to a point prediction, forecasters also provide a predictive distribution to quantify their uncertainty. Through the COVID-19 pandemic forecasts of case numbers, hospitalisations and deaths have had a strong influence on public policy and there merits and limitations have been widely discussed by politicians, experts and laypeople alike. Probabilistic COVID-19 Forecasts from different research institutions have been systematically collected and aggregated by the US Forecast Hub [Citation], the German and Polish Forecast Hub [Citation] and the European Forecast Hub [Citation]. One major challenge in comparing and evaluating these forecasts is that it is not immediately how to deal with targets on different orders of magnitudes (e.g. case numbers and hospitalisations) or how to take the potentially non-stationary nature of epidemiological processes into account. In this paper we will argue that evaluating forecasts on a logarithmic scale may be useful alongside scoring on the natural scale, and in some instances may be better suited to epidemiological forecasting contexts. 
 
 %Forecasts should be well calibrated (i.e. should not systematically deviate from the observations) and subject to calibration should be as precise as possible (Cite Gneiting). 
 
@@ -98,7 +69,7 @@ The WIS (lower values are better) can be decomposed into a dispersion component 
 
 where $1()$ is the indicator function, $y$ is the observed value, and $l$ and $u$ are the $\frac{\alpha}{2}$ and $1 - \frac{\alpha}{2}$ quantiles of the predictive distribution $F$, i.e. the lower and upper bound of a single central prediction interval. For a set of $K$ prediction intervals and the median $m$, the WIS is computed as a weighted sum, 
 \begin{equation}
-WIS = \frac{1}{K + 0.5} \cdot (w_0 \cdot |y - m| + \sum_{k = 1}^{K} w_k \cdot IS_{\alpha}(F, y)),    
+\text{WIS} = \frac{1}{K + 0.5} \cdot \left(w_0 \cdot |y - m| + \sum_{k = 1}^{K} w_k \cdot IS_{\alpha}(F, y)\right),    
 \end{equation} 
 where $w_k$ is a weight for every interval. Usually, $w_k = \frac{\alpha_k}{2}$ and $w_0 = 0.5$
 
@@ -120,10 +91,10 @@ where $X$ and $X'$ are independent realisations from the predictive distribution
 Another proper scoring rule commonly used is the log score [CITATION], which we will not discuss further in this paper.  
 
 \paragraph{Problems with the WIS and CRPS in an epidemiological setting}
-Their relation to the absolute error means that both the CRPS and the WIS scale with the prediction target. Forecasts of COVID-19 cases, for example typically have much higher scores than forecasts of hospitalisations of death. Similarly, when looking at performance across different locations or over time, average scores will be dominated by locations and times with high incidences. Single outliers also can have a disproportionate effect on aggregate scores. One can argue that this is meaningful and that we should care most about places and periods when incidences are high (maybe cite Bracher et al.). However, this may not always be true and is clearly not desirable when comparing performance of a model on different prediction targets: case numbers are not necessarily more important than hospitalisations, just because observed values tend be an order of magnitude higher. This makes forecasts often hard or impossible to compare. Distributions of forecast scores are usually highly skewed making it hard to model them using standard linear models. Researchers instead often resorted to evaluating different prediction targets or locations completely independently, a process that is often cumbersome and makes it hard to identify factors that systematically affect scores. In any epidemiological setting there is also a noticeable tension when processes (such as the spread of a disease) that are usually modelled multiplicatively are scored in terms of absolute (additive) errors. 
+Their relation to the absolute error means that both the CRPS and the WIS scale with the prediction target. Forecasts of COVID-19 cases, for example typically have higher scores than forecasts of hospitalisations of death. Similarly, when looking at performance across different locations or over time, average scores will be dominated by locations and times with high incidences. Outliers also can have a disproportionate effect on aggregate scores. One can argue that this is meaningful and that we should care most about places and periods when incidence is high (maybe cite Bracher et al.). However, this may not always be true and is clearly not desirable when comparing performance of a model on different prediction targets: case numbers are not necessarily more important than hospitalisations, just because observed values tend be an order of magnitude higher. This makes forecasts often hard or impossible to compare. Distributions of forecast scores, are also usually skewed making it hard to model them using standard linear models. Researchers instead often resorted to evaluating different prediction targets or locations independently, a process that is often cumbersome and makes it hard to identify factors that systematically affect scores. In epidemiological settings there is also a noticeable tension as processes (such as the spread of a disease) are typically considered by theory to evolve as exponential processes but using traditional proper scoring rules are evaluate in terms of absolute (additive on the linear scale) errors. 
 
 \paragraph{Outline of what we do} 
-A natural proposition is therefore to score forecasts on a logarithmic scale, making it easier to model and compare scores across targets by alleviating concerns about skewed forecast scores and also taking into account the multiplicative nature of epidemiological processes. In this paper we will ...
+A natural proposition is therefore to score forecasts on a logarithmic scale, bringing the scoring process closer to the underlying theory of how disease transmission takes place, and making it easier to model and compare scores across targets by alleviating concerns about skewed forecast score. In this paper we will be amazing again and again and again...
 %\begin{enumerate}
 %    \item Effects / Interpretation of scoring on a log scale
 %    \item Appropriate scales for epidemiological (and possibly other) processes
@@ -152,12 +123,12 @@ by scores computed on the logarithmic scale as
 S(\log{(x + 1)}, \log{(y + 1)}),    
 \end{equation}
 %
-where $S()$ is either the WIS or the CRPS and one is added to deal with zeros in the data. The so computed score is still proper, as for a single forecast the order between different forecasters is not affected by the monotone transformation.
+where $S()$ is the WIS or the CRPS and one is added to deal with zeros in the data. The computed score is still proper, as for a single forecast the order between different forecasters is not affected by the monotone transformation (citation).
 % last sentence not very clear
 Differences in the ranking between forecasters only appear when averaging over multiple forecasts, as deviations from the perfect forecast get penalised differently depending on whether forecasts are scored on the log or the natural scale. Note that simply taking the log of a score computed on the natural scale, i.e. computing $\log S(x, y)$ results in an improper score and is therefore not advised. We illustrate this point in Figure \ref{fig:log-improper} in the SI. 
 % ADD A COMMENT ABOUT LOG X + 1
 
-\paragraph{Scoring the log means scoring the growth rate} Computing a score based on the logarithm of the forecast and the observation is approximately equivalent to scoring a forecast of a multiplicative growth rate of the forecast target. The growth rate is defined as 
+\paragraph{Scoring the log means scoring the approximate growth rate} Computing a score based on the logarithm of the forecast and the observation is approximately equivalent to scoring a forecast of a multiplicative growth rate of the forecast target. The growth rate is defined as 
 %
 \begin{equation}
     g_{t, t+1} = \frac{y_{t+1} - y_t}{y_t},
@@ -175,11 +146,14 @@ If we score $\log y_{t_+1}$ rather than $y_{t+1}$, this changes to
 \log y_{t+1} = \log (1 + g_{t, t+1}) + \log y_t.    
 \end{equation}
 %
-Note that $\log y_t$ is a known quantity that can be removed from both sides without changing the score. What is uncertain is $\log y_{t+1} - \log y_t = \log (1 + g_{t, t+1})$.  For small values of $g$, we lastly have 
+Note that $\log y_t$ is a known quantity that can be removed from both sides without changing the score. What is uncertain is $\log y_{t+1} - \log y_t = \log (1 + g_{t, t+1})$.  For small values of $g$, we can make the following approximation
 \begin{equation}
     \log (1+ g_{t, t+1}) \approx g_{t, t+1}.
 \end{equation}
 %
+
+This connection with the underlying epidemic growth rate is an attractive property in and of itself as it is the conceptual target many forecasters and forecast consumers make use of. 
+
 When we score a forecast for $y_{t+1}$ on the log scale, the interval score for a single prediction interval changes as follows
 %
 \begin{align}
@@ -230,7 +204,7 @@ which simplifies to
 \end{equation}
 
 The left-hand side of equation \ref{eqn:is-log} was left unchanged. From the right-hand side we can see that for a single prediction interval, scoring the log of a forecast ($\log F_{t+1}$) against the log observed value ($\log y_{t+1}$) is exactly equivalent to evaluating a forecast for $\log (1 + g_{t, t+1})$. With $\log (1 + g_{t, t+1} \approx g_{t, t+1}$, this is approximately a forecast for the growth rate for small values of $g_{t, t+1}$. 
-Conveniently, the decomposition of the WIS into dispersion, over-prediction and under-prediction is preserved. The interpretation of the components has now changed in that they now approximately represent uncertainty, over-prediction, and under-prediction with the growth rate. 
+Conveniently, the decomposition of the WIS into dispersion, over-prediction and under-prediction is preserved. The interpretation of the components has now changed in that they now approximately represent uncertainty, over-prediction, and under-prediction with the growth rate and so are independent of current incidence. 
 
 \paragraph{Additive vs. multiplicative errors}
 Of course the growth rate (and more generally the term $\log (1 + g_{t, t+1})$) would be linked multiplicatively to the observed value on the natural scale. Recall that the WIS is closely linked to the absolute error. On the natural scale, we were conceptually evaluating an absolute error of our forecast with regards to the true observed value. Simplified to the case of a point forecast $\hat{y}_{t+1}$ we could express this as measuring an absolute error $\varepsilon_{t+1}$ such that
@@ -270,7 +244,7 @@ Applying the log transformation preservers propriety of the scoring rule. The ta
 
 In this section we explore the rationale for and implications of scoring forecasts on the log scale in an epidemiological context. Forecast evaluation serves several purposes. It provides feedback for forecasters and researchers necessary to improve their models, and it helps decision makers with distinguishing good from bad predictions and choosing forecasts that inform future decisions. 
 
-Generally, the way forecasts are evaluated should correspond to the error structure of the model and the type of errors models will usually make. In epidemiology, the spread of infectious diseases is usually modelled as a multiplicative process. COMPARTMENT MODELS. RENEWAL EQUATION. The number of infections usually grows with some exponential rate etc. The most important errors that models commonly make will therefore be multiplicative errors. It therefore makes sense to focus evaluation on these multiplicative errors. often, if the model is performing badly in multiplicative terms, this means that something with the model is wrong and needs fixing, regardless of performance in absolute terms. When selecting a model for decision-making, similar considerations apply. When a model is structured in a multiplicative way, we should base our trust in it on past relative performance, rather than absolute performance. 
+Generally, the way forecasts are evaluated should correspond to the error structure of the model and the type of errors models will usually make. In epidemiology, the spread of infectious diseases is usually modelled as an exponential process. COMPARTMENT MODELS. RENEWAL EQUATION. The number of infections usually grows with some exponential rate etc. Error from these models will then in general be dominated by multiplicative process errors. Under the assumption that these models are correctly capturing transmission dynamics inherent to the system it therefore makes sense to focus evaluation on these multiplicative errors. Often, if the model is performing badly in multiplicative terms, this means that there is a flaw with its assumptions that needs to be resolved, regardless of performance in absolute terms. When selecting a model for decision-making, similar considerations apply. When a model is structured in a multiplicative way, we should base our trust in it on past relative performance, rather than absolute performance. Though ultimately this decision is dependent on the users of the forecast who may prefer models that perform better on an absolute scale for a range of reasons (for example not over-estimating the peak size of an epidemic). 
 
 \paragraph{What happens when you average things}
 In order to compare model, we usually need to compare aggregate performance. In many epidemiological settings, whether we decide to evaluate relative or absolute performance has implications for how we weigh performance of models across different dimensions when we aggregate and compare scores. For example, different forecast targets like reported case numbers, hospitalisations and deaths have very different orders of magnitude and scores (even for an ideal forecaster) usually also differ by several orders of magnitude. If we aggregated scores on the natural scale across e.g. cases and deaths, in order to rank models by overall score, an equal weight on absolute performance would implicitly result in a much higher weight on performance on cases. On the log scale, we would put equal weight on the relative performance on cases and on deaths, making performance usually more easily comparable (as scores of an ideal forecaster would not differ as much as on the natural scale). 
@@ -282,27 +256,24 @@ Let us assume that we care in particular about situations where incidence number
 Then, scoring on the natural scale will help you identify identify the models that tend to be most situations in the situations we most care about. For example, when looking at one forecast target across time, it may be reasonable to assume that the model which performed best around the peak of one wave of COVID-19 may also be the one to take most seriously in the second wave of COVID-19. If, on the other hand, we believe that good models should do consistently well and that situations with high incidences do not provide orders of magnitude more information about which models perform well or badly in the circumstances we most care about, then scoring on the log scale may be more appropriate. For example, it may be reasonable not to think that predictive performance in a country like Germany would have a hundred times more importance than performance in a country like Luxembourg when determining the best model for future decision making. Similarly, we may not necessarily believe that predictive performance during the January 2022 wave of COVID-19 should carry three times as much weight than predictive performance during the January 2021 wave, just because numbers where three times as high. 
 % Maybe make a plot with one country and scores for that one country in different waves. We could then argue that within one wave, performance of the peak is meaningful, but across different waves (with different numbers) it is unclear, whether that difference conveys meaningful information. 
 
-When scoring forecasts on a log scale, one may fall in the opposite trap of giving to much weight to situations where incidences are low, as small errors (e.g. predicting 9, rather than 3 deaths) may have a much larger effect in relative terms than in absolute terms if the quantity to forecast is very small. How much weight is given to smaller or larger forecast quantities depends on the exact relationship between the mean and the variance of the quantity of interest. If the variance grows slower than the mean, then scores will on average be larger for small quantities than for larger ones. 
-EXPLAIN FIGURE AND ALSO HUB EXAMPLE. 
-In practice, this can be partly mitigated by restricting the analysis to forecast targets with with higher incidences. 
-% the phrase "scores give a higher weight to a or b" could be made clearer: This is about a scenario where you average across different targets and the average score is influenced by outliers
-
-OVERALL, IT TENDS TO BE THE CASE THAT SCORING SOMETHING ON THE LOG SCALE EVENS THINGS OUT QUITE A BIT.
+When scoring forecasts on a log scale, one may fall in the opposite trap of giving to much weight to situations where incidences are low, as small errors (e.g. predicting 9, rather than 3 deaths) may have a much larger effect in relative terms than in absolute terms if the quantity to forecast is very small. How much weight is given to smaller or larger forecast quantities depends on the exact relationship between the mean and the variance of the quantity of interest. To investigate this we sampled forecasts from different negative binomial distributions. The negative binomial distribution has mean $\mu$ and variance $\sigma^2 = \mu + \mu ^2 / \theta$ and for $\lim_{\theta \to \infty}$ converges to the Poisson distribution. For large values of $\theta$, resulting in a variance approximately equal to the mean, forecasts for lower quantities on average received higher scores on the log scale (see Figure \ref{fig:SIM-wis-state-size-mean}. For $\theta = 1$ (and correspondingly, $\sigma^2 = \mu + \mu^2$, we found that scores on the log scale remained approximately constant regardless of the size of the quantity to forecast. For $\theta = 0.1$ (and $\sigma^2 = \mu + 10 \cdot \mu^2$), scores on the log scale increased with the quantity to forecast. When scored on the natural scale, a higher quantity to forecast always lead to higher scores regardless of the chosen distribution (as long as the variance grows together with the mean). 
 
 %MAYBE A PARAGRAPH ABOUT OUTLIERS?
 %COULD ALSO MAKE A NICE PLOT ABOUT OUTLIERS, where we look at the effect of outliers. but maybe that is already included in the plot in Figure 1. 
 % could make an analysis re outliers: how do scores change if we remove the 1 or 2 worst forecasts? The one or two best forecasts?
-
 
 %THIS COULD INCLUDE JOHANNES EXAMPLE
 
 \begin{figure}[h!]
     \centering
     \includegraphics[width=0.9\textwidth]{output/figures/SIM-mean-sd-state-size.png}
-    \caption{Simulation of the effect of population size with ideal forecasts of a poisson-distributed variable. For each simulated state, we drew 1,000 observations from a poisson distribution with $\lambda = 100 \cdot \text{state size}$ and computed the WIS for an ideal forecast (i.e. the predictive distribution was poisson with $\lambda$ equal to the true $\lambda$ for every state). Left: Mean WIS depending on state size, right: Mean WIS depending on state sizes when scored on a log scale. Plots for the standard deviation, rather than the mean of WIS values look almost identical.}. 
-    \label{fig:log-crps-viz}
+    \caption{Simulation of the effect of population size with ideal forecasts of a negative-binomially-distributed variable. For each simulated state, we drew 1,000 observations from a negative binomial distribution with $\mu = 100 \cdot \text{state size}$ and with values of $\theta$ equal to 0.1, 1, and 1 billion. The variance of the negative binomial is given as $\sigma^2 = \mu + \mu^2 / \theta$, meaning that for large theta the negative binomial distribution is equal to the poisson distribution. For these simulated values we computed the WIS for an ideal forecast (i.e. the predictive distribution was negative binomial with $\mu$ and $\theta$ equal to the true $\mu$ and $\theta$ for every state). Left: Mean WIS depending on state size, right: Mean WIS depending on state sizes when scored on a log scale. Plots for the standard deviation, rather than the mean of WIS values look are given in Figure \ref{fig:SIM-wis-state-size-sd} in the SI.}. 
+    \label{fig:SIM-wis-state-size-mean}
 \end{figure}
 
+
+%Other transformations: 
+%Box-Cox, square root 
 
 %Score different things from the European / US Forecast Hub and plot the relationship between mean and variance. Plot log-scale scores for different things and see which of these influence average scores most \\
 % What happens to the decomposition of the WIS if we log? 
@@ -423,6 +394,13 @@ SOME DIFFERENCES BETWEEN SCORES ARE MEANINGFUL. E.G. WE WOULDN'T WANT SCORES FOR
     \includegraphics[width=0.9\textwidth]{output/figures/HUB-mean-scores-vs-total.png}
     \caption{Plot with Weighted interval scores against the mean number of observed cases or deaths.}
     \label{fig:HUB-mean-scores-total}
+\end{figure}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.9\textwidth]{output/figures/SIM-sd-state-size.png}
+    \caption{Simulation of the effect of population size with ideal forecasts of a negative-binomially-distributed variable. For each simulated state, we drew 1,000 observations from a negative binomial distribution with $\mu = 100 \cdot \text{state size}$ and with values of $\theta$ equal to 0.1, 1, and 1 billion. The variance of the negative binomial is given as $\sigma^2 = \mu + \mu^2 / \theta$, meaning that for large theta the negative binomial distribution is equal to the poisson distribution. For these simulated values we computed the WIS for an ideal forecast (i.e. the predictive distribution was negative binomial with $\mu$ and $\theta$ equal to the true $\mu$ and $\theta$ for every state). Left: Mean WIS depending on state size, right: Mean WIS depending on state sizes when scored on a log scale. Plots for the standard deviation, rather than the mean of WIS values look are given in Figure \ref{fig:SIM-wis-state-size-sd} in the SI.}. 
+    \label{fig:SIM-wis-state-size-mean}
 \end{figure}
 
 

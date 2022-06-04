@@ -7,7 +7,7 @@
 \usepackage{amssymb}
 \usepackage{natbib}
 \PassOptionsToPackage{hyphens}{url}
-\usepackage{url}
+\usepackage{url} 
 \usepackage[disable]{todonotes}
 \usepackage{multicol}
 \usepackage{rotating}
@@ -53,7 +53,7 @@ In the abstract, this article is a very good one. We did a very good job of the 
 % ===========================================================
 \section{Introduction}
 
-Forecasts play an important role in decision-making in epidemiology and public health [Citations], as well as other areas as diverse as for example economics [Citations] or agriculture [Citations]. Epidemiological modelling was an important tool to inform public policy throughout the COVID-19 pandemic and scenario modelling, as well as forecasts of cases, hospitalisations and deaths from COVID-19 have received widespread attention. Beginning in 2020, forecasts from different research institutions have been systematically collected, aggregated and evaluated by COVID-19 Forecast hubs in the US [Citation], Germany and Poland, and Europe [Citation]. 
+Forecasts play an important role in decision-making in epidemiology and public health [Citations], as well as other areas as diverse as for example economics [Citations] or agriculture [Citations]. Epidemiological modelling has been an important tool to inform public policy throughout the COVID-19 pandemic and scenario modelling, as well as forecasts of cases, hospitalisations and deaths from COVID-19 have received widespread attention. Beginning in 2020, forecasts from different research institutions have been systematically collected, aggregated and evaluated by COVID-19 Forecast hubs in the US [Citation], Germany and Poland, and Europe [Citation]. 
 
 We usually understand epidemiological processes to be exponential in nature and therefore most commonly describe and model them in terms of concepts like growth rates [CITATION?] or the effective reproduction number (the average number of secondary cases produced by each infected person) [CITATION]. Consequently, errors from such models will generally be dominated by multiplicative process errors. Under the assumption that these models are correctly capturing the underlying inherent transmission dynamics, it would make sense to focus evaluation on these multiplicative errors. In the past, however, evaluation of forecasts submitted to the Forecast Hubs was mostly centred around metrics like the weighted interval score (WIS), a proper scoring rule [CITATION] which, applied to raw forecasts, captures additive, rather than multiplicative errors. This makes it harder to diagnose and quantify model mis-specification, but also makes it more difficult to deal with the potential non-stationarity of epidemiological processes, or to compare performance across targets that are on very different orders of magnitudes (like for example cases and hospitalisations). In this paper, we propose to transform forecasts and observed values prior to evaluation using the WIS in a way that shifts the focus of the evaluation towards relative, rather than absolute errors. We illustrate the effect of this transformation using forecasts submitted to the European COVID-19 Forecast Hub. 
 

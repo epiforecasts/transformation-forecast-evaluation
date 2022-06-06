@@ -57,7 +57,7 @@ In the abstract, this article is a very good one. We did a very good job of the 
 
 Probabilistic forecasts play an important role in decision-making in epidemiology and public health [Citations], as well as other areas as diverse as for example economics [Citations] or agriculture [Citations]. Epidemiological modelling in particular has received widespread attention during the COVID-19 pandemic and has been an important tool to inform public policy. Evaluating forecasts is important, as the evaluation provides feedback for forecasters and researchers necessary to improve their models, and it helps decision makers with distinguishing good from bad predictions and choosing forecasts that inform future decisions.
 
-Proabbilistic forecasts are usually evaluated using so-called proper scoring rules, which return a numerical score as a function of the forecast and the later observed data. Forecasters, in expectaction, optimise their score by providing a predictive distribution that is equal to the data-generating distribution, and will be penalised if they fail to do so. Two proper scoring rules commonly used in epidemiology and other fields are the Continuous Ranked Probability Score (CRPS) [Gneiting 2007] and the Weighted Interval Score (WIS) [CITATION]. Due to their widespread use we focus on these two in this paper, ignoring other proper scoring rules. Both the WIS and CRPS represent a measure of the absolute distance between forecast and observation and can be thought of as a generalisation of the absolute error to full predictive distributions (see details in the SI). 
+Proabbilistic forecasts are usually evaluated using so-called proper scoring rules, which return a numerical score as a function of the forecast and the later observed data. Forecasters, in expectaction, optimise their score by providing a predictive distribution that is equal to the data-generating distribution, and will be penalised if they fail to do so. Two proper scoring rules commonly used in epidemiology and other fields are the Continuous Ranked Probability Score (CRPS) [Gneiting 2007] and the Weighted Interval Score (WIS) [CITATION]. Due to their widespread use we focus on these two in this paper, ignoring other proper scoring rules. Both the WIS and CRPS represent a measure of the absolute distance between the predictive distribution and observation and can be thought of as a generalisation of the absolute error to full predictive distributions (see details in the SI). 
 
 Evaluating forecasts based on absolute errors (for simplicity we use the term interchangeably with absolute distance, even though it technically only applies to point forecasts) may not always be desirable, especially in an epidemiological context. 
 % The reason for this is that generally, the way forecasts are evaluated should correspond to the error structure of the model and the type of errors models will usually make.
@@ -65,28 +65,11 @@ Epidemiological processes are usually understood to be exponential in nature and
 
 In this paper we argue that it may therefore often be helpful to shift the focus of the evaluation on multiplicative, rather than absolute errors. This can be achieved by transforming the forecasts as well as the observations using the logarithm before applying the WIS or CRPS. While we will mostly focus on the log transformation in this paper, the point we like to make is a broader one: it is possible to flexible change the focus of the evaluation by applying a multitude of different transformations before scoring forecasts. Instead of scoring multiplicative errors, one may for example like to apply a transformation that allows to score forecasters based on the shape of the trajectory they predicted. Furthermore, it is possible to capture different aspects in a single number by constructing composite scores as a weighted sum of scores based on different transformations. This allows forecast consumers to assign explicit weights to different qualities of the forecasts they deem to be important when assessing predictive performance. 
 
-In section [REF] we discuss which kinds of transformations can be applied. In section [REF] we give a detailed theoretical explanation of the rationale for applying the log transformation and discuss its interpretation. In section [REF] we present an applied example using forecasts submitted to the European COVID-19 Forecast Hub. The European COVID-19 Forecast Hub is one of several Forecast hubs that systematically collected, aggregated and evaluated forecasts of several COVID-19 targets created by different teams. 
-
-REWRITE HERE. 
-Beginning in 2020, forecasts from different research institutions have been systematically collected, aggregated and evaluated by COVID-19 Forecast hubs in the US [Citation], Germany and Poland, and Europe [Citation]. 
-Forecasts submitted to the COVID-19 Forecast Hubs are probabilistic in nature [Citation e.g. Held et al.], meaning that forecasters provide a full predictive distribution which quantifies their uncertainty. These predictive distributions are reported in the form of a set of 23 quantiles (11 symmetric prediction intervals as well as a median prediction). 
-
-
-% The WIS can be thought of as an approximation of the CRPS for forecasts where the predictive distribution is represented through a set of quantiles. The CRPS, and by extension the WIS, represents a generalisation of the absolute error to continuous distributions, meaning that forecasters are evaluated on the absolute distance of their predictive distribution to the observed value (i.e. some form of absolute error). For simplicity, we will use absolute error and absolute distance between forecast and observation interchangeably, even though the former applies to point predictions and the latter is used for probabilistic forecasts. 
-
-
-% 
-% 
-% 
-% We argue that when dealing with epidemiological processes it makes sense to shift the evaluation towards multiplicative errors by either taking the logarithm of both the forecast and the observations or by dividing them by the last known observation before scoring. 
-
-% What kinds of transformations can be considered meaningful depends on the context. We will illustrate the idea of transforming forecasts by focussing on the WIS as it is currently used in epidemiological settings such as the COVID-19 Forecast hubs. 
-% In this paper we focus on the WIS due to its simplicity and widespread use by the COVID-19 Forecast Hubs, but arguments apply analogously to the CRPS. Another proper scoring rule commonly used is the log score [CITATION], which we will not discuss further in this paper. 
-
+In section [REF] we discuss which kinds of transformations can be applied. In section [REF] we give a detailed theoretical explanation of the rationale for applying the log transformation and discuss its interpretation. In section [REF] we present an applied example using forecasts submitted to the European COVID-19 Forecast Hub. The European COVID-19 Forecast Hub is one of several Forecast hubs (together with a Hub in the US [CITATION] and one in Germany and Poland [CITATION]) that systematically collected, aggregated and evaluated forecasts of several COVID-19 targets created by different teams. Forecasts submitted to the COVID-19 Forecast Hubs are probabilistic in nature [Citation e.g. Held et al.], meaning that forecasters provide a full predictive distribution which quantifies their uncertainty. These predictive distributions are reported in the form of a set of 23 quantiles (11 symmetric prediction intervals as well as a median prediction). 
+%Currently, the US Flu Forecasting Hub and COVID-19 Scenario Hubs in the US and in Europe use the same format. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Transforming forecasts to shift the focus of the evaluation}
-
 
 \subsection{Permissible transformations / propriety} - JOHANNES
 
@@ -102,33 +85,33 @@ Note that simply taking the log of a score computed on the natural scale, i.e. c
 % \paragraph{Changes only come when you average across multiple scores}
 % For a single forecast, the ranking between forecasters would be preserved and the scores remain proper [Proof?]. Differences in the ranking between forecasters only appear when averaging over multiple forecasts, as deviations from the perfect forecast get penalised differently depending on whether forecasts are transformed or not. 
 
-\paragraph{Example transformations to score the growth rate}
+\paragraph{Example transformations}
 
 Take the log
 
-Divide by the latest known value
+Divide by the latest known value = score forecast on the growth rate
+
+Log that = score log growth rate
 
 Divide by the previous for each time value, which gives you a weekly growth rate, i.e. a trajectory. 
 
 Box-Cox
 
-square root 
+square root WAS THAT USED SOMEWHERE? 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Log transformation}
+\section{Log transforming forecasts and observations}
 
-As explained in the introduction, it may be useful to assess epidemiological forecasts based on multiplicative rather than absolute errors, i.e. based on how good they predict relative changes in the quantity of interest as apposed to how good they forecast absolute values. For count data, as are common in epidemiology, we can achieve this by taking the logarithm of both the forecasts and the observed values. 
-
-To illustrate this intuitively, let us consider a point forecast $\hat{y}_{t+1}$ for a quantity of interest $y_{t+1}$, such that 
+In this section (and those that follow) we focus on one particular transformation, taking the logarithm of forecasts and observations, which makes it possible to change the focus of the evaluation from absolute to relative errors. To illustrate the effects of applying the logarithm intuitively, let us consider a point forecast $\hat{y}_{t+1}$ for a quantity of interest $y_{t+1}$, such that 
 \begin{equation}
 y_{t+1} = \hat{y}_{t+1} + \varepsilon_{t+1}.
 \end{equation}
 
-The score will be determined by the size of the forecast error $\varepsilon_{t+1}$. When taking the logarithm of the forecast and the observation first, than the score is determined based on the absolute error $\varepsilon^*_{t+1}$: 
+The analogon of the WIS / CRPS for point forecasts is the absolute error, and so the score will be determined by the size of the forecast error $\varepsilon_{t+1}$. When taking the logarithm of the forecast and the observation first, than the score is determined based on the size of $\varepsilon^*_{t+1}$: 
 \begin{equation}
 \log y_{t+1} = \log \hat{y}_{t+1} + \varepsilon^*_{t+1}.
 \end{equation}
-
+%
 It is easy to see that this corresponds to evaluating a multiplicative error on the original $y_{t+1}$:
 %
 \begin{align}
@@ -137,11 +120,8 @@ y_{t+1} &= \hat{y}_{t+1} \cdot \exp{\varepsilon^*_{t+1}}.
 \end{align}
 %
 
-\paragraph{Dealing with negative counts and small values}
-In an epidemiological setting where we deal with count data, negative values should likely be omitted entirely. Values of zero should potentially also be removed from the analsys, as it does not make sense to interpret relative errors on zero counts. Alternatively, if one is not willing to omit them, a small quantity (such as 1) could be added to all observations before taking the logarithm. Note that predictive distribtions have to be truncated in a similar way. WOULD WE ALSO ADD ONE TO THE FORECAST? 
-
-\subsection{Interpretation}
-The log transformation changes which types of errors (absolute or relative) are penalised. The WIS and CRPS computed on the natural scale increase linearly with increasing absolute errors (see Figure \ref{fig:change-in-scores}A, regardless of whether the error is large in relative terms. Predicting 101,000 cases instead of the true 100,000 will be treated equally to predicting 2,000 hospitalisations, rather than the 1,000 observed. The WIS and CRPS based on log-transformed values however, penalise relative errors and increase linearly with an increase in relative errors (see Figure \ref{fig:change-in-scores}D). Forecasting 101,000 rather than 100,000 cases will be treated equally to forecasting 2,020, rather than 2,000 hospitalisations. Note that for a single forecast the relative rankings of different forecasts would be preserved. The transformation only makes a difference when aggregating predictions avross different dimensions. 
+On the natural scale, WIS and CRPS increase linearly with increasing absolute errors (see Figure \ref{fig:change-in-scores}A, regardless of whether the error is large in relative terms. Predicting 101,000 cases instead of the true 100,000 will be treated equally to predicting 2,000 hospitalisations, rather than the 1,000 observed. On the log scale, WIS and CRPS penalise relative errors and increase linearly with an increase in relative errors (see Figure \ref{fig:change-in-scores}D). Forecasting 101,000 rather than 100,000 cases will be treated equally to forecasting 2,020, rather than 2,000 hospitalisations. 
+% Note that for a single forecast the relative rankings of different forecasts would be preserved. The transformation only makes a difference when aggregating predictions across different dimensions. 
 
 \begin{figure}[h!]
     \centering
@@ -150,33 +130,7 @@ The log transformation changes which types of errors (absolute or relative) are 
     \label{fig:change-in-scores}
 \end{figure}
 
-Evaluating forecasts based on relative errors may be desirable, if different forecast targets, for example reported case numbers, hospitalisations and deaths, have very different orders of magnitude. In these instances scores (even for an ideal forecaster) usually also differ by several orders of magnitude. When scores are aggregated on the natural scale without any prior transformation, overall performance would be dominated by the performance on the target which has the highest absolute numbers. After the log transformation, equal weight would be put on the relative performance, making performance across different targets more easily comparable (as scores of an ideal forecaster would not differ as much as on the natural scale). 
-
-Using a log transformation, however, may not be appropriate if one believes that differences in absolute values are meaningful. This may be the case for example when comparing forecasts across locations or time points, rather than different forecasts targets. \citep{Bracher} for example argue that in epidemiological settings it is a desirable property of the CRPS / WIS that it assigns large scores to forecasts where counts are high, as this naturally reflects the situations we should most care about and helps us identify the models that perform best in similar situations. If, on the other hand, we believe that good models should do consistently well and that situations with high incidences do not provide significantly more information about which models perform well or badly, then scoring on the log scale may be more appropriate. For example, it may be reasonable not to think that predictive performance in a country like Germany would have a hundred times more importance than performance in a country like Luxembourg when determining the best model for future decision making. Similarly, we may not necessarily believe that predictive performance during the January 2022 wave of COVID-19 should carry three times as much weight than predictive performance during the January 2021 wave, just because numbers where three times as high. 
-% Maybe make a plot with one country and scores for that one country in different waves. We could then argue that within one wave, performance of the peak is meaningful, but across different waves (with different numbers) it is unclear, whether that difference conveys meaningful information. 
-
-An aggregate of forecasts scored on the natural scale will be dominated by predictions of quantities with high absolute values. For scoring log transformed forecasts, the opposite may be true, as small absolut errors (e.g. predicting 9, rather than 3 deaths) may be large in relative terms if the quantity to forecast is very small. How much weight is given to smaller or larger forecast quantities for raw and transformed forecasts depends on the exact relationship between the mean and the variance of the quantity of interest. 
-
-To investigate this we sampled forecasts from different negative binomial distributions. The negative binomial distribution has mean $\mu$ and variance $\sigma^2 = \mu + \mu ^2 / \theta$ and for $\lim_{\theta \to \infty}$ converges to the Poisson distribution. For large values of $\theta$, resulting in a variance approximately equal to the mean, forecasts for lower quantities on average received higher scores on the log scale (see Figure \ref{fig:SIM-wis-state-size-mean}. For $\theta = 1$ (and correspondingly, $\sigma^2 = \mu + \mu^2$, we found that scores on the log scale remained approximately constant regardless of the size of the quantity to forecast. For $\theta = 0.1$ (and $\sigma^2 = \mu + 10 \cdot \mu^2$), scores on the log scale increased with the quantity to forecast. When scored on the natural scale, a higher quantity to forecast always lead to higher scores regardless of the chosen distribution (as long as the variance grows together with the mean). 
-
-In order to deal with small counts, we can extend the argument made above to small values in general (rather than just zeros) and conclude that it is hard to reliably evaluate relative errors when dealing with small discrete counts. One could therefore decide to remove forecasts for small quantities below a certain threshold from the analysis. Alternatively, one could add a number $n$ (e.g. $n = 100$) to all observations and forecasts before taking the logarithm. This constitutes a strictly monotonic transformation which preserves propriety and would reduce all scores. Scores for forecasts on small quantities would be particularly affected, resulting in a more equal relative importance of scores for different quantities. Researchers can choose to add eitehr a small or large number, depending on how much they want to equalise relative errors when aggregating scores. 
-
-%COULD ALSO MAKE A NICE PLOT ABOUT OUTLIERS, where we look at the effect of outliers. but maybe that is already included in the plot in Figure 1. 
-% could make an analysis re outliers: how do scores change if we remove the 1 or 2 worst forecasts? The one or two best forecasts?
-
-%THIS COULD INCLUDE JOHANNES EXAMPLE
-
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.9\textwidth]{output/figures/SIM-mean-sd-state-size.png}
-    \caption{Simulation of the effect of population size with ideal forecasts of a negative-binomially-distributed variable. For each simulated state, we drew 1,000 observations from a negative binomial distribution with $\mu = 100 \cdot \text{state size}$ and with values of $\theta$ equal to 0.1, 1, and 1 billion. The variance of the negative binomial is given as $\sigma^2 = \mu + \mu^2 / \theta$, meaning that for large theta the negative binomial distribution is equal to the poisson distribution. For these simulated values we computed the WIS for an ideal forecast (i.e. the predictive distribution was negative binomial with $\mu$ and $\theta$ equal to the true $\mu$ and $\theta$ for every state). Left: Mean WIS depending on state size, right: Mean WIS depending on state sizes when scored on a log scale. Plots for the standard deviation, rather than the mean of WIS values look are given in Figure \ref{fig:SIM-wis-state-size-sd} in the SI.}. 
-    \label{fig:SIM-wis-state-size-mean}
-\end{figure}
-
-
 \subsection{Approximately scoring the growth rate}
-NOT SO CONVINCED ANYMORE THAT THIS WORKS. MY INTUITION IS IF YOU WANT THE GROWTH RATE YOU SHOULD ACTUALLY SCORE THE GROWTH RATE AND DIVIDE BY THE LAST OBSERVED VALUE. 
-
 Computing a score based on the logarithm of the forecast and the observation is also approximately equivalent to scoring a forecast of a multiplicative growth rate of the forecast target. The growth rate is defined as
 %
 \begin{equation}
@@ -191,25 +145,50 @@ y_{t+1} = (1 + g_{t, t+1}) \cdot y_t.
 \end{equation}
 %
 
-Now consider a forecast on $\log y_{t+1}$. Note that we can decompose the error into a known and an unknown part: 
+Now consider a forecast on $\log y_{t+1}$. Using the fact that for small values of $x$, $\log (1+ x) \approx x$, we can see that scoring forecasts on the log scale is approximately equal to scoring an additive error on the growth rate (on the natural scale), as long as the growth rate is small.
 %
 \begin{align}
-\log y_{t+1}  &= \log \hat{y}_{t+1} + \varepsilon^*_{t+1} \\
-              &= \log ((1 + \hat{g}_{t+1}) \cdot y_{t}) + \varepsilon^*_{t+1} \\
-              &= \log (1 + \hat{g}_{t, t+1}) + \log y_t + \varepsilon_{t+1} \Leftrightarrow \\
-              &= \log (1 + \hat{g}_{t, t+1}) + \log y_t - \log y_t + \varepsilon'_{t+1} \Leftrightarrow \\    
-              &= \log (1 + \hat{g}_{t, t+1}) + \varepsilon'_{t+1}.
+\log y_{t+1}        &= \log \hat{y}_{t+1} + \varepsilon^*_{t+1} \\
+                    &= \log ((1 + \hat{g}_{t+1}) \cdot y_{t}) + \varepsilon^*_{t+1} \\
+                    &= \log (1 + \hat{g}_{t, t+1}) + \log y_t + \varepsilon_{t+1} \Leftrightarrow \\
+\varepsilon'_{t+1}  &= \log y_{t+1} -  \log y_t - \log (1 + \hat{g}_{t, t+1}) \Leftrightarrow \\    
+                    &= \log (\frac{y_{t+1}}{y_t}) - \log (1 + \hat{g}_{t, t+1}) \Leftrightarrow \\    
+                    &= \log (1 + g_{t, t+1}) - \log (1 + \hat{g}_{t, t+1}) \Leftrightarrow \\   
+                    &\approx g_{t, t+1} - \hat{g}_{t, t+1} \quad \text{for small } \hat{g}_{t, t+1}, g_{t, t+1}. 
 \end{align}
 
-NOT SO SURE ANYMORE THAT THIS WORKS. CAN WE JUST SUBTRACT Y\_t? BECAUSE Y\_t STILL HAS INFORMATION ON THE SIZE OF THE QUANTITY YOU'RE FORECASTING AND ALSO WE'RE REALLY JUST SUBTRACTING IT FROM THE RIGHT HAND SIDE. 
+This approximation breaks down when the growth rate becomes too large. If scoring the growth rate is the focus of the evaluation, then it may be better to transform forecasts and observations by the last known values instead in order to score the growth rate explicitly. 
 
-What affects the score is only the unknown part, as shifting both the forecast and the observation by a known amount does not make a difference for evaluating the distance between forecast and observation. The WIS and CRPS therefore provide a measurement of an additive error on the forecast of$ \log (1 + \hat{g}_{t, t+1})$. For small values of $g$, we can make the following approximation
-\begin{equation}
-    \log (1+ g_{t, t+1}) \approx g_{t, t+1}.
-\end{equation}
-%
+\subsection{Dealing with negative counts and small values}
+Unfortunately, the log transformation cannot readily be applied when dealing with negative or zero values. In an epidemiological setting that involves count data, negative values should likely be omitted entirely. Values of zero should potentially also be removed from the analsys, as it does not make sense to interpret relative errors on zero counts. Alternatively, if one is not willing to omit them, a small quantity (such as 1) could be added to all observations before taking the logarithm. Note that predictive distribtions have to be truncated in a similar way. When dealing with count data we could extend this argument to all small values (rather than just zeros), as it is hard to reliably evaluate relative errors when dealing with small discrete values. One could therefore decide to remove forecasts for small quantities below a certain threshold from the analysis. Alternatively, one could add a number $n$ (e.g. $n = 100$) to all observations and forecasts before taking the logarithm. This constitutes a strictly monotonic transformation which preserves propriety and would reduce all scores (through reducing relative errors). Scores for forecasts on small quantities would be particularly affected, resulting in a more equal distribution of scores for forecasts of differing orders of magntitudes. Researchers can choose to add either a small or large number, depending on how much they want to equalise relative errors when aggregating scores. 
 
-Conveniently, the decomposition of the WIS into dispersion, overprediction and underprediction is preserved for both transformations. The interpretation of the components has now changed in that they now (approximately) represent uncertainty, over-prediction, and under-prediction with the growth rate and so are independent of current incidence. 
+\subsection{Relative importance when summarising scores}
+For a single transformation, the ranking between models is preserved, even though the numeric value of the score changes. However, when averaging across forecasts, the relative influence of individual forecasts on the aggregate score may differ dramatically, leading to changes in the overall model rankings. While the main rationale for applying the log transformation is that this better reflects the types of errors common in epidemiological modelling, it may also be helpful when scores based on the natural scale are very unequal. This usually happens, for example, when different forecast targets, like reported case numbers, hospitalisations and deaths, or the same targets across time and space, have very different orders of magnitude. In these instances, scores (even for an ideal forecaster) usually also differ by several orders of magnitude. When scores are aggregated on the natural scale without any prior transformation, overall performance would be dominated by the performance on the target which has the highest absolute numbers. After the log transformation, equal weight would be put on the relative performance, making performance across different targets more easily comparable (as scores of an ideal forecaster would not differ as much as on the natural scale). 
+
+While on the natural scale, aggregate forecasts will usually be dominated by predictions of quantities with high absolute values, the opposite may be true for scores based on log transformed predictions. Small absolute errors (e.g. predicting 9, rather than 3 deaths) may be large in relative terms if the quantity to forecast is very small. The strength of this effect depends on the exact relationship between the mean and the variance of the quantity of interest. 
+
+ADD TO FIGURE CAPTION? 
+To illustrate this with count data we sampled forecasts from different negative binomial distributions. The negative binomial distribution has mean $\mu$ and variance $\sigma^2 = \mu + \mu ^2 / \theta$ and for $\lim_{\theta \to \infty}$ converges to the Poisson distribution. For large values of $\theta$, resulting in a variance approximately equal to the mean, forecasts for lower quantities on average received higher scores on the log scale (see Figure \ref{fig:SIM-wis-state-size-mean}. For $\theta = 1$ (and correspondingly, $\sigma^2 = \mu + \mu^2$, we found that scores on the log scale remained approximately constant regardless of the size of the quantity to forecast. For $\theta = 0.1$ (and $\sigma^2 = \mu + 10 \cdot \mu^2$), scores on the log scale increased with the quantity to forecast. When scored on the natural scale, a higher quantity to forecast always lead to higher scores regardless of the chosen distribution (as long as the variance grows together with the mean). 
+
+One way to handle situations where scores are very unequal, as mentioned above, is to add a number $n$ to all forecasts and observations in order to reduce the relative weight of forecast targets with small quantities. 
+
+Whether or not a log transformation is apprpriate depends on whether one believes that differences in absolute values are meaningful. This may be the case for example when comparing forecasts across locations or time points, rather than different forecasts targets. \citep{Bracher} for example argue that in epidemiological settings it is a desirable property of the CRPS / WIS that it assigns large scores to forecasts where counts are high, as this naturally reflects the situations we should most care about and helps us identify the models that perform best in similar situations. If, on the other hand, we believe that good models should do consistently well and that situations with high incidences do not provide significantly more information about which models perform well or badly, then scoring on the log scale may be more appropriate. For example, it may be reasonable not to think that predictive performance in a country like Germany would have a hundred times more importance than performance in a country like Luxembourg when determining the best model for future decision making. Similarly, we may not necessarily believe that predictive performance during the January 2022 wave of COVID-19 should carry three times as much weight than predictive performance during the January 2021 wave, just because numbers where three times as high. 
+% Maybe make a plot with one country and scores for that one country in different waves. We could then argue that within one wave, performance of the peak is meaningful, but across different waves (with different numbers) it is unclear, whether that difference conveys meaningful information. 
+
+%COULD ALSO MAKE A NICE PLOT ABOUT OUTLIERS, where we look at the effect of outliers. but maybe that is already included in the plot in Figure 1. 
+% could make an analysis re outliers: how do scores change if we remove the 1 or 2 worst forecasts? The one or two best forecasts?
+
+%THIS COULD INCLUDE JOHANNES EXAMPLE
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.9\textwidth]{output/figures/SIM-mean-sd-state-size.png}
+    \caption{Simulation of the effect of population size with ideal forecasts of a negative-binomially-distributed variable. For each simulated state, we drew 1,000 observations from a negative binomial distribution with $\mu = 100 \cdot \text{state size}$ and with values of $\theta$ equal to 0.1, 1, and 1 billion. The variance of the negative binomial is given as $\sigma^2 = \mu + \mu^2 / \theta$, meaning that for large theta the negative binomial distribution is equal to the poisson distribution. For these simulated values we computed the WIS for an ideal forecast (i.e. the predictive distribution was negative binomial with $\mu$ and $\theta$ equal to the true $\mu$ and $\theta$ for every state). Left: Mean WIS depending on state size, right: Mean WIS depending on state sizes when scored on a log scale. Plots for the standard deviation, rather than the mean of WIS values look are given in Figure \ref{fig:SIM-wis-state-size-sd} in the SI.}. 
+    \label{fig:SIM-wis-state-size-mean}
+\end{figure}
+
+
+Conveniently, the decomposition of the WIS into dispersion, overprediction and underprediction is preserved. The interpretation of the components has now changed in that they now (approximately) represent uncertainty, over-prediction, and under-prediction with the growth rate and so are independent of current incidence. 
 
 
 
@@ -248,7 +227,7 @@ MAYBE FIT A NEGATIVE BINOMIAL TO THESE OBSERVATIONS
 \end{figure}
 
 \paragraph{Features of the scores}
-Across all time points and locations, the mean number weighted interval score on the natural scale for cases (deaths) was 8855 (59.3) with an overall standard deviation of 51274 (156). On the log scale, scores were much closer to each other (see Figure \ref{fig:HUB-average-scores}), with a mean wis for cases (deaths) of 0.507 (0.362) with an overall standard deviation of 0.745 (0.407). 
+Across all time points and locations, the mean number weighted interval score on the natural scale for cases (deaths) was 8855 (59.3) with an overall standard deviation of 51274 (156). On the log scale, scores were much closer to each other (see Figure \ref{fig:HUB-average-scores}), with a mean WIS for cases (deaths) of 0.507 (0.362) with an overall standard deviation of 0.745 (0.407). 
 % NEED A TABLE WITH SCORES for the Appendix
 On the natural scale, scores vary by several orders of magnitudes across locations (see \ref{fig:HUB-scores-location}), whereas variation across locations is much smaller for scores on the log scale and wis values are more evenly distributed. The ordering of scores across locations is not preserved when going from the natural to the log scale. 
 % Rather, there seems to be a slight inverse relationship that locations which previously had low scores now tend to receive higher scores. 
@@ -468,6 +447,27 @@ The left-hand side of equation \ref{eqn:is-log} was left unchanged. From the rig
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Idea parking lot 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% NOT SO CONVINCED ANYMORE THAT THIS WORKS. MY INTUITION IS IF YOU WANT THE GROWTH RATE YOU SHOULD ACTUALLY SCORE THE GROWTH RATE AND DIVIDE BY THE LAST OBSERVED VALUE. 
+% 
+% WELL MAYBE IT WORKS AFTER ALL AND IT WOULD BE THE EQUIVALENT OF LOGGING FIRST AND THEN SUBTRACTING THE LAST OBSERVED VALUE WAIT A MINUTE THAT'S A DIFFERENT TRANSFORMATION AND ALSO THAT's SCORING THE LOG GROWTH RATE. 
+% 
+% BUT THEN AGAIN I'M STILL CONFUSED, BECAUSE ANY RELATIVE ERROR ON A QUANTITY Y\_t+1 IS AUTOMATICALLY AN ABSOLUTE ERROR ON THE GROWTH RATE IF WE KNOW Y\_t. AH BUT YOU DON'T KNOW WHAT THE ABSOLUTE ERROR ON THE GROWTH RATE IS (E.G. FOR Y\_t+1 of 10 IF YOU DON'T SPECIFICALLY LOOK AT THE LAST VALUE. BUT WE ARE ASSUMING THAT THIS IS WHAT THE MODEL DOES WHEN IT MAKES A FORECAST INTERNALLY
+
+
+
+
+% The WIS can be thought of as an approximation of the CRPS for forecasts where the predictive distribution is represented through a set of quantiles. The CRPS, and by extension the WIS, represents a generalisation of the absolute error to continuous distributions, meaning that forecasters are evaluated on the absolute distance of their predictive distribution to the observed value (i.e. some form of absolute error). For simplicity, we will use absolute error and absolute distance between forecast and observation interchangeably, even though the former applies to point predictions and the latter is used for probabilistic forecasts. 
+
+
+% 
+% 
+% 
+% We argue that when dealing with epidemiological processes it makes sense to shift the evaluation towards multiplicative errors by either taking the logarithm of both the forecast and the observations or by dividing them by the last known observation before scoring. 
+
+% What kinds of transformations can be considered meaningful depends on the context. We will illustrate the idea of transforming forecasts by focussing on the WIS as it is currently used in epidemiological settings such as the COVID-19 Forecast hubs. 
+% In this paper we focus on the WIS due to its simplicity and widespread use by the COVID-19 Forecast Hubs, but arguments apply analogously to the CRPS. Another proper scoring rule commonly used is the log score [CITATION], which we will not discuss further in this paper. 
+
 
 % \paragraph{Problems with the WIS and CRPS in an epidemiological setting}
 % Their relation to the absolute error means that both the WIS and the CRPS usually scale with the prediction target. Forecasts of COVID-19 cases, for example typically have higher scores than forecasts of hospitalisations of death. Similarly, when looking at performance across different locations or over time, average scores will be dominated by locations and times with high incidences. Outliers also can have a disproportionate effect on aggregate scores. One can argue that this is meaningful and that we should care most about places and periods when incidence is high (maybe cite Bracher et al.). However, this may not always be true and is clearly not desirable when comparing performance of a model on different prediction targets: case numbers are not necessarily more important than hospitalisations, just because observed values tend be an order of magnitude higher. This makes forecasts often hard or impossible to compare. 

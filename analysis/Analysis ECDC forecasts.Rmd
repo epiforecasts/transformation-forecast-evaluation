@@ -48,10 +48,21 @@ scale_fn <- function(x) {
                 x))
 }
 
+label_fn <- function(x) {
+  ifelse(x < 1000, 
+         paste(x), 
+         ifelse(x < 1e6, 
+                paste0(x / 1000, "k"),
+                ifelse(x < 1e9, 
+                       paste0(x / 1e6, "m"), 
+                       paste0(x / 1e9, "b"))
+                )
+         )
+}
+
 
 
 ```
-
 
 ```{r}
 # load data 
@@ -63,27 +74,6 @@ hub_data <- rbindlist(list(
 )) |>
   unique()
 ```
-
-
-```{r}
-# create version of data where the true value is the true growth rate
-# interesting question: does it make a difference, whether we transform it 
-# to be the weekly growth rate, i.e. take the n-th root, where n is the horizon? 
-
-latest_truth <- fread(here("data", "weekly-truth-Europe.csv")) |>
-  rename(last_known_true_value = true_value) |>
-  mutate(forecast_date = target_end_date + 2) |>
-  select(location, target_type, forecast_date, last_known_true_value) |>
-  unique()
-
-# unsure whether the pmax hack is the right way to do it
-growth_data <- hub_data |>
-  inner_join(latest_truth) |>
-  mutate(true_value = true_value / pmax(last_known_true_value + 1),
-         prediction = prediction / pmax(last_known_true_value + 1)) |>
-  select(-last_known_true_value)
-```
-
 
 ```{r eval = recompute_scores}
 # score forecasts
@@ -122,6 +112,7 @@ fwrite(scores_gr, here("output", "data", "all-scores-growth-rate-european-hub.cs
 ```{r}
 scores <- fread(here("output", "data", "all-scores-european-hub.csv"))
 scores[, scale := factor(scale, levels = c("natural", "log"))]
+data.table::setnames(scores, old = c("aem", "sharpness"), new = c("ae_median", "dispersion"))
 
 scores_gr <- fread(here("output", "data", "all-scores-growth-rate-european-hub.csv"))
 scores_gr[, scale := factor(scale, levels = c("natural", "log"))]
@@ -132,23 +123,11 @@ General thoughts?
 - Focus on Hub-ensemble or average across all models? 
 - Focus on two weeks ahead? 
 
+## =============================================================================
+## FIGURE 4
 ## Mean vs. sd of observed values
 
 ```{r}
-
-label_fn <- function(x) {
-  ifelse(x < 1000, 
-         paste(x), 
-         ifelse(x < 1e6, 
-                paste0(x / 1000, "k"),
-                ifelse(x < 1e9, 
-                       paste0(x / 1e6, "m"), 
-                       paste0(x / 1e9, "b"))
-                )
-         )
-}
-
-
 # average number of cases and deaths
 hub_data |>
   dplyr::select(location, target_type, target_end_date, true_value) |>
@@ -158,13 +137,6 @@ hub_data |>
             sd_value = sd(true_value), 
             var_value = var(true_value))
 
-# negative binomial
-# MASS::glm.nb(true_value ~ target_type, 
-#        data = hub_data %>%
-#          mutate(true_value = pmax(true_value, 0)), 
-#        link = "identity")
-
-
 # plot with means across locations ---------------------------------------------
 label_fn_within <- function(x) {
   x <- gsub(pattern = "___Deaths", "", x)
@@ -172,24 +144,55 @@ label_fn_within <- function(x) {
   paste(x)
 }
 
-hub_data |>
+mean_observations <- hub_data |>
   dplyr::select(location, target_type, target_end_date, true_value) |>
   unique() |>
   group_by(target_type, location) |>
   summarise(mean_value = mean(true_value), 
             sd_value = sd(true_value), 
-            var_value = var(true_value)) |>
+            var_value = var(true_value))
+  
+plot_means_obs <- mean_observations |>
   ggplot(aes(y = mean_value, x = reorder_within(location, -mean_value, target_type))) + 
-  geom_bar(stat = "identity") + 
+  geom_bar(stat = "identity", fill = "grey50") + 
   facet_wrap(~ target_type, scales = "free") + 
-  theme_minimal() + 
+  theme_scoringutils() + 
   scale_y_continuous(labels = label_fn) + 
   scale_x_discrete(guide = guide_axis(n.dodge=2), labels = label_fn_within) + 
   labs(y = "Mean observed value", x = "Location")
 
-ggsave("output/figures/HUB-mean-obs-location.png", width = 9, height = 4)
+plot_df <- scores |> 
+  filter(model == "EuroCOVIDhub-ensemble", 
+         horizon == 2) |>
+  group_by(target_type, location, scale) |>
+  summarise(interval_score = mean(interval_score), 
+            .groups = "drop_last") |> 
+  full_join(mean_observations)
+
+plot_mean_scores <- plot_df |>
+  ggplot(aes(y = interval_score,
+             x = reorder_within(location, -mean_value, target_type))) + 
+  geom_bar(stat = "identity") + 
+  scale_fill_brewer(palette = "Set1", name = "Forecast target") + 
+  facet_wrap(scale ~ target_type, scale = "free") + 
+  theme_scoringutils() + 
+  theme(legend.position = "none") + 
+  scale_y_continuous(labels = scale_fn) + 
+  scale_x_discrete(guide = guide_axis(n.dodge=2), labels = label_fn_within) +
+  labs(y = "Interval score", x = "Location") 
+
+plot_means_obs / 
+  plot_mean_scores + 
+  plot_layout(heights = c(1, 2))
+
+ggsave("output/figures/HUB-mean-obs-location.png", width = 9, height = 8)
+
+# This uses the ensemble, but alternatively, we could think about just summarising across all models for these plots? 
+```
 
 
+
+```{r}
 # plot with mean vs. variance --------------------------------------------------
 hub_data |>
   dplyr::select(location, target_type, target_end_date, true_value) |>
@@ -207,7 +210,7 @@ hub_data |>
   # scale_y_continuous(labels = label_fn) +
   labs(y = "Variance observed value", x = "Mean observed value") + 
   geom_function(fun = function(x) x^2, linetype = "dashed", size = 0.5) + 
-  theme_minimal() + 
+  theme_scoringutils() + 
   geom_smooth(alpha = 0.2, size = 0.2)
 
 ggsave("output/figures/HUB-mean-var-obs.png", width = 7, height = 4)
@@ -237,12 +240,12 @@ scores |>
   geom_boxplot(alpha = 0.5) + 
   scale_fill_brewer(palette = "Set1", name = "Forecast target") + 
   facet_wrap(~ scale, scale = "free") + 
-  theme_minimal() + 
+  theme_scoringutils() + 
   theme(legend.position = "none") + 
   scale_y_continuous(labels = scale_fn, trans = "log10") + 
   labs(y = "Interval score", x = "Target type")
 
-ggsave("output/figures/HUB-average-scores.png", width = 7, height = 3.5)
+ggsave("output/figures/HUB-average-scores.png", width = 7, height = 2.5)
 ```
 
 *Scores are more comparable across targets*
@@ -258,64 +261,6 @@ scores |>
   make_table()
 ```
 
-
-
-## Scores across locations
-
---> could also do this plot with multiplicative scores, i.e. how much higher is a score than the lowest score observed
-
-```{r}
-# alternatively, we could think about just summarising across all models for these plots? 
-
-# make two separate plots to keep ordering. I.e. order locations according 
-# to log scale to illustrate that the ordering changes for cases
-
-get_order <- function(df, type = "Cases") {
-  df |> 
-    filter(scale == "natural", target_type == type) |>
-    arrange(-interval_score) |>
-    pull(location)
-}
-
-plot_df <- scores |> 
-  filter(model == "EuroCOVIDhub-ensemble", 
-         horizon == 2) |>
-  group_by(target_type, location, scale) |>
-  summarise(interval_score = mean(interval_score), 
-            .groups = "drop_last") 
-
-order_cases <- get_order(plot_df)
-order_deaths <- get_order(plot_df, type = "Deaths")
-
-plot <- function(plot_df, order) {
-  plot_df |>
-    mutate(location = factor(location, levels = order)) |>
-    ggplot(aes(y = interval_score, x = location)) + 
-    geom_bar(stat = "identity") + 
-    scale_fill_brewer(palette = "Set1", name = "Forecast target") + 
-    facet_wrap(~ target_type + scale, scale = "free") + 
-    theme_minimal() + 
-    theme(legend.position = "none") + 
-    scale_y_continuous(labels = scale_fn) + 
-    scale_x_discrete(guide = guide_axis(n.dodge=2)) +
-    labs(y = "Interval score", x = "Location")
-}
-
-cases <- plot_df |>
-  filter(target_type == "Cases") |>
-  plot(order = order_cases)
-
-deaths <- plot_df |>
-  filter(target_type == "Deaths") |>
-  plot(order = order_deaths)
-
-cases / 
-  deaths
-
-ggsave("output/figures/HUB-scores-locations.png", width = 7, height = 5)
-```
-
-*We see that the scores are much more evenly distributed across locations if we log the data* 
 
 ## Correlation between scores
 
@@ -335,95 +280,11 @@ scores |>
 
 
 
-## Variance scores across locations 
-
-```{r}
-scores |> 
-  filter(model == "EuroCOVIDhub-ensemble", 
-         horizon == 2) |>
-  group_by(target_type, location, scale) |>
-  summarise(mean_wis = mean(interval_score), 
-            sd_wis = sd(interval_score), 
-            .groups = "drop_last") |>
-  ggplot(aes(y = sd_wis, x = mean_wis)) + 
-  geom_abline(slope = 1, intercept = 0, linetype = "dashed", size = 0.5) + 
-  geom_point() + 
-  facet_wrap(~ target_type + scale, scale = "free") + 
-  theme_minimal() + 
-  theme(legend.position = "none") + 
-  # scale_x_continuous(labels = scale_fn) + 
-  # scale_y_continuous(labels = scale_fn) + 
-  scale_x_continuous(labels = scale_fn, trans = "log10") +
-  scale_y_continuous(labels = scale_fn, trans = "log10") +
-  labs(x = "Mean WIS", y = "Sd of WIS") 
-
-ggsave("output/figures/HUB-sd-vs-mean-scores.png", width = 7, height = 5)
-
-
-wis_vs_total <- function(scores, summary_fct = mean, fulldata = hub_data) {
-  
-  total_values <- 
-    fulldata |> 
-    filter(!is.na(prediction)) |>
-    group_by(location, target_type, target_end_date) |>
-    summarise(true_value = unique(true_value)) |>
-    group_by(location, target_type) |>
-    summarise(total = sum(true_value))
-  
-  plot_df <- scores |> 
-    filter(model == "EuroCOVIDhub-ensemble", 
-           horizon == 2) |>
-    group_by(target_type, location, scale) |>
-    summarise(wis = summary_fct(interval_score), 
-              .groups = "drop_last") |> 
-    inner_join(total_values) 
-  
-  plot_df |>
-    group_by(target_type, scale) |>
-    summarise(correlation = cor(wis, total)) |> 
-    print()
-  
-  plot_df |>
-    ggplot(aes(y = wis, x = total)) + 
-    geom_point() + 
-    facet_wrap(~ target_type + scale, scale = "free") + 
-    theme_minimal() + 
-    theme(legend.position = "none") + 
-    scale_x_continuous(labels = scale_fn) +
-    scale_y_continuous(labels = scale_fn) +
-    labs(y = "REPLACE", x = "Total number of observed values")
-} 
-
-wis_vs_total(scores) + 
-  labs(y = "Mean WIS")
-ggsave("output/figures/HUB-mean-scores-vs-total.png", width = 7, height = 5)
-
-wis_vs_total(scores, summary_fct = stats::sd) + 
-  labs(y = "Sd WIS")
-ggsave("output/figures/HUB-sd-scores-vs-total.png", width = 7, height = 5)
-
-
-# log-log versions of that plot
-wis_vs_total(scores) + 
-  labs(y = "Mean WIS") + 
-  scale_x_continuous(labels = scale_fn, trans = "log10") +
-  scale_y_continuous(labels = scale_fn, trans = "log10") 
-ggsave("output/figures/HUB-mean-scores-vs-total-log-log.png", width = 7, height = 5)
-
-wis_vs_total(scores, summary_fct = stats::sd) + 
-  labs(y = "Sd WIS") + 
-  scale_x_continuous(labels = scale_fn, trans = "log10") +
-  scale_y_continuous(labels = scale_fn, trans = "log10") 
-ggsave("output/figures/HUB-sd-scores-vs-total-log-log.png", width = 7, height = 5)
-
-# correlation
 
 
 
-```
 
 ## Scores over time
-
 restrict to a few locations, e.g. GB, FR, ES (highest average scores there)
 
 ```{r}
@@ -438,7 +299,7 @@ scores |>
   geom_line() + 
   geom_point() + 
   facet_grid(target_type ~ scale, scale = "free_y") + 
-  theme_minimal() + 
+  theme_scoringutils() + 
   labs(x = "Forecast date", y = "WIS relative to smallest observed value")
 
 ggsave("output/figures/HUB-scores-over-time.png", width = 7, height = 5)
@@ -464,7 +325,7 @@ scores |>
   geom_line() + 
   geom_point() + 
   facet_grid(target_type ~ scale) + 
-  theme_minimal() + 
+  theme_scoringutils() + 
   labs(x = "Forecast horizon in weeks", y = "Multplicative change in interval score")
 
 ggsave("output/figures/HUB-scores-over-horizon.png", width = 7, height = 5)
@@ -472,6 +333,232 @@ ggsave("output/figures/HUB-scores-over-horizon.png", width = 7, height = 5)
 ```
 
 *Slightly less increase on the log scale, but overall not a lot of difference*
+
+## Actual model rankings for single forecasts
+
+```{r}
+# we see that rankings change even for a single forecast. So we need to check everything is still correct. 
+# take one example
+test_data <- hub_data |>
+  filter(model %in% c("MUNI-ARIMA", "epiforecasts-EpiNow2"), 
+         forecast_date == "2021-10-18", 
+         target_type == "Cases", 
+         location == "AT")
+
+test_data |>
+  score(metrics = c("interval_score")) |>
+  summarise_scores()
+
+test_data |>
+  mutate(prediction = log(prediction), 
+         true_value = log(true_value)) |>
+  score(metrics = c("interval_score")) |>
+  summarise_scores()
+## indeed everything seems to be correct, but rankings still change FOR A SINGLE FORECAST. 
+# It seems this is because the trade-off between calibration and sharpness changes? 
+# need to check in what way
+
+
+rankings <- scores |>
+  select(-c(coverage_deviation, bias, aem, sharpness, underprediction, overprediction)) |>
+  group_by(location, forecast_date, horizon, target_type, scale) |>
+  mutate(ranking = rank(interval_score) / n()) |>
+   filter(forecast_date == "2021-10-18", 
+         target_type == "Cases", 
+         location == "AT") 
+
+factor_levels <-  rankings |>
+  filter(horizon == 2, scale == "natural") |>
+  group_by(model) |>
+  summarise(ranking = mean(ranking)) |>
+  arrange(-ranking) |>
+  pull(model)
+
+p_rankings <- rankings |>
+  filter(horizon == 2) |>
+  mutate(model = factor(model, levels = factor_levels)) |>
+  ggplot(aes(y = model, x = ranking)) +
+  ggdist::stat_halfeye() +
+  facet_wrap(~ scale) +
+  theme_scoringutils() +
+  labs(y = "Model", x = "Normalised ranking")
+
+rankings_diff <- rankings |>
+  select(model, location, target_end_date, forecast_date, interval_score, scale, ranking) |>
+  pivot_wider(names_from = scale, values_from = ranking, id_cols = -interval_score)
+
+p_diff_ranking <- rankings_diff |>
+  filter(horizon == 2) |>
+  mutate(diff_ranking = natural - log) |>
+  mutate(model = factor(model, levels = factor_levels)) |>
+  ggplot(aes(y = model, x = diff_ranking)) +
+  ggdist::stat_halfeye() +
+  theme_scoringutils() +
+  labs(y = "", x = "Differences in ranking") +
+  theme(axis.text.y = element_blank(), 
+        axis.ticks.y = element_blank(), 
+        axis.line.y = element_blank())
+
+p_rankings + p_diff_ranking + 
+  plot_layout(widths = c(2, 1))
+
+ggsave("output/figures/HUB-ranking-diffs.png", width = 9, height = 5)
+
+rankings_diff |>
+  group_by(horizon, target_type) |>
+  summarise(cor = cor(natural, log))
+```
+
+## Look at pairwise comparisons
+
+```{r}
+summarised_pairwise <- scores |>
+  filter(horizon == 2, 
+         target_type == "Cases") |>
+  summarise_scores(by = c("model", "scale"), relative_skill = TRUE)
+
+ranking_natural <- 
+  summarised_pairwise |>
+  filter(scale == "natural") |>
+  arrange(-relative_skill) |>
+  pull(model)
+
+plot_rel_skill <- summarised_pairwise |>
+  mutate(model = factor(model, levels = ranking_natural)) |>
+  ggplot(aes(y = model, x = relative_skill)) +
+  geom_bar(stat = "identity") +
+  theme_scoringutils() +
+  facet_wrap(~scale) +
+  labs(y = "Model", x = "Relative skill")
+  
+diffs <- summarised_pairwise |>
+  mutate(model = factor(model, levels = ranking_natural)) |>
+  select(model, relative_skill, scale) |>
+  pivot_wider(names_from = scale, values_from = relative_skill) |>
+  mutate(model = factor(model, levels = ranking_natural), 
+         difference = natural - log)
+
+plot_diffs <- diffs |>
+  mutate(title = "difference") |>
+  ggplot(aes(y = model, x = difference)) +
+  geom_bar(stat = "identity") +
+  theme_scoringutils() +
+  labs(y = "Model", x = "Difference in relative skill") +
+  theme(axis.title.y = element_blank(), 
+        axis.text.y = element_blank(), 
+        axis.ticks.y = element_blank(), 
+        axis.line.y = element_blank()) +
+  facet_wrap(~title)
+
+plot_distr_scores <- scores |>
+  filter(horizon == 2) |>
+  mutate(model = factor(model, levels = ranking_natural)) |>
+  ggplot(aes(y = model, x = interval_score)) +
+  ggdist::stat_pointinterval() +
+  facet_wrap(~ scale, scale = "free_x") +
+  theme_scoringutils() +
+  scale_x_log10(labels = label_fn) +
+  theme(axis.title.y = element_blank(), 
+        axis.text.y = element_blank(), 
+        axis.ticks.y = element_blank(), 
+        axis.line.y = element_blank()) +
+  labs(y = "Model", x = "WIS") 
+
+plot_rel_wis <- scores |>
+  filter(horizon == 2, 
+         target_type == "Cases") |>
+  mutate(model = factor(model, levels = ranking_natural)) |>
+  summarise_scores(by = c("model", "scale")) |>
+  plot_wis(relative_contributions = FALSE) +
+    theme(axis.title.y = element_blank(), 
+        axis.text.y = element_blank(), 
+        axis.ticks.y = element_blank(), 
+        axis.line.y = element_blank()) +
+  scale_x_continuous(labels = label_fn) +
+  facet_wrap(~scale, scales = "free_x")
+
+plot_rel_skill + plot_diffs + plot_rel_wis + #plot_distr_scores +
+  plot_layout(widths = c(2, 1, 2)) &
+  plot_layout(guides = "collect") &
+  theme(legend.position = "bottom")
+
+ggsave("output/figures/HUB-pairwise-comparisons.png", width = 9, height = 5)
+
+#Issues: this currently ignores that some models have only made forecasts for one location. They should usually be excluded, but maybe not necessary here as we're really more comparing the results for natural and log rather than the models against each other. 
+
+cor(diffs$log, diffs$natural)
+
+# "CovidMetrics-epiBATS" only has forecasts in DE
+# "ICM-agentModel" only in Poland
+# "UVA is everywhere
+hub_data |>
+  filter(model == "UVA-Ensemble") |> check_forecasts()
+
+plot_pred_score <- function(hub_data, scores, model,
+                            horizon = 2, type = "Cases") {
+  forecast_model <- model
+  h <- horizon
+  filtered_hub <- hub_data |>
+    filter(model == forecast_model, 
+           horizon %in% h, 
+           target_type == type) 
+  
+  locations <- unique(filtered_hub$location) 
+  
+  filtered_scores <- scores |>
+    filter(model == forecast_model, 
+           horizon %in% h, 
+           location %in% locations,
+           target_type == type) 
+  
+  plot_natural  <- filtered_hub |>  
+    plot_predictions(x = "target_end_date") +
+    scale_y_continuous(labels = label_fn)  +
+    theme(legend.position = "bottom")
+  
+  plot_log <- filtered_hub |>
+    mutate(prediction = log(prediction + 1), 
+           true_value = log(true_value + 1)) |>
+    plot_predictions(x = "target_end_date") +
+    scale_y_continuous(labels = label_fn)  +
+    theme(legend.position = "bottom")
+  
+  scores_natural <- filtered_scores |>
+    filter(scale == "natural") |>
+    summarise_scores("target_end_date") |>
+    mutate(target_end_date = factor(target_end_date)) |>
+    plot_wis(x = "target_end_date", flip = TRUE) +
+    scale_x_continuous(labels = label_fn)
+  
+  scores_log <- filtered_scores |>
+    filter(scale == "log") |>
+    summarise_scores("target_end_date") |>
+    mutate(target_end_date = factor(target_end_date)) |>
+    plot_wis(x = "target_end_date", flip = TRUE)
+  
+  (plot_natural + plot_log) /
+    (scores_natural + scores_log) +
+    plot_layout(guides = "collect") &
+    theme(legend.position = "bottom")
+}
+
+
+ICM <- plot_pred_score(hub_data, scores, "ICM-agentModel")
+
+epiBATS <- plot_pred_score(hub_data, scores, "CovidMetrics-epiBATS")
+
+BSLCoV <- plot_pred_score(hub_data, scores, "UB-BSLCoV")
+
+ggsave(filename = "output/figures/HUB-model-ICM.png", width = 7, height = 4.5, plot = ICM)
+ggsave(filename = "output/figures/HUB-model-epiBATS.png", width = 7, height = 4.5, plot = epiBATS)
+ggsave(filename = "output/figures/HUB-model-BSLCoV.png", width = 7, height = 4.5, plot = BSLCoV)
+
+
+```
+
+
+
+
 
 
 ## Distribution of scores
@@ -579,7 +666,7 @@ scores_gr |>
   geom_boxplot(alpha = 0.5) + 
   scale_fill_brewer(palette = "Set1", name = "Forecast target") + 
   facet_wrap(~ scale, scale = "free") + 
-  theme_minimal() + 
+  theme_scoringutils() + 
   theme(legend.position = "none") + 
   scale_y_continuous(labels = scale_fn, trans = "log10") + 
   labs(y = "Interval score", x = "Target type")
@@ -613,7 +700,7 @@ scores_gr |>
   geom_bar(stat = "identity") + 
   scale_fill_brewer(palette = "Set1", name = "Forecast target") + 
   facet_wrap(~ target_type + scale, scale = "free") + 
-  theme_minimal() + 
+  theme_scoringutils() + 
   theme(legend.position = "none") + 
   scale_y_continuous(labels = scale_fn) + 
   labs(y = "Interval score", x = "Target type")
@@ -639,7 +726,7 @@ scores_gr |>
   geom_line() + 
   geom_point() + 
   facet_grid(target_type ~ scale, scale = "free_y") + 
-  theme_minimal() + 
+  theme_scoringutils() + 
   labs(x = "Forecast date", y = "WIS relative to smallest observed value")
 ```
 
@@ -656,7 +743,7 @@ scores_gr |>
   geom_line() + 
   geom_point() + 
   facet_grid(target_type ~ scale, scale = "free_y") + 
-  theme_minimal() + 
+  theme_scoringutils() + 
   labs(x = "Forecast date", y = "WIS relative to smallest observed value")
 ```
 
@@ -673,7 +760,7 @@ scores_gr |>
   geom_line() + 
   geom_point() + 
   facet_grid(target_type ~ scale, scale = "free_y") + 
-  theme_minimal() + 
+  theme_scoringutils() + 
   labs(x = "Forecast date", y = "WIS relative to smallest observed value")
 ```
 
@@ -695,7 +782,7 @@ scores_gr |>
   geom_line() + 
   geom_point() + 
   facet_grid(target_type ~ scale) + 
-  theme_minimal() + 
+  theme_scoringutils() + 
   labs(x = "Forecast horizon in weeks", y = "Multplicative change in interval score")
 ```
 
@@ -756,4 +843,132 @@ performance::check_outliers(reg_gr_log)
 
 ```
 
+
+
+## Code parking lot
+
+
+```{r}
+# create version of data where the true value is the true growth rate
+# interesting question: does it make a difference, whether we transform it 
+# to be the weekly growth rate, i.e. take the n-th root, where n is the horizon? 
+
+latest_truth <- fread(here("data", "weekly-truth-Europe.csv")) |>
+  rename(last_known_true_value = true_value) |>
+  mutate(forecast_date = target_end_date + 2) |>
+  select(location, target_type, forecast_date, last_known_true_value) |>
+  unique()
+
+# unsure whether the pmax hack is the right way to do it
+growth_data <- hub_data |>
+  inner_join(latest_truth) |>
+  mutate(true_value = true_value / pmax(last_known_true_value + 1),
+         prediction = prediction / pmax(last_known_true_value + 1)) |>
+  select(-last_known_true_value)
+```
+
+
+
+
+## Variance of scores across locations 
+
+```{r}
+scores |> 
+  filter(model == "EuroCOVIDhub-ensemble", 
+         horizon == 2) |>
+  group_by(target_type, location, scale) |>
+  summarise(mean_wis = mean(interval_score), 
+            sd_wis = sd(interval_score), 
+            .groups = "drop_last") |>
+  ggplot(aes(y = sd_wis, x = mean_wis)) + 
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", size = 0.5) + 
+  geom_point() + 
+  facet_wrap(~ target_type + scale, scale = "free") + 
+  theme_scoringutils() + 
+  theme(legend.position = "none") + 
+  # scale_x_continuous(labels = scale_fn) + 
+  # scale_y_continuous(labels = scale_fn) + 
+  scale_x_continuous(labels = scale_fn, trans = "log10") +
+  scale_y_continuous(labels = scale_fn, trans = "log10") +
+  labs(x = "Mean WIS", y = "Sd of WIS") 
+
+ggsave("output/figures/HUB-sd-vs-mean-scores.png", width = 7, height = 5)
+```
+
+
+```{r}
+# negative binomial
+# MASS::glm.nb(true_value ~ target_type, 
+#        data = hub_data %>%
+#          mutate(true_value = pmax(true_value, 0)), 
+#        link = "identity")
+```
+
+
+
+## WIS vs. the totsl number of observed values
+probably not needed anymore, as we have similar things
+
+```{r}
+wis_vs_total <- function(scores, summary_fct = mean, fulldata = hub_data) {
+  
+  total_values <- 
+    fulldata |> 
+    filter(!is.na(prediction)) |>
+    group_by(location, target_type, target_end_date) |>
+    summarise(true_value = unique(true_value)) |>
+    group_by(location, target_type) |>
+    summarise(total = sum(true_value))
+  
+  plot_df <- scores |> 
+    filter(model == "EuroCOVIDhub-ensemble", 
+           horizon == 2) |>
+    group_by(target_type, location, scale) |>
+    summarise(wis = summary_fct(interval_score), 
+              .groups = "drop_last") |> 
+    inner_join(total_values) 
+  
+  plot_df |>
+    group_by(target_type, scale) |>
+    summarise(correlation = cor(wis, total)) |> 
+    print()
+  
+  plot_df |>
+    ggplot(aes(y = wis, x = total)) + 
+    geom_point() + 
+    facet_wrap(~ target_type + scale, scale = "free") + 
+    theme_scoringutils() + 
+    theme(legend.position = "none") + 
+    scale_x_continuous(labels = scale_fn) +
+    scale_y_continuous(labels = scale_fn) +
+    labs(y = "REPLACE", x = "Total number of observed values")
+} 
+
+wis_vs_total(scores) + 
+  labs(y = "Mean WIS")
+ggsave("output/figures/HUB-mean-scores-vs-total.png", width = 7, height = 5)
+
+wis_vs_total(scores, summary_fct = stats::sd) + 
+  labs(y = "Sd WIS")
+ggsave("output/figures/HUB-sd-scores-vs-total.png", width = 7, height = 5)
+
+
+# log-log versions of that plot
+wis_vs_total(scores) + 
+  labs(y = "Mean WIS") + 
+  scale_x_continuous(labels = scale_fn, trans = "log10") +
+  scale_y_continuous(labels = scale_fn, trans = "log10") 
+ggsave("output/figures/HUB-mean-scores-vs-total-log-log.png", width = 7, height = 5)
+
+wis_vs_total(scores, summary_fct = stats::sd) + 
+  labs(y = "Sd WIS") + 
+  scale_x_continuous(labels = scale_fn, trans = "log10") +
+  scale_y_continuous(labels = scale_fn, trans = "log10") 
+ggsave("output/figures/HUB-sd-scores-vs-total-log-log.png", width = 7, height = 5)
+
+# correlation
+
+
+
+```
 

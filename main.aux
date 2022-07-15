@@ -1,0 +1,93 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyperFirstAtBeginDocument{\AtBeginDocument}
+\HyperFirstAtBeginDocument{\ifx\hyper@anchor\@undefined
+\global\let\oldcontentsline\contentsline
+\gdef\contentsline#1#2#3#4{\oldcontentsline{#1}{#2}{#3}}
+\global\let\oldnewlabel\newlabel
+\gdef\newlabel#1#2{\newlabelxx{#1}#2}
+\gdef\newlabelxx#1#2#3#4#5#6{\oldnewlabel{#1}{{#2}{#3}}}
+\AtEndDocument{\ifx\hyper@anchor\@undefined
+\let\contentsline\oldcontentsline
+\let\newlabel\oldnewlabel
+\fi}
+\fi}
+\global\let\hyper@last\relax 
+\gdef\HyperFirstAtBeginDocument#1{#1}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\bibstyle{apalike}
+\citation{reichCollaborativeMultiyearMultimodel2019,funkShorttermForecastsInform2020,cramerEvaluationIndividualEnsemble2021,bracherShorttermForecastingCOVID192021,europeancovid-19forecasthubEuropeanCovid19Forecast2021,sherrattPredictivePerformanceMultimodel2022}
+\citation{timmermannForecastingMethodsFinance2018,elliottForecastingEconomicsFinance2016}
+\citation{gneitingWeatherForecastingEnsemble2005,kukkonenReviewOperationalRegionalscale2012}
+\citation{gneitingStrictlyProperScoring2007}
+\citation{bracherEvaluatingEpidemicForecasts2021}
+\citation{europeancovid-19forecasthubEuropeanCovid19Forecast2021,sherrattPredictivePerformanceMultimodel2022}
+\citation{cramerEvaluationIndividualEnsemble2021}
+\citation{bracherShorttermForecastingCOVID192021}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{3}{section.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2}Transforming forecasts to shift the focus of the evaluation}{4}{section.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Scores for different forecasts evaluated the WIS and the log WIS. We simulated 1000 observations $Y_i = {\rm  e}^{x_i}$, with $x_i \text  {iid} \sim \mathcal  {N}(0, 1)$. We then simulated 20 forecasters who would issue a predictive distribution $F = {\rm  e}^{x_i}$, with $x \sim \mathcal  {N}(0, \sigma )$, with values of $\sigma $ ranging from 0.1 to 2.}}{4}{figure.1}\protected@file@percent }
+\newlabel{fig:log-improper}{{1}{4}{Scores for different forecasts evaluated the WIS and the log WIS. We simulated 1000 observations $Y_i = {\rm e}^{x_i}$, with $x_i \text {iid} \sim \mathcal {N}(0, 1)$. We then simulated 20 forecasters who would issue a predictive distribution $F = {\rm e}^{x_i}$, with $x \sim \mathcal {N}(0, \sigma )$, with values of $\sigma $ ranging from 0.1 to 2}{figure.1}{}}
+\@writefile{toc}{\contentsline {paragraph}{Other transformations}{4}{section*.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3}Log transforming forecasts and observations}{4}{section.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Weighted interval score for a forecast distribution that is N(1, 0.2) and different observed values. Top: difference in absolute terms. Bottom: difference in relative terms. Interesting panels are top left and bottom right.}}{5}{figure.2}\protected@file@percent }
+\newlabel{fig:change-in-scores}{{2}{5}{Weighted interval score for a forecast distribution that is N(1, 0.2) and different observed values. Top: difference in absolute terms. Bottom: difference in relative terms. Interesting panels are top left and bottom right}{figure.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Approximately scoring the growth rate}{6}{subsection.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Dealing with negative counts and small values}{6}{subsection.3.2}\protected@file@percent }
+\citation{bracherEvaluatingEpidemicForecasts2021}
+\citation{europeancovid-19forecasthubEuropeanCovid19Forecast2021,sherrattPredictivePerformanceMultimodel2022}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Relative importance when summarising scores}{7}{subsection.3.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4}Empirical example: the European Forecast Hub}{7}{section.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Introduction to the Forecast Hub}{7}{section*.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Simulation of the effect of population size with ideal forecasts of a negative-binomially-distributed variable. For each simulated state, we drew 1,000 observations from a negative binomial distribution with $\mu = 100 \cdot \text  {state size}$ and with values of $\theta $ equal to 0.1, 1, and 1 billion. The variance of the negative binomial is given as $\sigma ^2 = \mu + \mu ^2 / \theta $, meaning that for large theta the negative binomial distribution is equal to the poisson distribution. For these simulated values we computed the WIS for an ideal forecast (i.e. the predictive distribution was negative binomial with $\mu $ and $\theta $ equal to the true $\mu $ and $\theta $ for every state). Left: Mean WIS depending on state size, right: Mean WIS depending on state sizes when scored on a log scale. Plots for the standard deviation, rather than the mean of WIS values look are given in Figure \ref  {fig:SIM-wis-state-size-sd} in the SI.}}{8}{figure.3}\protected@file@percent }
+\newlabel{fig:SIM-wis-state-size-mean}{{3}{8}{Simulation of the effect of population size with ideal forecasts of a negative-binomially-distributed variable. For each simulated state, we drew 1,000 observations from a negative binomial distribution with $\mu = 100 \cdot \text {state size}$ and with values of $\theta $ equal to 0.1, 1, and 1 billion. The variance of the negative binomial is given as $\sigma ^2 = \mu + \mu ^2 / \theta $, meaning that for large theta the negative binomial distribution is equal to the poisson distribution. For these simulated values we computed the WIS for an ideal forecast (i.e. the predictive distribution was negative binomial with $\mu $ and $\theta $ equal to the true $\mu $ and $\theta $ for every state). Left: Mean WIS depending on state size, right: Mean WIS depending on state sizes when scored on a log scale. Plots for the standard deviation, rather than the mean of WIS values look are given in Figure \ref {fig:SIM-wis-state-size-sd} in the SI}{figure.3}{}}
+\@writefile{toc}{\contentsline {paragraph}{Describing features of the data}{8}{section*.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Features of the scores}{8}{section*.5}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces CAPTION}}{9}{figure.4}\protected@file@percent }
+\newlabel{fig:HUB-mean-locations}{{4}{9}{CAPTION}{figure.4}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Observed mean against observed variance of observations. The dashed line marks what would be expecetd from a negative binomially distributed variable with variance of the observed value equal to the mean + the square of mean observed value. }}{9}{figure.5}\protected@file@percent }
+\newlabel{fig:HUB-variance-mean}{{5}{9}{Observed mean against observed variance of observations. The dashed line marks what would be expecetd from a negative binomially distributed variable with variance of the observed value equal to the mean + the square of mean observed value}{figure.5}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Distribution of rankings of the different Hub models. Rankings are computed as relative rankings, i.e. the ranking divided by the total number of models available for a given forecast target.}}{10}{figure.6}\protected@file@percent }
+\newlabel{fig:HUB-rankings}{{6}{10}{Distribution of rankings of the different Hub models. Rankings are computed as relative rankings, i.e. the ranking divided by the total number of models available for a given forecast target}{figure.6}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Distribution of interval scores for two week ahead forecasts of COVID-19 cases and deaths evaluated on the natural scale (left) and on the log scale (right). }}{10}{figure.7}\protected@file@percent }
+\newlabel{fig:HUB-average-scores}{{7}{10}{Distribution of interval scores for two week ahead forecasts of COVID-19 cases and deaths evaluated on the natural scale (left) and on the log scale (right)}{figure.7}{}}
+\@writefile{toc}{\contentsline {paragraph}{Rankings}{10}{section*.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{pairwise comparisons}{10}{figure.10}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Plot with Weighted interval scores against the mean number of observed cases or deaths.}}{11}{figure.8}\protected@file@percent }
+\newlabel{fig:HUB-mean-scores-total-loglog}{{8}{11}{Plot with Weighted interval scores against the mean number of observed cases or deaths}{figure.8}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Weighted interval scores across forecast horizons}}{11}{figure.9}\protected@file@percent }
+\newlabel{fig:HUB-scores-horizon}{{9}{11}{Weighted interval scores across forecast horizons}{figure.9}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces Changes in relative skill and the distribution of scores}}{12}{figure.10}\protected@file@percent }
+\newlabel{fig:HUB-pairwise}{{10}{12}{Changes in relative skill and the distribution of scores}{figure.10}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Discussion}{12}{section.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{summary of what we did}{12}{section*.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{context, implications, limitations}{12}{section*.9}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{outlook, future work}{12}{section*.10}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {A}Supplementary information}{13}{appendix.A}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {A.1}Additional information on the WIS}{13}{subsection.A.1}\protected@file@percent }
+\newlabel{wis}{{A.1}{13}{Additional information on the WIS}{subsection.A.1}{}}
+\@writefile{toc}{\contentsline {paragraph}{WIS}{13}{section*.11}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {A.2}Additional information on the CRPS}{13}{subsection.A.2}\protected@file@percent }
+\newlabel{crps}{{A.2}{13}{Additional information on the CRPS}{subsection.A.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {A.3}Scoring the growth rate directly}{14}{subsection.A.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {A.4}Changes in the WIS for forecasts on the log scale}{14}{subsection.A.4}\protected@file@percent }
+\newlabel{wis-log-derivation}{{A.4}{14}{Changes in the WIS for forecasts on the log scale}{subsection.A.4}{}}
+\bibdata{log-or-not.bib}
+\bibcite{bracherEvaluatingEpidemicForecasts2021}{{1}{2021a}{{Bracher et~al.}}{{}}}
+\bibcite{bracherShorttermForecastingCOVID192021}{{2}{2021b}{{Bracher et~al.}}{{}}}
+\newlabel{eqn:is-log}{{29}{15}{Changes in the WIS for forecasts on the log scale}{equation.A.29}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {A.5}Additional figures}{15}{subsection.A.5}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces Illustration of the fact that taking the log of WIS or CRPS results in an improper score}}{15}{figure.11}\protected@file@percent }
+\newlabel{fig:log-improper}{{11}{15}{Illustration of the fact that taking the log of WIS or CRPS results in an improper score}{figure.11}{}}
+\bibcite{elliottForecastingEconomicsFinance2016}{{3}{2016}{{Elliott and Timmermann}}{{}}}
+\bibcite{gneitingWeatherForecastingEnsemble2005}{{4}{2005}{{Gneiting and Raftery}}{{}}}
+\bibcite{gneitingStrictlyProperScoring2007}{{5}{2007}{{Gneiting and Raftery}}{{}}}
+\bibcite{kukkonenReviewOperationalRegionalscale2012}{{6}{2012}{{Kukkonen et~al.}}{{}}}
+\bibcite{sherrattPredictivePerformanceMultimodel2022}{{7}{2022}{{Sherratt et~al.}}{{}}}
+\@writefile{lof}{\contentsline {figure}{\numberline {12}{\ignorespaces Plot with Weighted interval scores against the mean number of observed cases or deaths.}}{16}{figure.12}\protected@file@percent }
+\newlabel{fig:HUB-mean-scores-total}{{12}{16}{Plot with Weighted interval scores against the mean number of observed cases or deaths}{figure.12}{}}
+\bibcite{timmermannForecastingMethodsFinance2018}{{8}{2018}{{Timmermann}}{{}}}
+\@writefile{lof}{\contentsline {figure}{\numberline {13}{\ignorespaces Simulation of the effect of population size with ideal forecasts of a negative-binomially-distributed variable. For each simulated state, we drew 1,000 observations from a negative binomial distribution with $\mu = 100 \cdot \text  {state size}$ and with values of $\theta $ equal to 0.1, 1, and 1 billion. The variance of the negative binomial is given as $\sigma ^2 = \mu + \mu ^2 / \theta $, meaning that for large theta the negative binomial distribution is equal to the poisson distribution. For these simulated values we computed the WIS for an ideal forecast (i.e. the predictive distribution was negative binomial with $\mu $ and $\theta $ equal to the true $\mu $ and $\theta $ for every state). Left: Mean WIS depending on state size, right: Mean WIS depending on state sizes when scored on a log scale. Plots for the standard deviation, rather than the mean of WIS values look are given in Figure \ref  {fig:SIM-wis-state-size-sd} in the SI.}}{17}{figure.13}\protected@file@percent }
+\newlabel{fig:SIM-wis-state-size-mean}{{13}{17}{Simulation of the effect of population size with ideal forecasts of a negative-binomially-distributed variable. For each simulated state, we drew 1,000 observations from a negative binomial distribution with $\mu = 100 \cdot \text {state size}$ and with values of $\theta $ equal to 0.1, 1, and 1 billion. The variance of the negative binomial is given as $\sigma ^2 = \mu + \mu ^2 / \theta $, meaning that for large theta the negative binomial distribution is equal to the poisson distribution. For these simulated values we computed the WIS for an ideal forecast (i.e. the predictive distribution was negative binomial with $\mu $ and $\theta $ equal to the true $\mu $ and $\theta $ for every state). Left: Mean WIS depending on state size, right: Mean WIS depending on state sizes when scored on a log scale. Plots for the standard deviation, rather than the mean of WIS values look are given in Figure \ref {fig:SIM-wis-state-size-sd} in the SI}{figure.13}{}}
+\gdef \@abspage@last{17}

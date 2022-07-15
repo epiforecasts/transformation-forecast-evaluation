@@ -39,4 +39,4 @@ summary |>
   theme_scoringutils() +
   labs(y = "Score", x = "Standard deviation of predictive distribution")
 
-ggsave("output/figures/example-log-first.png", width = 7, height = 5)
+ggsave("output/figures/example-log-first.png", width = 7, height = 2.5)

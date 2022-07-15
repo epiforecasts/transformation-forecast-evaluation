@@ -185,13 +185,14 @@ plot_means_obs /
   plot_mean_scores + 
   plot_layout(heights = c(1, 2))
 
-ggsave("output/figures/HUB-mean-obs-location.png", width = 9, height = 8)
+ggsave("output/figures/HUB-mean-obs-location.png", width = 9, height = 5.5)
 
 # This uses the ensemble, but alternatively, we could think about just summarising across all models for these plots? 
 ```
 
 
-
+Figure that shows Variance vs. mean of the observations. Makes the point that the
+data looks neg. binomial. 
 ```{r}
 # plot with mean vs. variance --------------------------------------------------
 hub_data |>
@@ -209,11 +210,11 @@ hub_data |>
   # scale_x_continuous(labels = label_fn) +
   # scale_y_continuous(labels = label_fn) +
   labs(y = "Variance observed value", x = "Mean observed value") + 
-  geom_function(fun = function(x) x^2, linetype = "dashed", size = 0.5) + 
+  geom_function(fun = function(x) {x + x^2}, linetype = "dashed", size = 0.5) + 
   theme_scoringutils() + 
   geom_smooth(alpha = 0.2, size = 0.2)
 
-ggsave("output/figures/HUB-mean-var-obs.png", width = 7, height = 4)
+ggsave("output/figures/HUB-mean-var-obs.png", width = 7, height = 2.5)
   
 ```
 
@@ -248,8 +249,6 @@ scores |>
 ggsave("output/figures/HUB-average-scores.png", width = 7, height = 2.5)
 ```
 
-*Scores are more comparable across targets*
-
 Mean scores: 
 ```{r}
 scores |> 
@@ -280,38 +279,6 @@ scores |>
 
 
 
-
-
-
-
-## Scores over time
-restrict to a few locations, e.g. GB, FR, ES (highest average scores there)
-
-```{r}
-scores |> 
-  filter(model == "EuroCOVIDhub-ensemble",
-         location %in% c("GB", "ES", "DE"),
-         horizon == 2) |>
-  rename(Location = location) |>
-  group_by(target_type, scale, Location) |>
-  mutate(multiplicative_score = interval_score / min(interval_score)) |>
-  ggplot(aes(y = multiplicative_score, x = forecast_date, colour = Location)) + 
-  geom_line() + 
-  geom_point() + 
-  facet_grid(target_type ~ scale, scale = "free_y") + 
-  theme_scoringutils() + 
-  labs(x = "Forecast date", y = "WIS relative to smallest observed value")
-
-ggsave("output/figures/HUB-scores-over-time.png", width = 7, height = 5)
-```
-
-*Overall it looks like there can still be substantial fluctuation in log scores, but maybe slightly less than when scored on an absolute scale. Interestingly, it seems like the smoothing effect is stronger for deaths than for cases.*
-
-
-
-
-
-
 ## Change of average scores for increasing forecast horizons
 
 ```{r}
@@ -324,85 +291,90 @@ scores |>
   ggplot(aes(y = multiplicative_score, x = horizon)) + 
   geom_line() + 
   geom_point() + 
-  facet_grid(target_type ~ scale) + 
+  facet_grid(scale ~ target_type) + 
   theme_scoringutils() + 
   labs(x = "Forecast horizon in weeks", y = "Multplicative change in interval score")
 
-ggsave("output/figures/HUB-scores-over-horizon.png", width = 7, height = 5)
+ggsave("output/figures/HUB-scores-over-horizon.png", width = 7, height = 4)
 
 ```
 
-*Slightly less increase on the log scale, but overall not a lot of difference*
 
-## Actual model rankings for single forecasts
+## Comparison of the distribution of model rankings
 
 ```{r}
-# we see that rankings change even for a single forecast. So we need to check everything is still correct. 
-# take one example
-test_data <- hub_data |>
-  filter(model %in% c("MUNI-ARIMA", "epiforecasts-EpiNow2"), 
-         forecast_date == "2021-10-18", 
-         target_type == "Cases", 
-         location == "AT")
-
-test_data |>
-  score(metrics = c("interval_score")) |>
-  summarise_scores()
-
-test_data |>
-  mutate(prediction = log(prediction), 
-         true_value = log(true_value)) |>
-  score(metrics = c("interval_score")) |>
-  summarise_scores()
-## indeed everything seems to be correct, but rankings still change FOR A SINGLE FORECAST. 
-# It seems this is because the trade-off between calibration and sharpness changes? 
-# need to check in what way
-
 
 rankings <- scores |>
-  select(-c(coverage_deviation, bias, aem, sharpness, underprediction, overprediction)) |>
+  select(-c(coverage_deviation, bias, ae_median, dispersion, underprediction, overprediction)) |>
   group_by(location, forecast_date, horizon, target_type, scale) |>
   mutate(ranking = rank(interval_score) / n()) |>
-   filter(forecast_date == "2021-10-18", 
-         target_type == "Cases", 
-         location == "AT") 
-
-factor_levels <-  rankings |>
-  filter(horizon == 2, scale == "natural") |>
-  group_by(model) |>
-  summarise(ranking = mean(ranking)) |>
-  arrange(-ranking) |>
-  pull(model)
-
-p_rankings <- rankings |>
-  filter(horizon == 2) |>
-  mutate(model = factor(model, levels = factor_levels)) |>
-  ggplot(aes(y = model, x = ranking)) +
-  ggdist::stat_halfeye() +
-  facet_wrap(~ scale) +
-  theme_scoringutils() +
-  labs(y = "Model", x = "Normalised ranking")
+  ungroup()
 
 rankings_diff <- rankings |>
-  select(model, location, target_end_date, forecast_date, interval_score, scale, ranking) |>
-  pivot_wider(names_from = scale, values_from = ranking, id_cols = -interval_score)
+  select(model, location, target_end_date, forecast_date, horizon,
+         interval_score, scale, ranking, target_type) |>
+  pivot_wider(names_from = scale, values_from = ranking, 
+              id_cols = -interval_score)
 
-p_diff_ranking <- rankings_diff |>
-  filter(horizon == 2) |>
-  mutate(diff_ranking = natural - log) |>
-  mutate(model = factor(model, levels = factor_levels)) |>
-  ggplot(aes(y = model, x = diff_ranking)) +
-  ggdist::stat_halfeye() +
-  theme_scoringutils() +
-  labs(y = "", x = "Differences in ranking") +
-  theme(axis.text.y = element_blank(), 
-        axis.ticks.y = element_blank(), 
-        axis.line.y = element_blank())
+plot_ranking_diffs <- function(
+  rankings, 
+  rankings_diff,
+  target_type
+) {
+  type <- target_type
+  # maybe replace this by the same ranking for all plots
+  factor_levels <- rankings |>
+    filter(horizon == 2, scale == "natural", target_type == type) |>
+    group_by(model) |>
+    summarise(ranking = mean(ranking)) |>
+    arrange(-ranking) |>
+    pull(model)
+  
+  # p_rankings <- rankings |>
+  #   filter(horizon == 2) |>
+  #   mutate(model = factor(model, levels = factor_levels)) |>
+  #   ggplot(aes(y = model, x = ranking)) +
+  #   ggdist::stat_halfeye() +
+  #   facet_wrap(~ scale) +
+  #   theme_scoringutils() +
+  #   labs(y = "Model", x = "Normalised ranking")
 
-p_rankings + p_diff_ranking + 
-  plot_layout(widths = c(2, 1))
+  
+  ranking_plot <- function(
+    hor
+  ) {
+    p <- rankings_diff |>
+      mutate(diff_ranking = natural - log) |>
+      mutate(model = factor(model, levels = factor_levels)) |>
+      filter(horizon == hor, 
+             !is.na(model)) |>
+      ggplot(aes(y = model, x = diff_ranking)) +
+      geom_vline(linetype = "dashed", xintercept = 0, 
+                 size = 0.6, color = "grey40") +
+      ggdist::stat_pointinterval() +
+      theme_scoringutils() +
+      labs(y = "", x = "Differences in ranking") 
+    
+    if (hor > 1) {
+      p <- p +
+        theme(axis.text.y = element_blank(), 
+              axis.ticks.y = element_blank(), 
+              axis.line.y = element_blank())
+    }
+    return(p)
+  }
+  
+  ranking_plot(hor = 1) + ranking_plot(2) + ranking_plot(3) + ranking_plot(4) +
+    plot_layout(nrow = 1)
+}
 
-ggsave("output/figures/HUB-ranking-diffs.png", width = 9, height = 5)
+# should probably have one plot for both cases and deaths since this is rankings
+p_diff_cases <- plot_ranking_diffs(rankings, rankings_diff, 
+                                   target_type = "Cases")
+
+ggsave(filename = "output/figures/HUB-ranking-diffs.png", 
+       plot = p_diff_cases,
+       width = 9, height = 5)
 
 rankings_diff |>
   group_by(horizon, target_type) |>
@@ -561,67 +533,12 @@ ggsave(filename = "output/figures/HUB-model-BSLCoV.png", width = 7, height = 4.5
 
 
 
-## Distribution of scores
-
-```{r}
-scores |>
-  ggplot(aes(x = interval_score)) + 
-  geom_density() + 
-  facet_wrap(~ target_type + scale, scale = "free") + 
-  scale_x_continuous(labels = scale_fn)
-```
-
-
-
-## Fit a model to data
-
-Check fit of the log scale model
-
-```{r echo=TRUE}
-reg_log <- scores |>
-  filter(scale == "log") |>
-  glm(formula = interval_score ~ 1 + model + location + target_type + horizon, 
-      family = gaussian)
-```
-
-
-```{r}
-# check distribution
-performance::check_distribution(reg_log) |>
-  plot()
-
-# check normality of residuals
-check_normality(reg_log) |>
-  plot(type = "qq")
-
-# heteroskedasticity of error terms - the plot takes extremly long to run
-performance::check_heteroskedasticity(reg_log)
-# performance::check_heteroskedasticity(reg_log) |>
-#   plot()
-
-# check influence of outliers - plot also takes very long to run
-performance::check_outliers(reg_log)
-# performance::check_outliers(reg_log) |>
-#   plot()
-
-```
 
 
 
 
 
-## Model rankings
 
-Still to do 
-
-- restrict to full set of observations
-- check how rankings change
-
-```{r}
-# find out which models have submitted forecasts for all locations and time points
-
-
-```
 
 
 
@@ -649,204 +566,30 @@ Still to do
 
 
 --- 
+# Code parking lot
 
-
-# Looking at growth rates directly
-
-## Scores of the growth rate across targets
-
-This uses the Hub ensemble
-
-```{r}
-scores_gr |> 
-  filter(model == "EuroCOVIDhub-ensemble", 
-         horizon == 2) |>
-  ggplot(aes(y = interval_score, x = target_type)) + 
-  geom_violin(aes(fill = target_type), alpha = 0.2, color = NA) + 
-  geom_boxplot(alpha = 0.5) + 
-  scale_fill_brewer(palette = "Set1", name = "Forecast target") + 
-  facet_wrap(~ scale, scale = "free") + 
-  theme_scoringutils() + 
-  theme(legend.position = "none") + 
-  scale_y_continuous(labels = scale_fn, trans = "log10") + 
-  labs(y = "Interval score", x = "Target type")
-```
-
-*Scoring the growth rate makes things more comparable*
-
-Mean scores: 
-```{r}
-scores_gr |> 
-  filter(model == "EuroCOVIDhub-ensemble", 
-         horizon == 2) |>
-  group_by(scale, target_type) |>
-  summarise(interval_score = mean(interval_score), 
-            .groups = "drop_last") |>
-  make_table()
-```
-
-
-
-## Scores for the growth rate across locations
-
-```{r}
-scores_gr |> 
-  filter(model == "EuroCOVIDhub-ensemble", 
-         horizon == 2) |>
-  group_by(target_type, location, scale) |>
-  summarise(interval_score = mean(interval_score), 
-            .groups = "drop_last") |>
-  ggplot(aes(y = interval_score, x = reorder(location, -interval_score))) + 
-  geom_bar(stat = "identity") + 
-  scale_fill_brewer(palette = "Set1", name = "Forecast target") + 
-  facet_wrap(~ target_type + scale, scale = "free") + 
-  theme_scoringutils() + 
-  theme(legend.position = "none") + 
-  scale_y_continuous(labels = scale_fn) + 
-  labs(y = "Interval score", x = "Target type")
-```
-
-
-
-
-## Scores for growth rate over time
-
+## Scores over time
 restrict to a few locations, e.g. GB, FR, ES (highest average scores there)
 
-UK: 
-
 ```{r}
-scores_gr |> 
+scores |> 
   filter(model == "EuroCOVIDhub-ensemble",
-         location == "GB",
+         location %in% c("GB", "ES", "DE"),
          horizon == 2) |>
-  group_by(target_type, scale) |>
+  rename(Location = location) |>
+  group_by(target_type, scale, Location) |>
   mutate(multiplicative_score = interval_score / min(interval_score)) |>
-  ggplot(aes(y = multiplicative_score, x = forecast_date)) + 
+  ggplot(aes(y = multiplicative_score, x = forecast_date, colour = Location)) + 
   geom_line() + 
   geom_point() + 
   facet_grid(target_type ~ scale, scale = "free_y") + 
   theme_scoringutils() + 
   labs(x = "Forecast date", y = "WIS relative to smallest observed value")
+
+ggsave("output/figures/HUB-scores-over-time.png", width = 7, height = 5)
 ```
 
-France: Looks like a data revision
-
-```{r}
-scores_gr |> 
-  filter(model == "EuroCOVIDhub-ensemble",
-         location == "FR",
-         horizon == 2) |>
-  group_by(target_type, scale) |>
-  mutate(multiplicative_score = interval_score / min(interval_score)) |>
-  ggplot(aes(y = multiplicative_score, x = forecast_date)) + 
-  geom_line() + 
-  geom_point() + 
-  facet_grid(target_type ~ scale, scale = "free_y") + 
-  theme_scoringutils() + 
-  labs(x = "Forecast date", y = "WIS relative to smallest observed value")
-```
-
-Spain: 
-
-```{r}
-scores_gr |> 
-  filter(model == "EuroCOVIDhub-ensemble",
-         location == "ES",
-         horizon == 2) |>
-  group_by(target_type, scale) |>
-  mutate(multiplicative_score = interval_score / min(interval_score)) |>
-  ggplot(aes(y = multiplicative_score, x = forecast_date)) + 
-  geom_line() + 
-  geom_point() + 
-  facet_grid(target_type ~ scale, scale = "free_y") + 
-  theme_scoringutils() + 
-  labs(x = "Forecast date", y = "WIS relative to smallest observed value")
-```
-
-
-
-
-
-
-## Change of average scores for the growth rate for increasing forecast horizons
-
-```{r}
-scores_gr |> 
-  filter(model == "EuroCOVIDhub-ensemble") |>
-  group_by(scale, target_type, horizon) |>
-  summarise(interval_score = mean(interval_score), 
-            .groups = "drop_last") |>
-  mutate(multiplicative_score = interval_score / min(interval_score)) |>
-  ggplot(aes(y = multiplicative_score, x = horizon)) + 
-  geom_line() + 
-  geom_point() + 
-  facet_grid(target_type ~ scale) + 
-  theme_scoringutils() + 
-  labs(x = "Forecast horizon in weeks", y = "Multplicative change in interval score")
-```
-
-
-
-
-
-
-
-## Distribution of scores growth rate
-
-```{r}
-scores_gr |>
-  ggplot(aes(x = interval_score)) + 
-  geom_density() + 
-  facet_wrap(~ target_type + scale, scale = "free") + 
-  scale_x_continuous(labels = scale_fn)
-```
-
-
-
-## Fit a model to growth rate data
-
-Check fit of the log scale model
-
-```{r echo=TRUE}
-reg_gr <- scores_gr |>
-  filter(scale == "natural") |>
-  glm(formula = interval_score ~ 1 + model + location + target_type + horizon, 
-      family = gaussian)
-
-reg_gr_log <- scores_gr |>
-  filter(scale == "log") |>
-  glm(formula = interval_score ~ 1 + model + location + target_type + horizon, 
-      family = gaussian)
-```
-
-
-
-```{r}
-# check distribution
-performance::check_distribution(reg_gr_log) |>
-  plot()
-
-# check normality of residuals
-check_normality(reg_gr_log) |>
-  plot(type = "qq")
-
-# heteroskedasticity of error terms - the plot takes extremly long to run
-performance::check_heteroskedasticity(reg_gr_log)
-# performance::check_heteroskedasticity(reg_log) |>
-#   plot()
-
-# check influence of outliers - plot also takes very long to run
-performance::check_outliers(reg_gr_log)
-# performance::check_outliers(reg_log) |>
-#   plot()
-
-```
-
-
-
-## Code parking lot
-
+*Overall it looks like there can still be substantial fluctuation in log scores, but maybe slightly less than when scored on an absolute scale. Interestingly, it seems like the smoothing effect is stronger for deaths than for cases.*
 
 ```{r}
 # create version of data where the true value is the true growth rate
@@ -866,9 +609,6 @@ growth_data <- hub_data |>
          prediction = prediction / pmax(last_known_true_value + 1)) |>
   select(-last_known_true_value)
 ```
-
-
-
 
 ## Variance of scores across locations 
 
@@ -895,7 +635,6 @@ scores |>
 ggsave("output/figures/HUB-sd-vs-mean-scores.png", width = 7, height = 5)
 ```
 
-
 ```{r}
 # negative binomial
 # MASS::glm.nb(true_value ~ target_type, 
@@ -903,8 +642,6 @@ ggsave("output/figures/HUB-sd-vs-mean-scores.png", width = 7, height = 5)
 #          mutate(true_value = pmax(true_value, 0)), 
 #        link = "identity")
 ```
-
-
 
 ## WIS vs. the totsl number of observed values
 probably not needed anymore, as we have similar things
@@ -971,4 +708,240 @@ ggsave("output/figures/HUB-sd-scores-vs-total-log-log.png", width = 7, height = 
 
 
 ```
+
+Test for a single example forecast to verify that rankings change
+```{r}
+# we see that rankings change even for a single forecast. So we need to check everything is still correct. 
+# take one example
+test_data <- hub_data |>
+  filter(model %in% c("MUNI-ARIMA", "epiforecasts-EpiNow2"), 
+         forecast_date == "2021-10-18", 
+         target_type == "Cases", 
+         location == "AT")
+
+test_data |>
+  score(metrics = c("interval_score")) |>
+  summarise_scores()
+
+test_data |>
+  mutate(prediction = log(prediction), 
+         true_value = log(true_value)) |>
+  score(metrics = c("interval_score")) |>
+  summarise_scores()
+## indeed everything seems to be correct, but rankings still change FOR A SINGLE FORECAST. 
+# It seems this is because the trade-off between calibration and sharpness changes? 
+# need to check in what way
+```
+
+
+## Distribution of scores
+
+```{r}
+scores |>
+  ggplot(aes(x = interval_score)) + 
+  geom_density() + 
+  facet_wrap(~ target_type + scale, scale = "free") + 
+  scale_x_continuous(labels = scale_fn)
+```
+
+## Fit a model to data
+
+Check fit of the log scale model
+```{r echo=TRUE}
+reg_log <- scores |>
+  filter(scale == "log") |>
+  glm(formula = interval_score ~ 1 + model + location + target_type + horizon, 
+      family = gaussian)
+```
+
+```{r}
+# check distribution
+performance::check_distribution(reg_log) |>
+  plot()
+
+# check normality of residuals
+check_normality(reg_log) |>
+  plot(type = "qq")
+
+# heteroskedasticity of error terms - the plot takes extremly long to run
+performance::check_heteroskedasticity(reg_log)
+# performance::check_heteroskedasticity(reg_log) |>
+#   plot()
+
+# check influence of outliers - plot also takes very long to run
+performance::check_outliers(reg_log)
+# performance::check_outliers(reg_log) |>
+#   plot()
+
+```
+
+
+
+--- 
+
+# Growth Rate stuff - Looking at growth rates directly
+
+## Scores of the growth rate across targets
+
+This uses the Hub ensemble
+```{r}
+scores_gr |> 
+  filter(model == "EuroCOVIDhub-ensemble", 
+         horizon == 2) |>
+  ggplot(aes(y = interval_score, x = target_type)) + 
+  geom_violin(aes(fill = target_type), alpha = 0.2, color = NA) + 
+  geom_boxplot(alpha = 0.5) + 
+  scale_fill_brewer(palette = "Set1", name = "Forecast target") + 
+  facet_wrap(~ scale, scale = "free") + 
+  theme_scoringutils() + 
+  theme(legend.position = "none") + 
+  scale_y_continuous(labels = scale_fn, trans = "log10") + 
+  labs(y = "Interval score", x = "Target type")
+```
+*Scoring the growth rate makes things more comparable*
+
+Mean scores: 
+```{r}
+scores_gr |> 
+  filter(model == "EuroCOVIDhub-ensemble", 
+         horizon == 2) |>
+  group_by(scale, target_type) |>
+  summarise(interval_score = mean(interval_score), 
+            .groups = "drop_last") |>
+  make_table()
+```
+
+## Scores for the growth rate across locations
+```{r}
+scores_gr |> 
+  filter(model == "EuroCOVIDhub-ensemble", 
+         horizon == 2) |>
+  group_by(target_type, location, scale) |>
+  summarise(interval_score = mean(interval_score), 
+            .groups = "drop_last") |>
+  ggplot(aes(y = interval_score, x = reorder(location, -interval_score))) + 
+  geom_bar(stat = "identity") + 
+  scale_fill_brewer(palette = "Set1", name = "Forecast target") + 
+  facet_wrap(~ target_type + scale, scale = "free") + 
+  theme_scoringutils() + 
+  theme(legend.position = "none") + 
+  scale_y_continuous(labels = scale_fn) + 
+  labs(y = "Interval score", x = "Target type")
+```
+
+## Scores for growth rate over time
+restrict to a few locations, e.g. GB, FR, ES (highest average scores there)
+
+UK: 
+```{r}
+scores_gr |> 
+  filter(model == "EuroCOVIDhub-ensemble",
+         location == "GB",
+         horizon == 2) |>
+  group_by(target_type, scale) |>
+  mutate(multiplicative_score = interval_score / min(interval_score)) |>
+  ggplot(aes(y = multiplicative_score, x = forecast_date)) + 
+  geom_line() + 
+  geom_point() + 
+  facet_grid(target_type ~ scale, scale = "free_y") + 
+  theme_scoringutils() + 
+  labs(x = "Forecast date", y = "WIS relative to smallest observed value")
+```
+
+France: Looks like a data revision
+```{r}
+scores_gr |> 
+  filter(model == "EuroCOVIDhub-ensemble",
+         location == "FR",
+         horizon == 2) |>
+  group_by(target_type, scale) |>
+  mutate(multiplicative_score = interval_score / min(interval_score)) |>
+  ggplot(aes(y = multiplicative_score, x = forecast_date)) + 
+  geom_line() + 
+  geom_point() + 
+  facet_grid(target_type ~ scale, scale = "free_y") + 
+  theme_scoringutils() + 
+  labs(x = "Forecast date", y = "WIS relative to smallest observed value")
+```
+
+Spain: 
+```{r}
+scores_gr |> 
+  filter(model == "EuroCOVIDhub-ensemble",
+         location == "ES",
+         horizon == 2) |>
+  group_by(target_type, scale) |>
+  mutate(multiplicative_score = interval_score / min(interval_score)) |>
+  ggplot(aes(y = multiplicative_score, x = forecast_date)) + 
+  geom_line() + 
+  geom_point() + 
+  facet_grid(target_type ~ scale, scale = "free_y") + 
+  theme_scoringutils() + 
+  labs(x = "Forecast date", y = "WIS relative to smallest observed value")
+```
+
+## Change of average scores for the growth rate for increasing forecast horizons
+```{r}
+scores_gr |> 
+  filter(model == "EuroCOVIDhub-ensemble") |>
+  group_by(scale, target_type, horizon) |>
+  summarise(interval_score = mean(interval_score), 
+            .groups = "drop_last") |>
+  mutate(multiplicative_score = interval_score / min(interval_score)) |>
+  ggplot(aes(y = multiplicative_score, x = horizon)) + 
+  geom_line() + 
+  geom_point() + 
+  facet_grid(target_type ~ scale) + 
+  theme_scoringutils() + 
+  labs(x = "Forecast horizon in weeks", y = "Multplicative change in interval score")
+```
+
+## Distribution of scores growth rate
+
+```{r}
+scores_gr |>
+  ggplot(aes(x = interval_score)) + 
+  geom_density() + 
+  facet_wrap(~ target_type + scale, scale = "free") + 
+  scale_x_continuous(labels = scale_fn)
+```
+
+## Fit a model to growth rate data
+
+Check fit of the log scale model
+```{r echo=TRUE}
+reg_gr <- scores_gr |>
+  filter(scale == "natural") |>
+  glm(formula = interval_score ~ 1 + model + location + target_type + horizon, 
+      family = gaussian)
+
+reg_gr_log <- scores_gr |>
+  filter(scale == "log") |>
+  glm(formula = interval_score ~ 1 + model + location + target_type + horizon, 
+      family = gaussian)
+```
+
+Check distribution
+```{r}
+# check distribution
+performance::check_distribution(reg_gr_log) |>
+  plot()
+
+# check normality of residuals
+check_normality(reg_gr_log) |>
+  plot(type = "qq")
+
+# heteroskedasticity of error terms - the plot takes extremly long to run
+performance::check_heteroskedasticity(reg_gr_log)
+# performance::check_heteroskedasticity(reg_log) |>
+#   plot()
+
+# check influence of outliers - plot also takes very long to run
+performance::check_outliers(reg_gr_log)
+# performance::check_outliers(reg_log) |>
+#   plot()
+
+```
+
+
 

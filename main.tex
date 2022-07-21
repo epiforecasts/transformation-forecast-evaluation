@@ -88,6 +88,7 @@ It is important to first apply the transformation and then score the transformed
     \label{fig:log-improper}
 \end{figure}
 
+
 Unfortunately, the log transformation cannot readily be applied when dealing with negative or zero values. In an epidemiological setting that involves count data, negative values should likely be omitted entirely. Values of zero should potentially also be removed from the analsys, as it does not make sense to interpret relative errors on zero counts. Alternatively, if one is not willing to omit them, a small quantity (such as 1) could be added to all observations before taking the logarithm. Note that predictive distribtions have to be truncated in a similar way. When dealing with count data we could extend this argument to all small values (rather than just zeros), as it is hard to reliably evaluate relative errors when dealing with small discrete values. One could therefore decide to remove forecasts for small quantities below a certain threshold from the analysis. 
 
 \subsection{Scoring multplicative errors}
@@ -149,7 +150,6 @@ Now consider a forecast on $\log y_{t+1}$. Using the fact that for small values 
 This approximation breaks down when the difference between the predicted and the actual growth rate becomes too large (albeit forecasts are still evaluated in terms of relative errors). If this is of great concern one may want to use a different transformation like dividing forecasts and observations by the last known values instead in order to score the growth rate explicitly (although this lacks the elegance of having one single transformation per time point). 
 
 Conveniently, the decomposition of the WIS into dispersion, overprediction and underprediction is preserved. The interpretation of the components has now changed in that they now (approximately) represent uncertainty, over-prediction, and under-prediction with the growth rate and so are independent of current incidence. 
-
 
 \subsection{Effects on model rankings}
 Rankings between different forecasts may be affected by applying the log transformation even when looking at a single forecast. As an example, consider two forecasters, A and B. Both issue a single 50\%-prediction interval for a target which later resolves as 1. Forecaster A issues the interval [0.5, 2], while forecaster B issues [0.9. 2.5]. On the natural scale, the score would equal the dispersion of the forecast, i.e. the length of this interval (since the observed value falls within the prediction interval). Forecaster A would receive a score of $2 - 0.5$ = 1.5, beating forecaster B who would receive a score of $2.5 - 0.9 = 1.6$. When we transform the forecast, forecaster A receives a score of $\log (\frac{2}{0.5}) = 1.39$, while forecaster B obtains a score of $\log (\frac{2.6}{0.9} = 1.06$ and now wins over forecaster A. The main difference between forecaster A and B is that forecaster A has issued a prediction interval ([0.5, 2]) that was more symmetric around the true value than the interval issued by forecaster B ([0.9. 2.6], which was more skewed). This means that in relative terms, Forecaster B was noticeably closer to the true value with the lower bound of her prediction interval, while only being slightly further away with the upper interval. This is likely to lead to a more lenient treatment of (one-sided) outlier forecasts. 
@@ -257,6 +257,8 @@ The correlation between the actual observations is 0.628 for cases and 0.631 for
     \caption{Distribution of interval scores for two week ahead forecasts of COVID-19 cases and deaths evaluated on the natural scale (left) and on the log scale (right). }
     \label{fig:HUB-average-scores}
 \end{figure}
+% Could also sort this figure according to population size?
+%Make multi panel Figure with Figure 2 and sort according to mean outcome
 
 When evaluated on the natural scale, there is  strong relationship between the mean of the weighted interval score and the total number of observed cases (correlation: 0.913) or deaths (cor: 0.849) in a location (see Figure \ref{fig:HUB-mean-scores-total-loglog} and Figure \ref{fig:HUB-mean-scores-total} in the SI). The relationship is less pronounced for scores on the log scale (cor: -0.019 for cases, -0.395 for deaths) and negative, meaning that locations with fewer observed cases or deaths tend to receive higher scores. 
 

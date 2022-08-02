@@ -28,13 +28,15 @@ vals <- expand.grid(
 
 scores <- vals |>
   mutate(scale = "natural") |>
-  eval_forecasts() |> 
+  score() |> 
+  summarise_scores(by = c("scale", "id")) |>
   rbind(
     vals |>
       mutate(true_value = log(true_value), 
              prediction = log(prediction), 
              scale = "log") |>
-      eval_forecasts()
+      score() |>
+      summarise_scores(by = c("scale", "id"))
   ) |>
   group_by(scale) |>
   mutate(score = interval_score / min(interval_score), 
@@ -50,8 +52,8 @@ p1 <- scores |>
   geom_line() + 
   labs(y = "WIS", x = "Observed value") + 
   scale_y_continuous(label = function(x) {paste(scale_factor * x)}) + 
-  facet_wrap(~ scale) + 
-  theme_minimal()
+  facet_wrap(~ scale, ncol = 1, scales = "free") + 
+  theme_scoringutils()
 
 scale_factor2 <- 3
 p2_log <- scores |>
@@ -69,10 +71,10 @@ p2_log <- scores |>
                               paste(x))
                      }, 
                      breaks = c(0.2, 1/2, 1, 2, 5)) + 
-  facet_wrap(~ scale) + 
-  theme_minimal()
+  facet_wrap(~ scale, ncol = 1, scales = "free") + 
+  theme_scoringutils()
 
-p1 / p2_log
+p1 + p2_log
 
 ggsave("output/figures/SIM-effect-log-score.png", width = 6, 
        height = 4)

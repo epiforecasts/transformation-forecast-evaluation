@@ -118,6 +118,34 @@ scores_gr <- fread(here("output", "data", "all-scores-growth-rate-european-hub.c
 scores_gr[, scale := factor(scale, levels = c("natural", "log"))]
 ```
 
+```{r}
+
+check <- hub_data |> 
+  check_forecasts()
+
+filtermodels <- check$unique_values |>
+  filter(horizon >= 4, 
+         target_type == 2,
+         true_value > 900,
+         quantile == 23, 
+         forecast_date > 16,
+         location == 32) |>
+  pull(model)
+
+scores <- scores[model %in% filtermodels]
+scores[, type_and_scale := paste0(target_type, " - ", scale)]
+scores[, type_and_scale := factor(type_and_scale, 
+                                  levels = c("Cases - natural", "Deaths - natural",
+                                             "Cases - log", "Deaths - log"))]
+
+hub_data <- hub_data[model %in% filtermodels]
+hub_data[, true_value := pmax(true_value, 0)]
+
+```
+
+
+
+
 General thoughts?
 
 - Focus on Hub-ensemble or average across all models? 
@@ -184,14 +212,26 @@ ggsave("output/figures/HUB-mean-obs-location.png", width = 9, height = 7)
 ```
 
 
-Figure that shows Variance vs. mean of the observations. Makes the point that the
+Figure 5? 
+that shows Variance vs. mean of the observations. Makes the point that the
 data looks neg. binomial. 
 ```{r}
 # plot with mean vs. variance --------------------------------------------------
-hub_data |>
-  dplyr::select(location, target_type, target_end_date, true_value) |>
-  unique() |>
-  group_by(location, target_type) |>
+plot_var_mean <- function(hub_data, log = FALSE) {
+  df <- hub_data |>
+    dplyr::select(location, target_type, target_end_date, true_value) |>
+    unique() |>
+    group_by(location, target_type)
+  
+  f <- function(x) {x + x^2}
+  
+  if (log) {
+    df <- mutate(df, true_value = log(pmax(true_value, 0) + 1))
+    
+    f <- function(x) {log(x + x^2 + 1)}
+  } 
+  
+  df |>
   summarise(mean_value = mean(true_value), 
             sd_value = sd(true_value), 
             var_value = var(true_value)) |>
@@ -200,15 +240,69 @@ hub_data |>
   facet_wrap(~ target_type, scales = "free") + 
   scale_x_continuous(trans = "log10", labels = label_fn) +
   scale_y_continuous(trans = "log10", labels = label_fn) +
-  # scale_x_continuous(labels = label_fn) +
-  # scale_y_continuous(labels = label_fn) +
   labs(y = "Variance observed value", x = "Mean observed value") + 
-  geom_function(fun = function(x) {x + x^2}, linetype = "dashed", size = 0.5) + 
+  geom_function(fun = f, linetype = "dashed", size = 0.5) + 
   theme_scoringutils() + 
   geom_smooth(alpha = 0.2, size = 0.2)
-
-ggsave("output/figures/HUB-mean-var-obs.png", width = 7, height = 2.5)
+}
   
+p1 <- plot_var_mean(hub_data)
+p2 <- plot_var_mean(hub_data, log = TRUE)
+
+
+wis_vs_total <- function(scores, summary_fct = mean, fulldata = hub_data) {
+  
+  total_values <- 
+    fulldata |> 
+    filter(!is.na(prediction)) |>
+    group_by(location, target_type, target_end_date) |>
+    summarise(true_value = unique(true_value)) |>
+    group_by(location, target_type) |>
+    summarise(total = sum(true_value))
+  
+  plot_df <- scores |> 
+    filter(model == "EuroCOVIDhub-ensemble", 
+           horizon == 2) |>
+    group_by(location, target_type, scale, type_and_scale) |>
+    summarise(wis = summary_fct(interval_score), 
+              .groups = "drop_last") |> 
+    inner_join(total_values) 
+  
+  plot_df |>
+    group_by(target_type, scale) |>
+    summarise(correlation = cor(wis, total)) |> 
+    print()
+  
+  plot_df |>
+    ggplot(aes(y = wis, x = total)) + 
+    geom_point() + 
+    facet_wrap(~ type_and_scale, scale = "free") + 
+    theme_scoringutils() + 
+    theme(legend.position = "none") + 
+    scale_x_continuous(labels = scale_fn) +
+    scale_y_continuous(labels = scale_fn) +
+    labs(y = "REPLACE", x = "Total number of observed values")
+} 
+
+# log-log versions of that plot
+
+p3 <- wis_vs_total(scores) + 
+  labs(y = "Mean WIS") + 
+  scale_x_continuous(labels = scale_fn, trans = "log10") +
+  scale_y_continuous(labels = scale_fn, trans = "log10") 
+
+p1 / p2 / p3 + 
+  plot_layout(heights = c(1, 1, 2))
+
+ggsave("output/figures/HUB-mean-scores-vs-total-log-log.png", width = 7, height = 6)
+
+# ggsave("output/figures/HUB-mean-scores-vs-total-log-log.png", width = 7, height = 4)
+
+
+
+
+  
+# ggsave("output/figures/HUB-mean-var-obs.png", width = 7, height = 2.5)
 ```
 
 
@@ -369,6 +463,38 @@ ggsave(filename = "output/figures/HUB-ranking-diffs.png",
        width = 9, height = 5)
 ```
 
+
+```{r}
+v1 <- c("a","b","c","d","e","f","g")
+v2 <- c("b","x","e","c","z","d","a")
+
+o <- 0.05
+DF <- data.frame(x = c(rep(1, length(v1)), rep(2, length(v2))),
+                 x1 = c(rep(1 + o, length(v1)), rep(2 - o, length(v2))),
+                 y = c(rev(seq_along(v1)), rev(seq_along(v2))),
+                 g = c(v1, v2))
+
+library(ggplot2)
+library(grid)
+ggplot(DF, aes(x=x, y=y, group=g, label=g)) +
+  geom_path(aes(x=x1), arrow = arrow(length = unit(0.02,"npc")), 
+            size=1, color="green") +
+  geom_text(size=10) +
+  theme_minimal() +
+  theme(axis.title = element_blank(),
+        axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        panel.grid = element_blank())
+```
+
+
+
+
+
+
+
+
+
 ## Look at pairwise comparisons
 
 ```{r}
@@ -395,7 +521,7 @@ diffs <- summarised_pairwise |>
   select(model, relative_skill, scale) |>
   pivot_wider(names_from = scale, values_from = relative_skill) |>
   mutate(model = factor(model, levels = ranking_natural), 
-         difference = natural - log)
+         difference = log - natural)
 
 plot_diffs <- diffs |>
   mutate(title = "difference") |>
@@ -450,51 +576,38 @@ ggsave("output/figures/HUB-pairwise-comparisons.png", width = 9, height = 5)
 # Correlations for ranks, scores and pairwise comparisons
 
 ```{r}
+
+# 1. observations natural vs. log --> pearson
+# 2. correlation scores natural vs. log (single forecasts) --> spearman
+
+
+# Table
 # correlation between values
-hub_data |>
+cor_data <- hub_data |>
   select(location, target_end_date, target_type, true_value) |>
   unique() |>
   mutate(log_obs = log(pmax(true_value, 0) + 1)) |>
   group_by(target_type) |>
   summarise(cor = cor(true_value, log_obs))
 
-# correlation between scores
-cor_scores <- scores |>
-  filter(horizon <=4) |>
-  select(interval_score, scale, forecast_date, model, horizon, location, target_type) |>
-  pivot_wider(names_from = scale, values_from = interval_score) |>
-  group_by(horizon, target_type) |>
-  summarise(cor = cor(natural, log), 
-            spearman = cor(natural, log))
-
-cor_scores |> 
-  mutate(`Target type` = target_type) |>
-  ggplot(aes(x = horizon, y = cor, 
-             fill = `Target type`, color = `Target type`)) + 
-  geom_histogram(stat = "identity", position = "dodge") +
-  theme_scoringutils() + 
-  coord_cartesian(ylim = c(0, 1)) +
-  labs(y = "Correlation (scores natural vs. log)", x = "Forecast horizon")
-
+# # correlation between scores
+# # not really meaningful: if we do ranks it's just going to be ranks over everything which doesn't make sense
+# # if we do individual scores than it's a bit unclear what the "correct" correlation should be
+# cor_scores <- scores |>
+#   filter(horizon <=4) |>
+#   select(interval_score, scale, forecast_date, model, horizon, location, target_type) |>
+#   pivot_wider(names_from = scale, values_from = interval_score) |>
+#   group_by(horizon, target_type) |>
+#   summarise(cor = cor(natural, log), 
+#             spearman = cor(natural, log, method = "spearman"))
 
 # Correlation between ranks when going from natural to log
 correlation_ranks <- rankings_wide |>
   filter(horizon < 5) |>
   group_by(horizon, target_type) |>
-  summarise(cor = cor(natural, log)) |>
+  summarise(cor = cor(natural, log), 
+            spearman = cor(natural, log, method = "spearman")) |>
   rename(`Target type` = target_type)
-  
-plot_cor_ranks <- correlation_ranks |>
-  ggplot(aes(x = horizon, y = cor, 
-             fill = `Target type`, color = `Target type`)) + 
-  geom_histogram(stat = "identity", position = "dodge") +
-  theme_scoringutils() + 
-  coord_cartesian(ylim = c(0, 1)) +
-  labs(y = "Correlation (rank natural vs. log)", x = "Forecast horizon")
-
-ggsave(filename = "output/figures/HUB-cor-ranks.png", width = 7, height = 4.5, 
-       plot = plot_cor_ranks)
-
 
 # Correlation between pairwise comparisons
 correlation_rel_skill <- scores |>
@@ -505,26 +618,40 @@ correlation_rel_skill <- scores |>
   select(model, horizon, target_type, relative_skill, scale) |>
   pivot_wider(values_from = relative_skill, names_from = scale) |>
   group_by(horizon, target_type) |>
-  summarise(cor = cor(natural, log)) 
-  
-plot_cor_skill <- correlation_rel_skill |>
-  rename(`Target type` = target_type) |>
-  ggplot(aes(x = horizon, y = cor, fill = `Target type`, color = `Target type` )) + 
-  # geom_line() +
-  # geom_point() +
+  summarise(cor = cor(natural, log), 
+            spearman = cor(natural, log, method = "spearman")) 
+
+p_cor_ranks <- correlation_ranks |>
+  ggplot(aes(x = horizon, y = cor, 
+             fill = `Target type`, color = `Target type`)) + 
   geom_histogram(stat = "identity", position = "dodge") +
   theme_scoringutils() + 
   coord_cartesian(ylim = c(0, 1)) +
-  labs(y = "Correlation (rel. skill natural vs. log)", x = "Forecast horizon")
+  labs(y = "Corr. ranks single forecasts", x = "Forecast horizon")
 
-ggsave(filename = "output/figures/HUB-cor-rel-skill.png", width = 7, height = 4.5, 
-       plot = plot_cor_skill)
+# p_cor_scores <- cor_scores |> 
+#   mutate(`Target type` = target_type) |>
+#   ggplot(aes(x = horizon, y = cor, 
+#              fill = `Target type`, color = `Target type`)) + 
+#   geom_histogram(stat = "identity", position = "dodge") +
+#   theme_scoringutils() + 
+#   coord_cartesian(ylim = c(0, 1)) +
+#   labs(y = "Spearman corr. scores single forecasts", x = "Forecast horizon")
+  
+p_cor_skill <- correlation_rel_skill |>
+  rename(`Target type` = target_type) |>
+  ggplot(aes(x = horizon, y = cor, fill = `Target type`, color = `Target type` )) + 
+  geom_histogram(stat = "identity", position = "dodge") +
+  theme_scoringutils() + 
+  coord_cartesian(ylim = c(0, 1)) +
+  labs(y = "Correlation rel. skill", x = "Forecast horizon")
 
-plot_cors <- plot_cor_ranks + plot_cor_skill +
-  plot_layout(guides = "collect") & 
+plot_cors <- p_cor_ranks  + p_cor_skill +
+  plot_layout(guides = "collect") +
+  plot_annotation(tag_levels = "A") &
   theme(legend.position = "bottom")
 
-ggsave(filename = "output/figures/HUB-cors-skill-rank.png", width = 7, height = 3, 
+ggsave(filename = "output/figures/HUB-cors.png", width = 7, height = 3, 
        plot = plot_cors)
 
 ```
@@ -775,65 +902,22 @@ ggsave("output/figures/HUB-sd-vs-mean-scores.png", width = 7, height = 5)
 probably not needed anymore, as we have similar things
 
 ```{r}
-wis_vs_total <- function(scores, summary_fct = mean, fulldata = hub_data) {
-  
-  total_values <- 
-    fulldata |> 
-    filter(!is.na(prediction)) |>
-    group_by(location, target_type, target_end_date) |>
-    summarise(true_value = unique(true_value)) |>
-    group_by(location, target_type) |>
-    summarise(total = sum(true_value))
-  
-  plot_df <- scores |> 
-    filter(model == "EuroCOVIDhub-ensemble", 
-           horizon == 2) |>
-    group_by(target_type, location, scale) |>
-    summarise(wis = summary_fct(interval_score), 
-              .groups = "drop_last") |> 
-    inner_join(total_values) 
-  
-  plot_df |>
-    group_by(target_type, scale) |>
-    summarise(correlation = cor(wis, total)) |> 
-    print()
-  
-  plot_df |>
-    ggplot(aes(y = wis, x = total)) + 
-    geom_point() + 
-    facet_wrap(~ target_type + scale, scale = "free") + 
-    theme_scoringutils() + 
-    theme(legend.position = "none") + 
-    scale_x_continuous(labels = scale_fn) +
-    scale_y_continuous(labels = scale_fn) +
-    labs(y = "REPLACE", x = "Total number of observed values")
-} 
-
-wis_vs_total(scores) + 
-  labs(y = "Mean WIS")
-ggsave("output/figures/HUB-mean-scores-vs-total.png", width = 7, height = 5)
-
-wis_vs_total(scores, summary_fct = stats::sd) + 
-  labs(y = "Sd WIS")
-ggsave("output/figures/HUB-sd-scores-vs-total.png", width = 7, height = 5)
 
 
-# log-log versions of that plot
-wis_vs_total(scores) + 
-  labs(y = "Mean WIS") + 
-  scale_x_continuous(labels = scale_fn, trans = "log10") +
-  scale_y_continuous(labels = scale_fn, trans = "log10") 
-ggsave("output/figures/HUB-mean-scores-vs-total-log-log.png", width = 7, height = 5)
-
-wis_vs_total(scores, summary_fct = stats::sd) + 
-  labs(y = "Sd WIS") + 
-  scale_x_continuous(labels = scale_fn, trans = "log10") +
-  scale_y_continuous(labels = scale_fn, trans = "log10") 
-ggsave("output/figures/HUB-sd-scores-vs-total-log-log.png", width = 7, height = 5)
-
-# correlation
+# wis_vs_total(scores) + 
+#   labs(y = "Mean WIS")
+# ggsave("output/figures/HUB-mean-scores-vs-total.png", width = 7, height = 5)
+# 
+# wis_vs_total(scores, summary_fct = stats::sd) + 
+#   labs(y = "Sd WIS")
+# ggsave("output/figures/HUB-sd-scores-vs-total.png", width = 7, height = 5)
 
 
+# wis_vs_total(scores, summary_fct = stats::sd) + 
+#   labs(y = "Sd WIS") + 
+#   scale_x_continuous(labels = scale_fn, trans = "log10") +
+#   scale_y_continuous(labels = scale_fn, trans = "log10") 
+# ggsave("output/figures/HUB-sd-scores-vs-total-log-log.png", width = 7, height = 5)
 
 ```
 

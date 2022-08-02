@@ -181,22 +181,10 @@ If one finds that average scores are dominated by forecasts for small quantities
 
 \section{Empirical example: the European Forecast Hub}
 
-As an empirical example for evaluating forecasts on the natural and on the log scale we use forecasts from the European Forecast Hub \citep{europeancovid-19forecasthubEuropeanCovid19Forecast2021, sherrattPredictivePerformanceMultimodel2022}. Every week the European Forecast Hub collates and aggregates forecasts for different COVID-19 related targets from teams around the world. Forecasts are made one to four weeks ahead into the future and follow a quantile-based format with a set of 22 quantiles plus the median ($0.01, 0.025, 0.05, ..., 0.5, ... 0.95, 0.975, 0.99$). The forecasts for the purpose of this illustrations are two-week-ahead forecasts made between XXX and XXX for reported cases and deaths from COVID-19 in XXX countries. Where not otherwise stated, we report results for a two-week-ahead forecast horizon. 
-
-Pooled across all time points and locations, the mean number of cases (deaths) observed was 22811 (368) with an overall standard deviation of 47135 (831) (see Table \ref{tab:HUB-summary}). The average number of observed cases and deaths varies considerably by location (see Figure \ref{fig:HUB-mean-locations}A and B). Observations are overdispersed, meaning that for a given location, the variance in observations exceeds the mean of all observed values (see Figure \ref{fig:HUB-variance-mean}). 
-%maybe make a line of best fit of the form variance = alpha * mean^2 + beta * mean
-
-Pooled across all time points and locations, the mean WIS on the natural scale for cases (deaths) was 8855 (59.3) with an overall standard deviation of 51274 (156) (see Table \ref{tab:HUB-summary}). On the log scale, scores were much closer to each other (see Figure \ref{fig:HUB-average-scores}), with a mean WIS for cases (deaths) of 0.507 (0.362) with an overall standard deviation of 0.745 (0.407). 
-
-Variation of scores across targets (see Figure XX) and locations (see Figure \ref{fig:HUB-mean-locations}A, B) is much larger on the natural than on the log scale, where scores are more evenly distributed. On the natural scale, average scores per location correlate strongly (XX) with the average number of observed cases or deaths (See Figure XX). On the log scale, this correlation is much weaker and slightly negative. Forecasts across different locations receive more similar scores, with a tendency for scores to be slightly higher in locations with few observed cases and deaths (see Figures XX and \ref{fig:HUB-mean-locations}. 
-%This is in line with the observation that the association between variance is smaller than mu^2 + mu, meaning that we would expect this. 
-For individual forecasts, rankings between models are mostly preserved (correlation: X for cases, Y for deaths), with differences increasing across forecast horizons (see Figure \ref{fig:HUB-cors-scores}). 
-
-The correlation between scores on the log and natural scale for different locations is XX for cases and XX for deaths. 
-The correlation between the actual observations is 0.628 for cases and 0.631 for deaths. IS THAT HELPFUL? 
+As an empirical example for evaluating forecasts on the natural and on the log scale we use forecasts from the European Forecast Hub \citep{europeancovid-19forecasthubEuropeanCovid19Forecast2021, sherrattPredictivePerformanceMultimodel2022}. Every week the European Forecast Hub collates and aggregates forecasts for different COVID-19 related targets from teams around the world. Forecasts are made one to four weeks ahead into the future and follow a quantile-based format with a set of 22 quantiles plus the median ($0.01, 0.025, 0.05, ..., 0.5, ... 0.95, 0.975, 0.99$). The forecasts for the purpose of this illustrations are two-week-ahead forecasts made between XXX and XXX for reported cases and deaths from COVID-19 in XXX countries. We filtered all forecasts submitted to the Hub to only include models which have submitted forecasts for both deaths and cases for 4 horizons in 32 locations on at least 16 forecast dates. Where not otherwise stated, we report results for a two-week-ahead forecast horizon. 
 
 
-\begin{table}[h!]]
+\begin{table}[h!]
     \centering
     
     \begin{tabular}{lllcc}
@@ -206,20 +194,40 @@ The correlation between the actual observations is 0.628 for cases and 0.631 for
     Cases & Observations & mean & 20308 & 8.39\\
     Cases & Observations & sd & 43405 & 2.11\\
     Cases & Observations & var & 1884002308 & 4.46\\
+    \addlinespace
     Deaths & Observations & mean & 259 & 3.79\\
     Deaths & Observations & sd & 532 & 2.11\\
-    \addlinespace
     Deaths & Observations & var & 283492 & 4.46\\
+    \addlinespace
+    \hline
+    \addlinespace
     Cases & WIS & mean & 4544 & 0.28\\
     Cases & WIS & sd & 17585 & 0.49\\
+    \addlinespace
     Deaths & WIS & mean & 28 & 0.22\\
     Deaths & WIS & sd & 67 & 0.26\\
     \bottomrule
     \end{tabular}
     
-    \caption{CAPTION}
+    \caption{Table with summary statistics for observations and scores for forecasts from the ECDC data set.}
     \label{tab:HUB-summary}
 \end{table}
+
+Pooled across all time points and locations, the mean number of cases (deaths) observed was 22811 (368) with an overall standard deviation of 47135 (831) (see Table \ref{tab:HUB-summary}). The average number of observed cases and deaths varies considerably by location (see Figure \ref{fig:HUB-mean-locations}A and B). Observations are overdispersed, meaning that for a given location, the variance in observations exceeds the mean of all observed values (see Figure \ref{fig:HUB-variance-mean}). 
+%maybe make a line of best fit of the form variance = alpha * mean^2 + beta * mean
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.9\textwidth]{output/figures/HUB-average-scores.png}
+    \caption{Distribution of interval scores for two week ahead forecasts of COVID-19 cases and deaths evaluated on the natural scale (left) and on the log scale (right). }
+    \label{fig:HUB-average-scores}
+\end{figure}
+
+Pooled across all time points and locations, the mean WIS on the natural scale for cases (deaths) was 8855 (59.3) with an overall standard deviation of 51274 (156) (see Table \ref{tab:HUB-summary}). On the log scale, scores were much closer to each other (see Figure \ref{fig:HUB-average-scores}), with a mean WIS for cases (deaths) of 0.507 (0.362) with an overall standard deviation of 0.745 (0.407). 
+
+Variation of scores across targets (see Figure \ref{fig:HUBXXX} and locations (see Figure \ref{fig:HUB-mean-locations}A, B) is much larger on the natural than on the log scale, where scores are more evenly distributed. On the natural scale, average scores per location correlate strongly (XX) with the average number of observed cases or deaths (See Figure XX). On the log scale, this correlation is much weaker and slightly negative. Forecasts across different locations receive more similar scores, with a tendency for scores to be slightly higher in locations with few observed cases and deaths (see Figures XX and \ref{fig:HUB-mean-locations}. 
+%This is in line with the observation that the association between variance is smaller than mu^2 + mu, meaning that we would expect this. 
+For individual forecasts, rankings between models are mostly preserved (correlation: X for cases, Y for deaths), with differences increasing across forecast horizons (see Figure \ref{fig:HUB-cors}). 
 
 \begin{figure}[h!]
     \centering
@@ -237,28 +245,10 @@ The correlation between the actual observations is 0.628 for cases and 0.631 for
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.9\textwidth]{output/figures/HUB-cors-skill-rank.png}
-    \caption{Correlation between scores on the natural and on the log scale. A: Correlation between relative ranks (the rank in terms of WIS divided by the number of models) for individual forecasts, separated by forecast horizon. B: Correlation between relative skill values achieved by models across locations and time points, separated by forecast horizon.}
-    \label{fig:HUB-cors-scores}
+    \includegraphics[width=0.9\textwidth]{output/figures/HUB-cors.png}
+    \caption{Correlation between scores on the natural and on the log scale. A: Correlation between relative ranks (the rank in terms of WIS divided by the number of models) for individual forecasts, separated by forecast horizon. B: Correlation between relative skill values achieved by models across locations and time points, separated by forecast horizon. SHOULD THIS BE SPEARMAN?}
+    \label{fig:HUB-cors}
 \end{figure}
-
-
-
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.9\textwidth]{output/figures/HUB-ranking-diffs.png}
-    \caption{Distribution of rankings of the different Hub models. Rankings are computed as relative rankings, i.e. the ranking divided by the total number of models available for a given forecast target.}
-    \label{fig:HUB-rankings}
-\end{figure}
-
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.9\textwidth]{output/figures/HUB-average-scores.png}
-    \caption{Distribution of interval scores for two week ahead forecasts of COVID-19 cases and deaths evaluated on the natural scale (left) and on the log scale (right). }
-    \label{fig:HUB-average-scores}
-\end{figure}
-% Could also sort this figure according to population size?
-%Make multi panel Figure with Figure 2 and sort according to mean outcome
 
 When evaluated on the natural scale, there is  strong relationship between the mean of the weighted interval score and the total number of observed cases (correlation: 0.913) or deaths (cor: 0.849) in a location (see Figure \ref{fig:HUB-mean-scores-total-loglog} and Figure \ref{fig:HUB-mean-scores-total} in the SI). The relationship is less pronounced for scores on the log scale (cor: -0.019 for cases, -0.395 for deaths) and negative, meaning that locations with fewer observed cases or deaths tend to receive higher scores. 
 
@@ -269,7 +259,7 @@ When evaluated on the natural scale, there is  strong relationship between the m
     \label{fig:HUB-mean-scores-total-loglog}
 \end{figure}
 
-Both on the natural scale as well as on the log scale, scores increase considerably with increasing forecast horizon (see Figure \ref{fig:HUB-scores-horizon}). The increase is more pronounced for cases than for deaths and arguably represents an increase in the relative difficulty to forecast values further into the future. A similar increase both on the natural and the log scale indicates that we are able to observe the increase in difficulty regardless of how we evaluate the scores. 
+Both on the natural scale as well as on the log scale, scores increase considerably with increasing forecast horizon (see Figure \ref{fig:HUB-scores-horizon}). The increase is more pronounced for cases than for deaths and arguably represents an increase in the relative difficulty to forecast values further into the future. A similar increase both on the natural and the log scale suggests that we are able to observe the increase in difficulty regardless of how we evaluate the scores. 
 
 \begin{figure}[h!]
     \centering

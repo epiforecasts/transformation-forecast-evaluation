@@ -182,27 +182,13 @@ As an empirical example for evaluating forecasts on the natural and on the log s
 
 In addition to the WIS we use pairwise comparisons (CITATION Kramer) to evaluate models against each other. In a first step, score ratios are computed for all pairs of models by taking the set of overlapping forecasts between the two models and dividing the score of one model over the score achieved by the other model. The relative skill for a given model is then obtained by taking the geometric mean of all score ratios which involve that model. Low values are better, and the average model receives a relative skill score of 1. 
 
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.9\textwidth]{output/figures/HUB-mean-var-obs.png}
-    \caption{Observed mean against observed variance of observations in different locations across time. The dashed line marks what would be expecetd from a negative binomially distributed variable with variance of the observed value equal to the mean + the square of mean observed value. }
-    \label{fig:HUB-variance-mean}
-\end{figure}
-
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.9\textwidth]{output/figures/HUB-average-scores.png}
-    \caption{Distribution of interval scores for two week ahead forecasts of COVID-19 cases and deaths evaluated on the natural scale (left) and on the log scale (right). }
-    \label{fig:HUB-average-scores}
-\end{figure}
-
 
 SECTION STRUCUTRE / IMPORTANT THINGS
 \begin{itemize}
 \item X variation gets smaller / more even
 \item X relationship with country size changes
 \item X inndividual rankings stay similar
-\item relative skill scores change a lot
+\item X relative skill scores change a lot
 \item deep dive into what happens for individual models
 \item scores increase across forecast horizons
 \end{itemize}
@@ -210,11 +196,26 @@ SECTION STRUCUTRE / IMPORTANT THINGS
 Maybe look at correlation between bias and score?
 Correlation between relative WIS contributions.?
 
-\paragraph{Mean / sd of cases and WIS values}
-Pooled across all time points and locations, the mean number of cases (deaths) observed was 22811 (368) with an overall standard deviation of 47135 (831) (see Table \ref{tab:HUB-summary}). The average number of observed cases and deaths varies considerably by location (see Figure \ref{fig:HUB-mean-locations}A and B). Observations were overdispersed, meaning that for a given location, the variance in observations exceeds the mean of all observed values (see Figure \ref{fig:HUB-variance-mean}). 
-%Could fit a model var = alpha * x2 + beta *x
+\paragraph{Variation of scores gets smaller}
+The average number of observed cases and deaths varies considerably by location and target type (see Figure \ref{fig:HUB-mean-locations}A and B). On the natural scale, scores also vary considerably across targets (see Fig \ref{fig:HUB-mean-locations}D) and locations (see Fig \ref{fig:HUB-mean-locations}C). On the log scale, scores are more evenly distributed between targets (see Fig \ref{fig:HUB-mean-locations}D) and locations (see Fig \ref{fig:HUB-mean-locations}. 
 
-On the natural scale, scores vary considerably across targets (see Fig \ref{}) and locations (see Fig \ref{}) and correlate strongly (XX) with the average number of observed cases / deaths in a given country (see Fig \ref{fig:HUB-mean-locations}A, B). On the log scale, scores are more evenly distributed between targets (see Fig \ref{}) and locations (see Fig \ref{fig:HUB-mean-locations}. The correlation between average WIS and the mean number of observations in a country is much weaker and tends to be negative. Locations therefore tend to have a more equal influence on avearage scores, with smaller countries potentially being slightly overrepresented. 
+Both on the natural scale as well as on the log scale, scores increase considerably with increasing forecast horizon (see Figure \ref{fig:HUB-scores-horizon}). The increase is more pronounced for cases than for deaths and arguably represents an increase in the relative difficulty to forecast values further into the future. A similar increase both on the natural and the log scale suggests that we are able to observe the increase in difficulty regardless of how we evaluate the scores. 
+
+\paragraph{Correlation WIS - obs, location relationship}
+On the natural scale, scores correlate strongly (XX) with the average number of observed cases / deaths in a given country (see Fig \ref{fig:HUB-mean-locations}A, B). The correlation between average WIS and the mean number of observations in a country is much weaker and tends to be negative. Locations therefore tend to have a more equal influence on avearage scores, with smaller countries potentially being slightly overrepresented. 
+
+For individual forecasts, rankings between models for single forecasts are mostly preserved (correlation: X for cases, Y for deaths), with differences increasing across forecast horizons (see Figure \ref{fig:HUB-cors}). When evaluating performance across different forecasts and forecast targets, relative skill scores of the models change considerably. At least for cases, the effect is stronger with increasing forecast horizon.
+
+For relative skill scores, however, rankings do change a lot. The correlation between skill scores for two week ahead forecasts on the log and natural scale is XX. The correlation is stronger for deaths than for cases and tends to be lower for longer horizons. This might be because outliers are more likely for case forecasts than for death forecasts and also are more likely with increasing forecast horizon. 
+
+\paragraph{Deep dive}
+Differences are likely driven by
+- on average, under-prediction plays a larger role (in relative terms), at least for cases. 
+- confidence intervals that go very low can produce artifacts --> baseline plot, not shown. 
+- natural scale punishes missing the peak very harshly. Log scale also punishes when you miss a new upswing. Arguably this is very good and potentially even closer to what we want. 
+
+% Observations were overdispersed, meaning that for a given location, the variance in observations exceeds the mean of all observed values (see Figure \ref{fig:HUB-variance-mean}). 
+%Could fit a model var = alpha * x2 + beta *x
 %This is in line with the observation that the association between variance is smaller than mu^2 + mu, meaning that we would expect this. 
 
  % Pooled across all time points and locations, the mean WIS on the natural scale for cases (deaths) was 8855 (59.3) with an overall standard deviation of 51274 (156) (see Table \ref{tab:HUB-summary}). On the log scale, scores were much closer to each other (see Figure \ref{fig:HUB-average-scores}), with a mean WIS for cases (deaths) of 0.507 (0.362) with an overall standard deviation of 0.745 (0.407). 
@@ -224,37 +225,17 @@ On the natural scale, scores vary considerably across targets (see Fig \ref{}) a
 \begin{figure}[h!]
     \centering
     \includegraphics[width=0.9\textwidth]{output/figures/HUB-mean-obs-location.png}
-    \caption{Scores and average observed values across 1ocations. A, B: Mean of observed cases and deaths across all time points for different locations. C, D: XXX WIS for forecasts made by the Hub ensemble. D, E: Average WIS for log-transformed forecasts. }
+    \caption{Scores and average observed values across 1ocations. A, Mean of observed cases and deaths across all time points for different locations. B: XXX WIS for forecasts made by the Hub ensemble. C: Distribution of interval scores for two week ahead forecasts of COVID-19 cases and deaths evaluated on the natural scale (left) and on the log scale (right).}
     \label{fig:HUB-mean-locations}
 \end{figure}
 
-\paragraph{individual rankings}
-For individual forecasts, rankings between models for single forecasts are mostly preserved (correlation: X for cases, Y for deaths), with differences increasing across forecast horizons (see Figure \ref{fig:HUB-cors}). When evaluating performance across different forecasts and forecast targets, relative skill scores of the models change considerably. At least for cases, the effect is stronger with increasing forecast horizon. 
-
 
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.9\textwidth]{output/figures/HUB-cors.png}
+    \includegraphics[width=0.9\textwidth]{output/figures/HUB-correlations.png}
     \caption{Correlation between scores on the natural and on the log scale. A: Correlation between relative ranks (the rank in terms of WIS divided by the number of models) for individual forecasts, separated by forecast horizon. B: Correlation between relative skill values achieved by models across locations and time points, separated by forecast horizon. SHOULD THIS BE SPEARMAN?}
     \label{fig:HUB-cors}
-\end{figure}
-
-
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.9\textwidth]{output/figures/HUB-mean-scores-vs-total-log-log.png}
-    \caption{My current thinking is that the top row is helpful, as it explalins what the mean / var relationship is which is relevant for how much weight small countries get. I think the 2nd row is just completely useless. The 3rd and 4th row may be helpful. In some sense it is duplicated information from above, but it gives some nice intuiton for the correlations. I could alternatively also turn it into a correlation plot and add it to the other one. }
-    \label{fig:HUB-mean-scores-total-loglog}
-\end{figure}
-
-Both on the natural scale as well as on the log scale, scores increase considerably with increasing forecast horizon (see Figure \ref{fig:HUB-scores-horizon}). The increase is more pronounced for cases than for deaths and arguably represents an increase in the relative difficulty to forecast values further into the future. A similar increase both on the natural and the log scale suggests that we are able to observe the increase in difficulty regardless of how we evaluate the scores. 
-
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.9\textwidth]{output/figures/HUB-scores-over-horizon.png}
-    \caption{Weighted interval scores across forecast horizons}
-    \label{fig:HUB-scores-horizon}
 \end{figure}
 
 % \paragraph{Rankings}
@@ -265,38 +246,15 @@ Both on the natural scale as well as on the log scale, scores increase considera
 \begin{figure}[h!]
     \centering
     \includegraphics[width=0.9\textwidth]{output/figures/HUB-pairwise-comparisons.png}
-    \caption{Changes in relative skill and the distribution of scores. MAYBE THIS SHOULD ONLY BE CASES?}
+    \caption{Changes in relative skill and the distribution of scores.Based on case forecasts only.}
     \label{fig:HUB-pairwise}
 \end{figure}
 
-% Correlation between pairwise comparisons is 0.4414717. 
-
-
-
-
-
-
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.9\textwidth]{output/figures/HUB-model-ICM.png}
+    \includegraphics[width=0.9\textwidth]{output/figures/HUB-model-comparison.png}
     \caption{Top: 2-week-ahead predictions. Bottom: scores }
-    \label{fig:HUB-model-ICM}
-\end{figure}
-
-
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.9\textwidth]{output/figures/HUB-model-epiBATS.png}
-    \caption{Top: 2-week-ahead predictions. Bottom: scores }
-    \label{fig:HUB-model-epiBATS}
-\end{figure}
-
-
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.9\textwidth]{output/figures/HUB-model-BSLCoV.png}
-    \caption{Top: 2-week-ahead predictions. Bottom: scores }
-    \label{fig:HUB-model-BSLCoV}
+    \label{fig:HUB-model-comparison-ensemble}
 \end{figure}
 
 
@@ -372,6 +330,15 @@ Whether or not a log transformation is apprpriate depends on whether one believe
     \caption{Table with summary statistics for observations and scores for forecasts from the ECDC data set.}
     \label{tab:HUB-summary}
 \end{table}
+
+
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.9\textwidth]{output/figures/HUB-mean-scores-vs-total-log-log.png}
+    \caption{My current thinking is that the top row is helpful, as it explalins what the mean / var relationship is which is relevant for how much weight small countries get. I think the 2nd row is just completely useless. The 3rd and 4th row may be helpful. In some sense it is duplicated information from above, but it gives some nice intuiton for the correlations. I could alternatively also turn it into a correlation plot and add it to the other one. }
+    \label{fig:HUB-mean-scores-total-loglog}
+\end{figure}
 
 
 \subsection{Additional information on the WIS} \label{wis}

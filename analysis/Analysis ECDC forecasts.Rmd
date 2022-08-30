@@ -743,10 +743,6 @@ ggsave(filename = "output/figures/HUB-cors.png", width = 7, height = 3,
 ## Figure 7 - Example comparisons of forecasts on the log and the natural scale
 
 ```{r}
-# "CovidMetrics-epiBATS" only has forecasts in DE
-# "ICM-agentModel" only in Poland
-# "UVA is everywhere
-
 plot_pred_score <- function(hub_data, scores, model,
                             horizon = 2, type = "Cases", 
                             remove_x_text = TRUE) {
@@ -815,25 +811,18 @@ plot_pred_score <- function(hub_data, scores, model,
 }
 
 
-# ICM <- plot_pred_score(hub_data, scores, "ICM-agentModel")
-# epiBATS <- plot_pred_score(hub_data, scores, "CovidMetrics-epiBATS")
-# BSLCoV <- plot_pred_score(hub_data, scores, "UB-BSLCoV")
-# ggsave(filename = "output/figures/HUB-model-ICM.png", width = 9, height = 5, plot = ICM)
-# ggsave(filename = "output/figures/HUB-model-epiBATS.png", width = 9, height = 5, plot = epiBATS)
-
-
-
-ensemble_cases <- plot_pred_score(hub_data |> filter(location == "DE"), 
-                                  scores, "EuroCOVIDhub-ensemble", 
+put_plot_together <- function(modelname = "EuroCOVIDhub-ensemble", 
+                              locationname = "DE") {
+  
+  plot_cases <- plot_pred_score(hub_data |> filter(location == locationname), 
+                                  scores, modelname, 
                                   remove_x_text = TRUE, 
                                   type = "Cases")
-
-ensemble_deaths <- plot_pred_score(hub_data |> filter(location == "DE"), 
-                                   scores, "EuroCOVIDhub-ensemble", 
-                                   type = "Deaths")
-
-put_plot_together <- function(plot_cases, 
-                              plot_deaths) {
+  
+  plot_deaths <- plot_pred_score(hub_data |> filter(location == locationname), 
+                                     scores, modelname, 
+                                     type = "Deaths")
+  
   layout <- "
 AE
 BF
@@ -849,31 +838,15 @@ DH"
     theme(legend.position = "bottom")
 }
 
-put_plot_together(ensemble_cases, ensemble_deaths)
+put_plot_together("EuroCOVIDhub-ensemble")
 ggsave(filename = "output/figures/HUB-model-comparison-ensemble.png", width = 9, height = 7)
 
+put_plot_together("epiforecasts-EpiNow2")
+ggsave(filename = "output/figures/HUB-model-comparison-epinow.png", width = 9, height = 7)
 
+put_plot_together("EuroCOVIDhub-baseline", locationname = "DE")
+ggsave(filename = "output/figures/HUB-model-comparison-baseline.png", width = 9, height = 7)
 
-ensemble_cases <- plot_pred_score(hub_data |> filter(location == "DE"), 
-                                  scores, "epiforecasts-EpiNow2", 
-                                  remove_x_text = TRUE, 
-                                  type = "Cases")
-
-ensemble_deaths <- plot_pred_score(hub_data |> filter(location == "DE"), 
-                                   scores, "EuroCOVIDhub-baseline", 
-                                   type = "Deaths")
-
-
-
-# baseline <- plot_pred_score(hub_data |> filter(location == "DE"), scores, "EuroCOVIDhub-baseline") 
-# epinow <- plot_pred_score(hub_data |> filter(location == "DE"), scores, "epiforecasts-EpiNow2") 
-# 
-# ensemble / epinow +
-#   plot_layout(guides = "collect", 
-#               heights = c(1, 1, 2)) +
-#   theme(legend.position = "bottom")
-# 
-# ggsave(filename = "output/figures/HUB-model-comparison.png", width = 9, height = 7)
 
 ```
 

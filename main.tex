@@ -192,7 +192,7 @@ In addition to the WIS we use pairwise comparisons (CITATION Kramer) to evaluate
 % \end{itemize}
 % 
 % Maybe look at correlation between bias and score?
-% Correlation between relative WIS contributions.?
+% Correlation between relative WIS contributions on the log vs. the natural scale.?
 
 \begin{figure}[h!]
     \centering
@@ -226,7 +226,7 @@ On the natural scale, scores correlate strongly (XX) with the average number of 
 For individual forecasts, rankings between models for single forecasts are mostly preserved (average rank correlation for single forecasts: X for cases, Y for deaths), with differences increasing across forecast horizons (see Figure \ref{fig:HUB-cors}). When evaluating performance across different forecasts and forecast targets, relative skill scores of the models change considerably. The change is stronger for cases than for deaths (Figure \ref{fig:HUB-cors}XX) and tends to increase with increasing forecast horizon. 
 
 When comparing examples of forecasts on the natural scale with log-transformed ones (see Figures XX, XX, XX) a few interesting patterns emerge. Missing the peak, i.e. predicting increasing numbers while actual observations are already falling, tends to contribute a lot to overall scores on the log scale (see forecasts in May in Figure XXA, B). On the log scale, these have less of an influence, as errors are smaller in relative terms (see panels C and D). We hypothesise that the larger divergence in scores for cases (compared to scores for deaths) displayed in Figure \ref{fig:HUB-cors}C is related to the fact that outlier forecasts missing the peak are more common for cases than for deaths. 
-Conversely, failure to predict an upswing while numbers are still low, is not severely punished on the natural scale (see forecasts in July in Figure XX A, B), as overall absolute errors are low. On the log scale, missing lower inflection points tends to lead to more severe penalties (see panels C and D). One can also observe that on the natural scale, scores tend to track the overall level of the target quantity (compare for example forecasts for March-July with forecasts for September-October in Figure XXE, F). On the log scale, scores increase whenever forecasts are far away from the truth in relative terms, regardless of the overall level of observations. Furthermore, including very low numbers in the confidence intervals may lead to very high scores on the log-scale. This may be an issue especially when forecasting small quantities. Figure XXX shows forecasts and scores for the baseline model, which had zero included in its 50 percent intervals for the forecasts in XX to XX, leading to excessive dispersion values on the log scale. Notwithstanding the general concern, one can argue that in the specific example including zero in the prediction intervals was unreasonable and rightly penalised given that case numbers were over 1000. 
+Conversely, failure to predict an upswing while numbers are still low, is not severely punished on the natural scale (see forecasts in July in Figure XX A, B), as overall absolute errors are low. On the log scale, missing lower inflection points tends to lead to more severe penalties (see panels C and D). One can also observe that on the natural scale, scores tend to track the overall level of the target quantity (compare for example forecasts for March-July with forecasts for September-October in Figure XXE, F). On the log scale, scores increase whenever forecasts are far away from the truth in relative terms, regardless of the overall level of observations. Furthermore, including very low numbers in the confidence intervals may lead to very high scores on the log-scale. This may be an issue especially when forecasting small quantities. Figure \ref{fig:HUB-model-comparison-baseline} shows forecasts and scores for the baseline model, which had zero included in its 50 percent intervals for the forecasts in XX to XX, leading to excessive dispersion values on the log scale. Notwithstanding the general concern, one can argue that in the specific example (at least for cases) including zero in the prediction intervals was unreasonable and rightly penalised given that case numbers were in the thousands. 
 
 \begin{figure}[h!]
     \centering
@@ -275,9 +275,6 @@ Whether or not a log transformation is apprpriate depends on whether one believe
 % - WHAT KINDS OF DATA CAN I CONDITION ON? 
 % - WOULD DIVIDING A FORECAST BY ITS RESOLUTION WORK? 
 % - CAN I SCORE THE TRAJECTORY / WEEK-TO-WEEK GROWTH RATE BY DIVIDING the 4 week ahead forecast by the three week ahead forecast? 
-
-
-
 
  %COULD ALSO MAKE A NICE PLOT ABOUT OUTLIERS, where we look at the effect of outliers. but maybe that is already included in the plot in Figure 1. 
 % could make an analysis re outliers: how do scores change if we remove the 1 or 2 worst forecasts? The one or two best forecasts?
@@ -364,28 +361,7 @@ where $X$ and $X'$ are independent realisations from the predictive distribution
 
 
 
-
-\subsection{Scoring the growth rate directly}
-By dividing every observed value and every forecast by the last observed value prior to evaluation, we replace forecasting $y_{t+1}$ with forecasting  $y_{t+1} / y_t = 1 + g_{t, t+1}$. Just as we were previously penalised an additive error with respect the absolute value, we are now penalising an absolute error with respect to the growth rate. 
-
-We can illustrate what's happening by thinking of an analogous point prediction $\hat{g_{t, t+1}}$ for the growth rate. We could then write
-\begin{equation}
-    1 + g_{t, t+1} = 1 + \hat{g}_{t, t+1} + \varepsilon^*_{t+1}. 
-\end{equation}
-%
-The WIS and CRPS would evaluate the forecast based on the error $\varepsilon^*_{t+1}$. This translates to an absolute error on the actual forecast target that is multiplicatively connected to the last observed value: 
-\begin{align}
-    y_{t+1} &= (1 + \hat{g}_{t, t+1} + \varepsilon^*_{t+1}) \cdot y_t \\
-            &= (1 + \hat{g}_{t, t+1}) \cdot y_t + \varepsilon^*_{t+1} \cdot y_t \\
-            &= \hat{y}_{t+1} + \varepsilon^*_{t+1} \cdot y_t.
-\end{align}
-
-One disadvantage of this is that we can't really do anything when an observation is zero. 
-%is this helpful?%
-%Maybe add some math on how we actually transform the distribution. E.g. divide every quantile or sample by the last observed value, divide the distribution?%
-
-
-\subsection{Changes in the WIS for forecasts on the log scale} \label{wis-log-derivation}
+\subsection{PROBABLY DELETE? Changes in the WIS for forecasts on the log scale} \label{wis-log-derivation}
 
 This connection with the underlying epidemic growth rate is an attractive property in and of itself as it is the conceptual target many forecasters and forecast consumers make use of. 
 
@@ -443,24 +419,23 @@ The left-hand side of equation \ref{eqn:is-log} was left unchanged. From the rig
 
 \subsection{Additional figures}
 
-
-
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.99\textwidth]{output/figures/HUB-model-comparison-baseline.png}
+    \caption{
+    Forecasts and scores for two-week-ahead predictions from the EuroCOVIDhub-ensemble made in Germany. A, E: 50\% and 90\% prediction intervals and observed values for cases and deaths on the natural scale. B, F: Corresponding scores. C, G: Forecasts and observations on the log scale. D, H: Corresponding scores. 
+    }
+    \label{fig:HUB-model-comparison-baseline}
+\end{figure}
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.99\textwidth]{output/placeholder-image.png}
-    \caption{Placeholder}
-    \label{fig:placeholder}
+    \includegraphics[width=0.99\textwidth]{output/figures/HUB-model-comparison-epinow.png}
+    \caption{
+    Forecasts and scores for two-week-ahead predictions from the EuroCOVIDhub-ensemble made in Germany. A, E: 50\% and 90\% prediction intervals and observed values for cases and deaths on the natural scale. B, F: Corresponding scores. C, G: Forecasts and observations on the log scale. D, H: Corresponding scores. 
+    }
+    \label{fig:HUB-model-comparison-epinow}
 \end{figure}
-
-
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.99\textwidth]{output/figures/HUB-mean-scores-vs-total.png}
-    \caption{Plot with Weighted interval scores against the mean number of observed cases or deaths.}
-    \label{fig:HUB-mean-scores-total}
-\end{figure}
-
 
 \clearpage
 \bibliography{log-or-not.bib}
@@ -550,20 +525,6 @@ The left-hand side of equation \ref{eqn:is-log} was left unchanged. From the rig
 %    \item Discuss this in light of Johannes' analysis of how the decomposition of WIS values differs if the data are skewed
 %    \item compare this to the PIT-value-like relative bias scores we used for the German / Polish paper, which capture a relative tendency to over- or under-predict, rather than absolute penalties. 
 %\end{itemize}
-
-
-%\section{Modelling scores}
-%\paragraph{Motivation} Alternative is to use summary measures or pairwise comparison, which becomes cumbersome for many dimensions. 
-
-%\paragraph{caveats, practical limitations}
-%\begin{itemize}
-%    \item What kind of transformations can we do? Propose random effect models
-%    \item is there anything we can't do? 
-%    \item How does logging change the error distribution? On the natural scale, you have huge outliers. What's the appropriate error distribution to use? confidence intervals. Maybe we can only say something about the effects
-%\end{itemize}
-
-
-%Also: what, empirically is the distribution of errors? 
 
 
  % Pooled across all time points and locations, the mean WIS on the natural scale for cases (deaths) was 8855 (59.3) with an overall standard deviation of 51274 (156) (see Table \ref{tab:HUB-summary}). On the log scale, scores were much closer to each other (see Figure \ref{fig:HUB-average-scores}), with a mean WIS for cases (deaths) of 0.507 (0.362) with an overall standard deviation of 0.745 (0.407). 

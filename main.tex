@@ -83,7 +83,7 @@ It is important to first apply the transformation and then score the transformed
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.9\textwidth]{output/figures/example-log-first.png}
+    \includegraphics[width=0.99\textwidth]{output/figures/example-log-first.png}
     \caption{Scores for different forecasts evaluated the WIS and the log WIS. We simulated 1000 observations $Y_i = {\rm e}^{x_i}$, with $x_i \text{iid} \sim \mathcal{N}(0, 1)$. We then simulated 20 forecasters who would issue a predictive distribution $F = {\rm e}^{x_i}$, with $x \sim \mathcal{N}(0, \sigma)$, with values of $\sigma$ ranging from 0.1 to 2.}
     \label{fig:log-improper}
 \end{figure}
@@ -115,7 +115,7 @@ On the natural scale, WIS and CRPS increase linearly with increasing absolute er
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.9\textwidth]{output/figures/SIM-effect-log-score.png}
+    \includegraphics[width=0.99\textwidth]{output/figures/SIM-effect-log-score.png}
     \caption{Weighted interval score for a forecast distribution that is N(1, 0.2) and different observed values. Top: difference in absolute terms. Bottom: difference in relative terms. Interesting panels are top left and bottom right.} 
     \label{fig:change-in-scores}
 \end{figure}
@@ -157,19 +157,19 @@ Rankings between different forecasts may be affected by applying the log transfo
 Overall model rankings usually differ even more when performance is averaged across multiple forecasts. This effect is not mainly driven by the kinds of changes in model rankings for single forecasts we just discussed. Rather, aggregate scores across multiple forecasts are affected by the fact some scores will in general be much larger than others. On the natural scale, aggregate scores will usually be dominated by predictions of quantities with high absolute values. Even an ideal forecaster will make much larger errors when predicting a quantity such as reported case numbers, than when predicting hospitalisations. Evaluating forecasts based on relative errors may help with comparing performance across different targets. However, log transforming forecasts and observations may also result in the opposite extreme, since small absolute errors (e.g. predicting 9, rather than 3 deaths) may be large in relative terms if the quantity to forecast is very small. This is especially true when forecasts are restricted to discrete values. 
 Whether or not forecast targets with smaller quantities receive higher scores than those for targets with larger quantities, depends on the exact relationship between the mean and the variance of the quantity of interest. 
 
-MAYBE MOVE TO SI
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.99\textwidth]{output/figures/SIM-mean-state-size.png}
+    \caption{Simulation showing how the relationship between mean and variance of the forecast quantity affects scores. 1,000 samples were drawn from different negative binomial distributions and scores were computed assuming an ideal forecaster (forecast distribution equal to data-generating distribution). Observations were simulated for different means of the negative-binomial distributions (representing, for example, the number of cases in differently sized states) as well as different relationships between mean and variance (representing, for example, three different infectious processes). The variance of the negative binomial is given as $\sigma^2 = \mu + \mu^2 / \theta$, meaning that for large theta the negative binomial distribution is equal to the poisson distribution. We used values of $\theta = 0.1$ (red), 1 (green) and 1b (blue). To make the scores for the different distributios comparable, scores were normalised to one, meaning that the mean score for every distribution (red, green, blue) is one. 
+    A: Normalised WIS for ideal forecasts with increasing means of three distribution with different relationships between mean and variance. B: Same plot as A with both axes log-transformed. MAYBE CAN GET RID OF B.}
+    \label{fig:SIM-wis-state-size-mean}
+\end{figure}
+
+MAYBE MOVE TO SI. NEED TO ASK JOHANNES ABOUT IT. 
 For simulated negative binomial count data, log predictions for small quantities receive on average higher scores than forecasts for large quantities if the mean and the variance grow at the same rate $\sigma^2 = \mu$, about equal scores when the variance grows at a rate of $\sigma^2 = \mu + \mu^2$ (Figure \ref{fig:SIM-wis-state-size-mean}), and smaller scores when the variance grows faster than that. 
 % To illustrate this with count data we sampled forecasts from different negative binomial distributions. The negative binomial distribution has mean $\mu$ and variance $\sigma^2 = \mu + \mu ^2 / \theta$ and for $\lim_{\theta \to \infty}$ converges to the Poisson distribution. For large values of $\theta$, resulting in a variance approximately equal to the mean, forecasts for lower quantities on average received higher scores on the log scale (see Figure \ref{fig:SIM-wis-state-size-mean}. For $\theta = 1$ (and correspondingly, $\sigma^2 = \mu + \mu^2$, we found that scores on the log scale remained approximately constant regardless of the size of the quantity to forecast. For $\theta = 0.1$ (and $\sigma^2 = \mu + 10 \cdot \mu^2$), scores on the log scale increased with the quantity to forecast. When scored on the natural scale, a higher quantity to forecast always lead to higher scores regardless of the chosen distribution (as long as the variance grows together with the mean). 
 
-I KNOW YOU ALL ARE GOING TO HATE THIS, BUT IT IS SOOOO CLEVER! :-(
-If one finds that average scores are dominated by forecasts for small quantities one could omit these forecasts entirely, arguing that relative errors are difficult to meaningfully interpret for small quantities. One might also take a more experimental route, namely adding a number $n$ (e.g. $n = 100$) to all observations and forecasts before taking the logarithm. This also constitutes a strictly monotonic transformation which preserves propriety and would reduce all scores (through reducing relative errors). Scores for forecasts on small quantities would be particularly affected, resulting in a more equal distribution of scores for forecasts of differing orders of magntitudes. Researchers could choose to add either a small or large number, depending on how much they want to equalise relative errors when aggregating scores. 
-
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.9\textwidth]{output/figures/SIM-mean-sd-state-size.png}
-    \caption{Simulation of the effect of population size with ideal forecasts of a negative-binomially-distributed variable. For each simulated state, we drew 1,000 observations from a negative binomial distribution with $\mu = 100 \cdot \text{state size}$ and with values of $\theta$ equal to 0.1, 1, and 1 billion. The variance of the negative binomial is given as $\sigma^2 = \mu + \mu^2 / \theta$, meaning that for large theta the negative binomial distribution is equal to the poisson distribution. For these simulated values we computed the WIS for an ideal forecast (i.e. the predictive distribution was negative binomial with $\mu$ and $\theta$ equal to the true $\mu$ and $\theta$ for every state). Left: Mean WIS depending on state size, right: Mean WIS depending on state sizes when scored on a log scale. Plots for the standard deviation, rather than the mean of WIS values look are given in Figure \ref{fig:SIM-wis-state-size-sd} in the SI.}. 
-    \label{fig:SIM-wis-state-size-mean}
-\end{figure}
+In the previous subsection we suggested to add a small number to all values in order to handle zeroes in the observations. While the choice of the number to add is somewhat arbitrary, it does have an influence on scores. By adding a number to forecasts as well as observations, measures of relative errors are slighly altered (while still preserving propriety of the score as we're applying a strictly monotonic transformation). Especially for forecasts of small values, the choice of the number that is added may affect scores quite strongly, as relative errors shrhink most for small quantities when adding a number. In principle, it is also possible to add a large number (e.g. 100 or 10,000) to all observations and forecasts in order to equalise relative errors between forecasts of different quantities if one finds that average scores are dominated too strongly by forecasts for small quantities. 
 
 
 
@@ -177,85 +177,72 @@ If one finds that average scores are dominated by forecasts for small quantities
 
 \section{Empirical example: the European Forecast Hub}
 
-\paragraph{Intro Hub}
 As an empirical example for evaluating forecasts on the natural and on the log scale we use forecasts from the European Forecast Hub \citep{europeancovid-19forecasthubEuropeanCovid19Forecast2021, sherrattPredictivePerformanceMultimodel2022}. Every week the European Forecast Hub collates and aggregates forecasts for different COVID-19 related targets from teams around the world. Forecasts are made one to four weeks ahead into the future and follow a quantile-based format with a set of 22 quantiles plus the median ($0.01, 0.025, 0.05, ..., 0.5, ... 0.95, 0.975, 0.99$). The forecasts for the purpose of this illustrations are two-week-ahead forecasts made between XXX and XXX for reported cases and deaths from COVID-19 in XXX countries. We filtered all forecasts submitted to the Hub to only include models which have submitted forecasts for both deaths and cases for 4 horizons in 32 locations on at least 16 forecast dates. Where not otherwise stated, we report results for a two-week-ahead forecast horizon. 
 
 In addition to the WIS we use pairwise comparisons (CITATION Kramer) to evaluate models against each other. In a first step, score ratios are computed for all pairs of models by taking the set of overlapping forecasts between the two models and dividing the score of one model over the score achieved by the other model. The relative skill for a given model is then obtained by taking the geometric mean of all score ratios which involve that model. Low values are better, and the average model receives a relative skill score of 1. 
 
+% SECTION STRUCUTRE / IMPORTANT THINGS
+% \begin{itemize}
+% \item X variation gets smaller / more even
+% \item X relationship with country size changes
+% \item X inndividual rankings stay similar
+% \item X relative skill scores change a lot
+% \item deep dive into what happens for individual models
+% \item scores increase across forecast horizons
+% \end{itemize}
+% 
+% Maybe look at correlation between bias and score?
+% Correlation between relative WIS contributions.?
 
-SECTION STRUCUTRE / IMPORTANT THINGS
-\begin{itemize}
-\item X variation gets smaller / more even
-\item X relationship with country size changes
-\item X inndividual rankings stay similar
-\item X relative skill scores change a lot
-\item deep dive into what happens for individual models
-\item scores increase across forecast horizons
-\end{itemize}
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.99\textwidth]{output/figures/HUB-mean-obs-location.png}
+    \caption{Observations and scores across locations and forecast horizons. A, Average (across all time points) of observed cases and deaths for different locations. B: Boxplot (y-axis on log-scale) of all cases and deaths. C: Scores for two-week-ahead forecasts from the EuroCOVIDhub-ensemble (averaged across all forecast dates) for different locations, evaluated on the natural as well as the logarithmic scale. D: Corresponding box-plots of all individual scores for two-week-ahead predictions. E: Boxplots for the relative change of scores for the EuroCOVIDhub-ensemble across forecast horizons. For any given forecast date and location, forecasts were made for four different forecast horizons, resulting in four scores. All scores were divided by the score for forecast horizon one.}
+    \label{fig:HUB-mean-locations}
+\end{figure}
 
-Maybe look at correlation between bias and score?
-Correlation between relative WIS contributions.?
+Across the dataset, the average number of observed cases and deaths varied considerably by location and target type (see Figure \ref{fig:HUB-mean-locations}A and B). On the natural scale, scores also varied considerably across targets (see Fig \ref{fig:HUB-mean-locations}D) and locations (see Fig \ref{fig:HUB-mean-locations}C). On the log scale, scores were more evenly distributed between targets (see Fig \ref{fig:HUB-mean-locations}D) and locations (see Fig \ref{fig:HUB-mean-locations}. Both on the natural scale as well as on the log scale, scores increased considerably with increasing forecast horizon (see Figure \ref{fig:HUB-scores-horizon}). The increase was more pronounced for cases than for deaths. We hypothesise that this increase in scores across horizons represents the relative difficulty to forecast values into the future, which was noticeable both on the natural as well as the logarithmic scale. 
 
-\paragraph{Variation of scores gets smaller}
-The average number of observed cases and deaths varies considerably by location and target type (see Figure \ref{fig:HUB-mean-locations}A and B). On the natural scale, scores also vary considerably across targets (see Fig \ref{fig:HUB-mean-locations}D) and locations (see Fig \ref{fig:HUB-mean-locations}C). On the log scale, scores are more evenly distributed between targets (see Fig \ref{fig:HUB-mean-locations}D) and locations (see Fig \ref{fig:HUB-mean-locations}. 
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.99\textwidth]{output/figures/HUB-correlations.png}
+    \caption{Correlations between observations and scores. A: Mean WIS for two-week-ahead predictions of the EuroCOVIDhub-ensemble against the average number of observations in a location. B: Average Spearman (rank-) correlation of scores for individual forecasts from \textit{all} models. For every individual target (defined by a combination of forecast date, target type, horizon, location), one score was obtained per model. Then, the rank correlation was computed between the scores for all models on the natural scale vs. on the log scale. All rank correlations were averaged and stratified by horizon and target type. C: Correlation between relative skill scores. For every forecast horizon and target type, a separate rel. skill score was computed per model using pairwise comparisons. The plot shows the correlation between the rel. skill scores on the natural vs. on the log scale.}
+    \label{fig:HUB-cors}
+\end{figure}
 
-Both on the natural scale as well as on the log scale, scores increase considerably with increasing forecast horizon (see Figure \ref{fig:HUB-scores-horizon}). The increase is more pronounced for cases than for deaths and arguably represents an increase in the relative difficulty to forecast values further into the future. A similar increase both on the natural and the log scale suggests that we are able to observe the increase in difficulty regardless of how we evaluate the scores. 
+On the natural scale, scores correlate strongly (XX) with the average number of observed cases / deaths in a given country (see Fig \ref{fig:HUB-mean-locations}A, B). On the log scale, the correlation between average WIS and the mean number of observations in a country is much weaker and if anything tends to be slightly negative (giving higher weight to locations with few observations when averaging scores). 
 
-\paragraph{Correlation WIS - obs, location relationship}
-On the natural scale, scores correlate strongly (XX) with the average number of observed cases / deaths in a given country (see Fig \ref{fig:HUB-mean-locations}A, B). The correlation between average WIS and the mean number of observations in a country is much weaker and tends to be negative. Locations therefore tend to have a more equal influence on avearage scores, with smaller countries potentially being slightly overrepresented. 
 
-For individual forecasts, rankings between models for single forecasts are mostly preserved (correlation: X for cases, Y for deaths), with differences increasing across forecast horizons (see Figure \ref{fig:HUB-cors}). When evaluating performance across different forecasts and forecast targets, relative skill scores of the models change considerably. At least for cases, the effect is stronger with increasing forecast horizon.
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.99\textwidth]{output/figures/HUB-model-comparison-ensemble.png}
+    \caption{
+    Forecasts and scores for two-week-ahead predictions from the EuroCOVIDhub-ensemble made in Germany. A, E: 50\% and 90\% prediction intervals and observed values for cases and deaths on the natural scale. B, F: Corresponding scores. C, G: Forecasts and observations on the log scale. D, H: Corresponding scores. 
+    }
+    \label{fig:HUB-model-comparison-ensemble}
+\end{figure}
 
-For relative skill scores, however, rankings do change a lot. The correlation between skill scores for two week ahead forecasts on the log and natural scale is XX. The correlation is stronger for deaths than for cases and tends to be lower for longer horizons. This might be because outliers are more likely for case forecasts than for death forecasts and also are more likely with increasing forecast horizon. 
 
-\paragraph{Deep dive}
-Differences are likely driven by
-- on average, under-prediction plays a larger role (in relative terms), at least for cases. 
-- confidence intervals that go very low can produce artifacts --> baseline plot, not shown. 
-- natural scale punishes missing the peak very harshly. Log scale also punishes when you miss a new upswing. Arguably this is very good and potentially even closer to what we want. 
+For individual forecasts, rankings between models for single forecasts are mostly preserved (average rank correlation for single forecasts: X for cases, Y for deaths), with differences increasing across forecast horizons (see Figure \ref{fig:HUB-cors}). When evaluating performance across different forecasts and forecast targets, relative skill scores of the models change considerably. The change is stronger for cases than for deaths (Figure \ref{fig:HUB-cors}XX) and tends to increase with increasing forecast horizon. 
+
+When comparing examples of forecasts on the natural scale with log-transformed ones (see Figures XX, XX, XX) a few interesting patterns emerge. Missing the peak, i.e. predicting increasing numbers while actual observations are already falling, tends to contribute a lot to overall scores on the log scale (see forecasts in May in Figure XXA, B). On the log scale, these have less of an influence, as errors are smaller in relative terms (see panels C and D). We hypothesise that the larger divergence in scores for cases (compared to scores for deaths) displayed in Figure \ref{fig:HUB-cors}C is related to the fact that outlier forecasts missing the peak are more common for cases than for deaths. 
+Conversely, failure to predict an upswing while numbers are still low, is not severely punished on the natural scale (see forecasts in July in Figure XX A, B), as overall absolute errors are low. On the log scale, missing lower inflection points tends to lead to more severe penalties (see panels C and D). One can also observe that on the natural scale, scores tend to track the overall level of the target quantity (compare for example forecasts for March-July with forecasts for September-October in Figure XXE, F). On the log scale, scores increase whenever forecasts are far away from the truth in relative terms, regardless of the overall level of observations. Furthermore, including very low numbers in the confidence intervals may lead to very high scores on the log-scale. This may be an issue especially when forecasting small quantities. Figure XXX shows forecasts and scores for the baseline model, which had zero included in its 50 percent intervals for the forecasts in XX to XX, leading to excessive dispersion values on the log scale. Notwithstanding the general concern, one can argue that in the specific example including zero in the prediction intervals was unreasonable and rightly penalised given that case numbers were over 1000. 
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.99\textwidth]{output/figures/HUB-pairwise-comparisons.png}
+    \caption{Changes in model ratings as measured by relative skill for two-week-ahead predictions. Top row: cases, bottom row: deaths. NEED TO CHANGE THE ANNOTATION LEVELS.}
+    \label{fig:HUB-pairwise}
+\end{figure}
+
+\paragraph{SAM} 
+
+COULD MAYBE ADD SOME ANALYSIS ABOUT WHAT KINDS OF MODELS BENEFITTED AND WHICH ONES GOT PENALISED MORE. AT THE MOMENT WE HAVE A VERY NICE FIGURE THAT ISN'T REALLY REFERENCED IN THE TEXT. SAM TO THE RESCUE!
+
 
 % Observations were overdispersed, meaning that for a given location, the variance in observations exceeds the mean of all observed values (see Figure \ref{fig:HUB-variance-mean}). 
 %Could fit a model var = alpha * x2 + beta *x
 %This is in line with the observation that the association between variance is smaller than mu^2 + mu, meaning that we would expect this. 
-
- % Pooled across all time points and locations, the mean WIS on the natural scale for cases (deaths) was 8855 (59.3) with an overall standard deviation of 51274 (156) (see Table \ref{tab:HUB-summary}). On the log scale, scores were much closer to each other (see Figure \ref{fig:HUB-average-scores}), with a mean WIS for cases (deaths) of 0.507 (0.362) with an overall standard deviation of 0.745 (0.407). 
-
-% When evaluated on the natural scale, there is  strong relationship between the mean of the weighted interval score and the total number of observed cases (correlation: 0.913) or deaths (cor: 0.849) in a location (see Figure \ref{fig:HUB-mean-scores-total-loglog} and Figure \ref{fig:HUB-mean-scores-total} in the SI). The relationship is less pronounced for scores on the log scale (cor: -0.019 for cases, -0.395 for deaths) and negative, meaning that locations with fewer observed cases or deaths tend to receive higher scores. 
-
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.9\textwidth]{output/figures/HUB-mean-obs-location.png}
-    \caption{Scores and average observed values across 1ocations. A, Mean of observed cases and deaths across all time points for different locations. B: XXX WIS for forecasts made by the Hub ensemble. C: Distribution of interval scores for two week ahead forecasts of COVID-19 cases and deaths evaluated on the natural scale (left) and on the log scale (right).}
-    \label{fig:HUB-mean-locations}
-\end{figure}
-
-
-
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.9\textwidth]{output/figures/HUB-correlations.png}
-    \caption{Correlation between scores on the natural and on the log scale. A: Correlation between relative ranks (the rank in terms of WIS divided by the number of models) for individual forecasts, separated by forecast horizon. B: Correlation between relative skill values achieved by models across locations and time points, separated by forecast horizon. SHOULD THIS BE SPEARMAN?}
-    \label{fig:HUB-cors}
-\end{figure}
-
-% \paragraph{Rankings}
-% So one effect is that for a given dispersion on the natural scale, it's better if that interval is skewed, as that implies that at least you only off a lot in one direction in negative terms, and not in the other direction. Maybe looking at over-and underprediction is the key here. 
-%ADD SAME PLOT TO SI FOR HORIZON 4. 
-
-\paragraph{pairwise comparisons}
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.9\textwidth]{output/figures/HUB-pairwise-comparisons.png}
-    \caption{Changes in relative skill and the distribution of scores.Based on case forecasts only.}
-    \label{fig:HUB-pairwise}
-\end{figure}
-
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.9\textwidth]{output/figures/HUB-model-comparison.png}
-    \caption{Top: 2-week-ahead predictions. Bottom: scores }
-    \label{fig:HUB-model-comparison-ensemble}
-\end{figure}
 
 
 
@@ -335,7 +322,7 @@ Whether or not a log transformation is apprpriate depends on whether one believe
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.9\textwidth]{output/figures/HUB-mean-scores-vs-total-log-log.png}
+    \includegraphics[width=0.99\textwidth]{output/figures/HUB-mean-scores-vs-total-log-log.png}
     \caption{My current thinking is that the top row is helpful, as it explalins what the mean / var relationship is which is relevant for how much weight small countries get. I think the 2nd row is just completely useless. The 3rd and 4th row may be helpful. In some sense it is duplicated information from above, but it gives some nice intuiton for the correlations. I could alternatively also turn it into a correlation plot and add it to the other one. }
     \label{fig:HUB-mean-scores-total-loglog}
 \end{figure}
@@ -461,7 +448,7 @@ The left-hand side of equation \ref{eqn:is-log} was left unchanged. From the rig
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.9\textwidth]{output/placeholder-image.png}
+    \includegraphics[width=0.99\textwidth]{output/placeholder-image.png}
     \caption{Placeholder}
     \label{fig:placeholder}
 \end{figure}
@@ -469,19 +456,13 @@ The left-hand side of equation \ref{eqn:is-log} was left unchanged. From the rig
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.9\textwidth]{output/figures/HUB-mean-scores-vs-total.png}
+    \includegraphics[width=0.99\textwidth]{output/figures/HUB-mean-scores-vs-total.png}
     \caption{Plot with Weighted interval scores against the mean number of observed cases or deaths.}
     \label{fig:HUB-mean-scores-total}
 \end{figure}
 
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.9\textwidth]{output/figures/SIM-sd-state-size.png}
-    \caption{Simulation of the effect of population size with ideal forecasts of a negative-binomially-distributed variable. For each simulated state, we drew 1,000 observations from a negative binomial distribution with $\mu = 100 \cdot \text{state size}$ and with values of $\theta$ equal to 0.1, 1, and 1 billion. The variance of the negative binomial is given as $\sigma^2 = \mu + \mu^2 / \theta$, meaning that for large theta the negative binomial distribution is equal to the poisson distribution. For these simulated values we computed the WIS for an ideal forecast (i.e. the predictive distribution was negative binomial with $\mu$ and $\theta$ equal to the true $\mu$ and $\theta$ for every state). Left: Mean WIS depending on state size, right: Mean WIS depending on state sizes when scored on a log scale. Plots for the standard deviation, rather than the mean of WIS values look are given in Figure \ref{fig:SIM-wis-state-size-sd} in the SI.}. 
-    \label{fig:SIM-wis-state-size-mean}
-\end{figure}
 
-
+\clearpage
 \bibliography{log-or-not.bib}
 
 
@@ -537,7 +518,7 @@ The left-hand side of equation \ref{eqn:is-log} was left unchanged. From the rig
 % not sure this plot is really meaningful
 %\begin{figure}[h!]
 %    \centering
-%    \includegraphics[width=0.9\textwidth]{output/figures/HUB-sd-vs-mean-scores.png}
+%    \includegraphics[width=0.99\textwidth]{output/figures/HUB-sd-vs-mean-scores.png}
 %    \caption{CAPTION}
 %    \label{fig:HUB-mean-sd-scores}
 %\end{figure}
@@ -582,5 +563,9 @@ The left-hand side of equation \ref{eqn:is-log} was left unchanged. From the rig
 %\end{itemize}
 
 
-%\paragraph{Optional: Application to data from the Euro-Hub}
 %Also: what, empirically is the distribution of errors? 
+
+
+ % Pooled across all time points and locations, the mean WIS on the natural scale for cases (deaths) was 8855 (59.3) with an overall standard deviation of 51274 (156) (see Table \ref{tab:HUB-summary}). On the log scale, scores were much closer to each other (see Figure \ref{fig:HUB-average-scores}), with a mean WIS for cases (deaths) of 0.507 (0.362) with an overall standard deviation of 0.745 (0.407). 
+
+% When evaluated on the natural scale, there is  strong relationship between the mean of the weighted interval score and the total number of observed cases (correlation: 0.913) or deaths (cor: 0.849) in a location (see Figure \ref{fig:HUB-mean-scores-total-loglog} and Figure \ref{fig:HUB-mean-scores-total} in the SI). The relationship is less pronounced for scores on the log scale (cor: -0.019 for cases, -0.395 for deaths) and negative, meaning that locations with fewer observed cases or deaths tend to receive higher scores. 

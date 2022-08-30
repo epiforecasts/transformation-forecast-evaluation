@@ -53,7 +53,8 @@ p1 <- scores |>
   labs(y = "WIS", x = "Observed value") + 
   scale_y_continuous(label = function(x) {paste(scale_factor * x)}) + 
   facet_wrap(~ scale, ncol = 1, scales = "free") + 
-  theme_scoringutils()
+  theme_scoringutils() + 
+  theme(panel.spacing = unit(1, "lines"))
 
 scale_factor2 <- 3
 p2_log <- scores |>
@@ -72,10 +73,11 @@ p2_log <- scores |>
                      }, 
                      breaks = c(0.2, 1/2, 1, 2, 5)) + 
   facet_wrap(~ scale, ncol = 1, scales = "free") + 
-  theme_scoringutils()
+  theme_scoringutils() + 
+  theme(panel.spacing = unit(1, "lines"))
 
 p1 + p2_log
 
-ggsave("output/figures/SIM-effect-log-score.png", width = 6, 
-       height = 4)
+ggsave("output/figures/SIM-effect-log-score.png", width = 7, 
+       height = 3)
 

@@ -51,6 +51,8 @@ summary |>
   geom_point() + 
   facet_wrap(~type, scales = "free_y") + 
   theme_scoringutils() +
-  labs(y = "Score", x = "Standard deviation of predictive distribution")
+  labs(y = "Score", x = "Standard deviation of predictive distribution") + 
+  theme(panel.spacing = unit(1, "lines"))
 
-ggsave("output/figures/example-log-first.png", width = 8, height = 2.5)
+ggsave("output/figures/example-log-first.png", width = 7, height = 2.1)
+

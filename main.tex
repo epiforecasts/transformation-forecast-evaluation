@@ -73,18 +73,13 @@ In this paper, we discuss how log transforming the forecasts and observations pr
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Log transforming forecasts and observations}
 
-Log transforming forecasts and observations shifts the focus of the evaluation while preserving propriety of the score. Instead of scoring the magnitude of absolute errors this approach captures relative errors and is approximately equivalent to scoring a forecast for the growth rate of the observed quantity. 
-
-We focus on the log transformation, as it represents a convenient way of achieving our goal of evaluating how well a forecast captures the growth dynamic inherent to epidemiological process.
+The goal of log transforming forecasts and observations is to shift the focus of the evaluation while preserving the propriety of the score. Instead of a score representing the magnitude of absolute errors this approach allows to obtain a score which measures relative error and provides an approximate measure for how well a forecast captures the multiplicative growth rate of the target quantity. In this paper we focus on the log transformation, but note that many other transformations may be useful and appropriate (see section XXXX) .
 
 
 
 
-Applying the log transformation, among other transformations, is permissible because it is a strictly monotonic transformation. 
 
-While rankings between different models may indeed change, even for a single forecast, the relevant condition for a scoring rule to be strictly proper is still satisfied: In expectation a forecaster will receive the best score if she reports a predictive distribution that is equal to the data-generating distribution, even after transforming both the forecasts and the observations (representing draws from the data-generating distribution). 
-
-It is important to first apply the transformation and then score the transformed forecasts and observations. Simply taking the log of the WIS or the CRPS computed on the natural scale, i.e. computing $\log S(x, y)$ results in an improper score and is therefore not advised. This is because the logarithm of the WIS / CRPS does not penalise outliers enough and therefore incentivises overconfident predictions. We illustrate this point using simulated data in Figure \ref{fig:log-improper}, where it can easily be seen that overconfident models perform best in terms of the log WIS. 
+The log transformation is permissible (in the sense that it preserves propriety of the score), because it is a strictly monotonic transformation. Even though actual rankings between models may change, a forecaster will in expectation still minimise her score if she reports a predictive distribution that is equal to the data-generating distribution. The order of the operations matters, and applying the log transformation after scores have been computed, i.e. computing $\log S(x, y)$ results in an improper score. This is because taking the logarithm of the WIS / CRPS results in a score that does not penalise outliers enough and therefore incentivises overconfident predictions. We illustrate this point using simulated data in Figure \ref{fig:log-improper}, where it can easily be seen that overconfident models perform best in terms of the log WIS. 
 
 \begin{figure}[h!]
     \centering
@@ -92,7 +87,6 @@ It is important to first apply the transformation and then score the transformed
     \caption{Scores for different forecasts evaluated the WIS and the log WIS. We simulated 1000 observations $Y_i = {\rm e}^{x_i}$, with $x_i \text{iid} \sim \mathcal{N}(0, 1)$. We then simulated 20 forecasters who would issue a predictive distribution $F = {\rm e}^{x_i}$, with $x \sim \mathcal{N}(0, \sigma)$, with values of $\sigma$ ranging from 0.1 to 2.}
     \label{fig:log-improper}
 \end{figure}
-
 
 Unfortunately, the log transformation cannot readily be applied when dealing with negative or zero values. In an epidemiological setting that involves count data, negative values should likely be omitted entirely. One potential way to deal values of zero is to add a small quantity, such as 1, to all observations and predictions before taking the logarithm as is common practice when log transforming counts. When dealing with count data we could extend this argument to all small values (rather than just zeros), as it is hard to reliably evaluate relative errors when dealing with small discrete values. An alternative solution is to remove forcasts for small, relative, values from ongoing analysis. In the following sections we will explore the implications of both of these strategies.
 
@@ -159,8 +153,7 @@ Conveniently, the decomposition of the WIS into dispersion, overprediction and u
 \subsection{Effects on model rankings}
 Rankings between different forecasts may be affected by applying the log transformation even when looking at a single forecast. As an example, consider two forecasters, A and B. Both issue a single 50\%-prediction interval for a target which later resolves as 1. Forecaster A issues the interval [0.5, 2], while forecaster B issues [0.9. 2.5]. On the natural scale, the score would equal the dispersion of the forecast, i.e. the length of this interval (since the observed value falls within the prediction interval). Forecaster A would receive a score of $2 - 0.5$ = 1.5, beating forecaster B who would receive a score of $2.5 - 0.9 = 1.6$. When we transform the forecast, forecaster A receives a score of $\log (\frac{2}{0.5}) = 1.39$, while forecaster B obtains a score of $\log (\frac{2.6}{0.9}) = 1.06$ and now wins over forecaster A. The main difference between forecaster A and B is that forecaster A has issued a prediction interval ([0.5, 2]) that was more symmetric around the true value than the interval issued by forecaster B ([0.9. 2.6], which was more skewed). This means that in relative terms, Forecaster B was noticeably closer to the true value with the lower bound of her prediction interval, while only being slightly further away with the upper interval. This is likely to lead to a more lenient treatment of (one-sided) outlier forecasts. 
 
-Overall model rankings usually differ even more when performance is averaged across multiple forecasts. This effect is not mainly driven by the kinds of changes in model rankings for single forecasts we just discussed. Rather, as observations from exponential processes are likely to be on very different absolute scales, large observations will account for the majority of absolute score but will not dominate relative scores in the same way. When aggregating scores across metrices with different scales, for example reported cases, and hospitalisations even an ideal forecaster will make much larger errors when predicting a quantity such as reported case numbers, than when predicting hospitalisations. Evaluating forecasts based on relative errors may help with comparing performance across different targets. However, log transforming forecasts and observations may also result in the opposite extreme, since small absolute errors (e.g. predicting 9, rather than 3 deaths) may be large in relative terms if the quantity to forecast is very small. This is especially true when forecasts are restricted to discrete values. 
-Whether or not forecast targets with smaller quantities receive higher scores than those for targets with larger quantities, depends on the exact relationship between the mean and the variance of the quantity of interest. 
+Overall model rankings usually differ even more when performance is averaged across multiple forecasts. This effect is not mainly driven by the kinds of changes in model rankings for single forecasts we just discussed. Rather, as observations from exponential processes are likely to be on very different absolute scales, large observations will account for the majority of absolute score but will not dominate relative scores in the same way. When aggregating scores across metrics with different scales, for example reported cases, and hospitalisations, even an ideal (i.e. perfect) forecaster will make much larger errors when predicting case numbers than when predicting hospitalisations. Evaluating forecasts based on relative errors may help with comparing performance across different targets. However, log transforming forecasts and observations may also result in the opposite extreme, since small absolute errors (e.g. predicting 9, rather than 3 deaths) may be large in relative terms if the quantity to forecast is very small. This is especially true when forecasts are restricted to discrete values. 
 
 \begin{figure}[h!]
     \centering
@@ -170,6 +163,7 @@ Whether or not forecast targets with smaller quantities receive higher scores th
     \label{fig:SIM-wis-state-size-mean}
 \end{figure}
 
+Whether or not forecast targets with smaller quantities receive higher scores than those for targets with larger quantities, depends on the exact relationship between the mean and the variance of the quantity of interest. 
 
 For simulated negative binomial count data, log predictions for small quantities receive on average higher scores than forecasts for large quantities if the mean and the variance grow at the same rate $\sigma^2 = \mu$, about equal scores when the variance grows at a rate of $\sigma^2 = \mu + \mu^2$ (Figure \ref{fig:SIM-wis-state-size-mean}), and smaller scores when the variance grows faster than that. 
 % To illustrate this with count data we sampled forecasts from different negative binomial distributions. The negative binomial distribution has mean $\mu$ and variance $\sigma^2 = \mu + \mu ^2 / \theta$ and for $\lim_{\theta \to \infty}$ converges to the Poisson distribution. For large values of $\theta$, resulting in a variance approximately equal to the mean, forecasts for lower quantities on average received higher scores on the log scale (see Figure \ref{fig:SIM-wis-state-size-mean}. For $\theta = 1$ (and correspondingly, $\sigma^2 = \mu + \mu^2$, we found that scores on the log scale remained approximately constant regardless of the size of the quantity to forecast. For $\theta = 0.1$ (and $\sigma^2 = \mu + 10 \cdot \mu^2$), scores on the log scale increased with the quantity to forecast. When scored on the natural scale, a higher quantity to forecast always lead to higher scores regardless of the chosen distribution (as long as the variance grows together with the mean). 
@@ -221,8 +215,8 @@ Across the dataset, the average number of observed cases and deaths varied consi
     \label{fig:HUB-cors}
 \end{figure}
 
-As expected on the natural scale, scores correlate strongly (XX) with the average number of observed cases / deaths in a given country (see Fig \ref{fig:HUB-mean-locations}A, B) and this relationship is not evident on the log scale. Interestingly, there is some evidence a negative relationship between the mean number of observations in a country and score when evaluated on a log scale implying that countries with lower mean incidence may be harder to forecast.
-
+As expected on the natural scale, scores correlate strongly (XX) with the average number of observed cases / deaths in a given country (see Fig \ref{fig:HUB-mean-locations}A, B).
+This relationship is not evident on the log scale, where correlation is much weaker and maybe slightly negative, implying larger scores for for countries with lower mean incidences. 
 
 
 \begin{figure}[h!]

@@ -145,29 +145,6 @@ fwrite(scores_gr, here("output", "data", "all-scores-growth-rate-european-hub.cs
 ```
 
 
-## Basic data summary
-```{r}
-hub_data |>
-  summarise(min_date = min(forecast_date), 
-            max_date = max(forecast_date)) |>
-  mutate(week_diff = (max_date - min_date - 1) / 7)
-
-hub_data$location |> 
-  unique() |>
-  length()
-
-hub_data |> 
-  filter(horizon == 2) |>
-  avail_forecasts(by = c("target_end_date", "target_type", "model")) |>
-  mutate(forecast_date = as.Date(target_end_date) - 12) |>
-  plot_avail_forecasts(show_numbers = FALSE) +
-  facet_grid(~ target_type) + 
-  labs(y = "Model", x = "Forecast date") 
-
-ggsave(filename = "output/figures/number-avail-forecasts.png", height = 4, width = 10)
-```
-
-
 ## =============================================================================
 ## FIGURE 4
 ## Mean vs. sd of observed values + boxplots for distribution across target type + location
@@ -286,6 +263,7 @@ ggsave("output/figures/HUB-mean-obs-location.png", width = 10, height = 10)
 # This uses the ensemble, but alternatively, we could think about just summarising across all models for these plots? 
 ```
 
+## =============================================================================
 ## Figure 5 - Correlations between everything
 ```{r}
 wis_vs_total <- function(scores, summary_fct = mean, fulldata = hub_data) {
@@ -385,91 +363,120 @@ ggsave("output/figures/HUB-correlations.png", width = 7, height = 5.5)
 ```
 
 
-
-
-
-
-## Scores across forecast targets
-
-This uses the Hub ensemble
+## =============================================================================
+## Figure 6 - Example comparisons of forecasts on the log and the natural scale
 
 ```{r}
-scores |>
-  dplyr::select(location, target_type, scale, target_end_date, interval_score) |>
-  unique() |>
-  group_by(target_type, scale) |>
-  summarise(mean_value = mean(interval_score), 
-            sd_value = sd(interval_score), 
-            var_value = var(interval_score))
+plot_pred_score <- function(hub_data, scores, model,
+                            horizon = 2, type = "Cases", 
+                            remove_x_text = TRUE) {
+  forecast_model <- model
+  h <- horizon
+  filtered_hub <- hub_data |>
+    filter(model == forecast_model, 
+           horizon %in% h, 
+           target_type == type) 
+  
+  locations <- unique(filtered_hub$location) 
+  
+  filtered_scores <- scores |>
+    filter(model == forecast_model, 
+           horizon %in% h, 
+           location %in% locations,
+           target_type == type) 
+  
+  plot_natural  <- filtered_hub |>  
+    mutate(id = paste(type, "- natural")) |>
+    plot_predictions(x = "target_end_date") +
+    scale_y_continuous(labels = label_fn)  +
+    facet_wrap(~ id) +
+    theme(legend.position = "bottom", 
+          axis.text.x = element_blank(), 
+          axis.title.x = element_blank()) +
+    labs(y = "Predictions")
+  
+  plot_log <- filtered_hub |>
+    mutate(prediction = log(prediction + 1), 
+           true_value = log(true_value + 1)) |>
+    mutate(id = paste(type, "- log")) |>
+    plot_predictions(x = "target_end_date") +
+    scale_y_continuous(labels = label_fn)  +
+    facet_wrap(~ id) +
+    theme(legend.position = "bottom", 
+          axis.text.x = element_blank(), 
+          axis.title.x = element_blank()) +
+    labs(y = "Predictions")
+  
+  scores_natural <- filtered_scores |>
+    filter(scale == "natural") |>
+    summarise_scores("target_end_date") |>
+    mutate(target_end_date = factor(target_end_date)) |>
+    plot_wis(x = "target_end_date", flip = TRUE) +
+    scale_x_continuous(labels = label_fn) +
+    labs(y = "Target end date")
+  
+  scores_log <- filtered_scores |>
+    filter(scale == "log") |>
+    summarise_scores("target_end_date") |>
+    mutate(target_end_date = factor(target_end_date)) |>
+    plot_wis(x = "target_end_date", flip = TRUE) +
+    labs(y = "Target end date")
+  
+  if (remove_x_text) {
+    scores_natural <- scores_natural +
+      theme(axis.text.x = element_blank(), 
+            axis.title.x = element_blank())
+    # scores_log <- scores_log +
+    #   theme(axis.text.x = element_blank(), 
+    #         axis.title.x = element_blank())
+  }
+  
+  list(plot_natural, scores_natural, plot_log, scores_log )
+}
 
 
-ggsave("output/figures/HUB-average-scores.png", width = 7, height = 2.5)
+put_plot_together <- function(modelname = "EuroCOVIDhub-ensemble", 
+                              locationname = "DE") {
+  
+  plot_cases <- plot_pred_score(hub_data |> filter(location == locationname), 
+                                  scores, modelname, 
+                                  remove_x_text = TRUE, 
+                                  type = "Cases")
+  
+  plot_deaths <- plot_pred_score(hub_data |> filter(location == locationname), 
+                                     scores, modelname, 
+                                     type = "Deaths")
+  
+  layout <- "
+AE
+BF
+CG
+DH"
+  
+  plot_cases[[1]] + plot_cases[[2]] + plot_cases[[3]] +
+    plot_cases[[4]] + plot_deaths[[1]] +
+    plot_deaths[[2]] + plot_deaths[[3]] + plot_deaths[[4]] +
+    plot_annotation(tag_levels = "A") +
+    plot_layout(guides = "collect", 
+                design = layout) &
+    theme(legend.position = "bottom")
+}
+
+put_plot_together("EuroCOVIDhub-ensemble")
+ggsave(filename = "output/figures/HUB-model-comparison-ensemble.png", width = 10, height = 7)
+
+put_plot_together("epiforecasts-EpiNow2")
+ggsave(filename = "output/figures/HUB-model-comparison-epinow.png", width = 10, height = 7)
+
+put_plot_together("EuroCOVIDhub-baseline", locationname = "DE")
+ggsave(filename = "output/figures/HUB-model-comparison-baseline.png", width = 10, height = 7)
+
+
 ```
 
-Mean scores: 
-```{r}
-scores |> 
-  filter(model == "EuroCOVIDhub-ensemble", 
-         horizon == 2) |>
-  group_by(scale, target_type) |>
-  summarise(interval_score = mean(interval_score), 
-            .groups = "drop_last") |>
-  make_table()
-```
 
-
-## Correlation between scores
-
-```{r}
-scores |> 
-  filter(model == "EuroCOVIDhub-ensemble", 
-         horizon == 2) |>
-  group_by(target_type, location, scale) |>
-  summarise(interval_score = mean(interval_score), 
-            .groups = "drop_last") %>%
-  pivot_wider(values_from = interval_score, names_from = scale) %>%
-  group_by(target_type) %>%
-  summarise(correlation = cor(natural, log))
-```
-
-
-
-
-
-## Change of average scores for increasing forecast horizons
-
-```{r}
-scores |> 
-  filter(model == "EuroCOVIDhub-ensemble") |>
-  group_by(scale, target_type, horizon) |>
-  summarise(interval_score = mean(interval_score), 
-            .groups = "drop_last") |>
-  mutate(multiplicative_score = interval_score / min(interval_score)) |>
-  ggplot(aes(y = multiplicative_score, x = horizon)) + 
-  geom_line() + 
-  geom_point() + 
-  facet_grid(scale ~ target_type) + 
-  theme_scoringutils() + 
-  labs(x = "Forecast horizon in weeks", y = "Multplicative change in interval score")
-
-ggsave("output/figures/HUB-scores-over-horizon.png", width = 7, height = 4)
-
-```
-
-
-```{r}
-
-```
-
-
-
-
-
-
-
-
-
-## Figure 6 - Look at pairwise comparisons and changes in rankings
+## =============================================================================
+## Figure 7 - Look at pairwise comparisons and changes in rankings (plus Appendix figures)
 
 ```{r}
 
@@ -550,7 +557,7 @@ plot_ranking_change <- summarised_pairwise |>
       size=1, show.legend = FALSE) +
   # geom_text(size=3.3, hjust = 0) +
   coord_cartesian(#xlim = c(0.5, 4), 
-                  ylim = c(0.8, 9.15)) +
+                  ylim = c(0.75, 8.25)) +
   theme_scoringutils() +
   theme(axis.title = element_blank(),
         axis.line.x = element_blank(),
@@ -559,6 +566,10 @@ plot_ranking_change <- summarised_pairwise |>
         axis.ticks = element_blank(),
         panel.grid = element_blank(), 
         legend.position="none")
+
+
+
+plot_rel_wis + plot_ranking_change
 
 # layout <- "
 # AAA
@@ -569,13 +580,6 @@ return(
     plot_ranking_change, plot_rel_skill_natural, plot_rel_skill_log, plot_diffs, plot_rel_wis
   )
 )
-
-plot_ranking_change + plot_rel_skill + plot_diffs + plot_rel_wis + #plot_distr_scores 
-  plot_layout(design = layout) +
-  plot_layout(heights = c(1, 2)) +
-  plot_layout(widths = c(2, 1, 2)) +
-  plot_layout(guides = "collect") &
-  theme(legend.position = "bottom")
 }
 
 ranking_cases <- ranking_figure(target = "Cases")
@@ -611,6 +615,164 @@ ggsave("output/figures/HUB-pairwise-comparisons.png", width = 10.5, height = 6)
 
 
 ```
+
+
+
+## =============================================================================
+## Summary numbers for the text + Figure Available Forecasts fo Appendix
+
+```{r}
+hub_data |>
+  summarise(min_date = min(forecast_date), 
+            max_date = max(forecast_date)) |>
+  mutate(week_diff = (max_date - min_date - 1) / 7)
+
+hub_data$location |> 
+  unique() |>
+  length()
+
+hub_data |> 
+  filter(horizon == 2) |>
+  avail_forecasts(by = c("target_end_date", "target_type", "model")) |>
+  mutate(forecast_date = as.Date(target_end_date) - 12) |>
+  plot_avail_forecasts(show_numbers = FALSE) +
+  facet_grid(~ target_type) + 
+  labs(y = "Model", x = "Forecast date") 
+
+ggsave(filename = "output/figures/number-avail-forecasts.png", height = 4, width = 10)
+```
+
+
+## =============================================================================
+## Summary table for Appendix
+
+
+# Table with relevant values
+
+```{r}
+summary <- hub_data |>
+  filter(horizon == 2) |>
+  mutate(natural = true_value, 
+         log = log(pmax(0, true_value) +1)) |>
+  select(location, target_type, target_end_date, natural, log) |>
+  pivot_longer(cols = c(natural, log), values_to = "true_value", names_to = "scale") |>
+  unique() |>
+  group_by(target_type, scale) |>
+  summarise(mean = mean(true_value), 
+            sd = sd(true_value), 
+            var = var(true_value))
+  
+table_obs <- summary |>
+  pivot_longer(cols = c(mean, sd, var), names_to = "measure") |>
+  pivot_wider(values_from = value, names_from = scale) |>
+  select(target_type, measure, natural, log) |>
+  mutate(quantity = "Observations", 
+         natural = round(natural), 
+         log = round(log, 2)) |>
+  select(target_type, quantity, measure, natural, log)
+
+table_scores <- scores |> 
+  filter(model == "EuroCOVIDhub-ensemble", 
+         horizon == 2) |>
+  group_by(target_type, scale) |>
+  summarise(mean = mean(interval_score), 
+            sd = sd(interval_score), 
+            .groups = "drop_last") |>
+  pivot_longer(cols = c(mean, sd), names_to = "measure") |>
+  pivot_wider(values_from = value, names_from = scale) |>
+ mutate(quantity = "WIS", 
+         natural = round(natural), 
+         log = round(log, 2)) |>
+  select(target_type, quantity, measure, natural, log)
+  
+table <- rbind(table_obs, 
+               table_scores) |>
+  arrange(quantity, target_type, measure)
+
+
+
+table |>
+  kable(format = "latex", booktabs = TRUE,
+        align = c("l", "l", "l", rep("c", 2)),
+        # col.names = c(" ", names(scores)[-(1:2)])) %>%
+  ) #|>
+  # collapse_rows(columns = 1) %>%
+  # kable_styling(latex_options = c("scale_down",
+  #                                 "hold_position")) %>%
+  # column_spec(1, background = "white") %>%
+  # pack_rows("Observations", 1, 6, indent = FALSE,
+  #           hline_after = TRUE) %>%
+  # pack_rows("WIS", 7, 10, indent = FALSE,
+  #           hline_after = TRUE)
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## Scores across forecast targets
+
+This uses the Hub ensemble
+
+```{r}
+scores |>
+  dplyr::select(location, target_type, scale, target_end_date, interval_score) |>
+  unique() |>
+  group_by(target_type, scale) |>
+  summarise(mean_value = mean(interval_score), 
+            sd_value = sd(interval_score), 
+            var_value = var(interval_score))
+
+
+ggsave("output/figures/HUB-average-scores.png", width = 7, height = 2.5)
+```
+
+Mean scores: 
+```{r}
+scores |> 
+  filter(model == "EuroCOVIDhub-ensemble", 
+         horizon == 2) |>
+  group_by(scale, target_type) |>
+  summarise(interval_score = mean(interval_score), 
+            .groups = "drop_last") |>
+  make_table()
+```
+
+## Correlation between scores
+
+```{r}
+scores |> 
+  filter(model == "EuroCOVIDhub-ensemble", 
+         horizon == 2) |>
+  group_by(target_type, location, scale) |>
+  summarise(interval_score = mean(interval_score), 
+            .groups = "drop_last") %>%
+  pivot_wider(values_from = interval_score, names_from = scale) %>%
+  group_by(target_type) %>%
+  summarise(correlation = cor(natural, log))
+```
+
+
 
 
 # Correlations for ranks, scores and pairwise comparisons
@@ -717,116 +879,6 @@ ggsave(filename = "output/figures/HUB-cors.png", width = 7, height = 3,
 
 
 
-## Figure 7 - Example comparisons of forecasts on the log and the natural scale
-
-```{r}
-plot_pred_score <- function(hub_data, scores, model,
-                            horizon = 2, type = "Cases", 
-                            remove_x_text = TRUE) {
-  forecast_model <- model
-  h <- horizon
-  filtered_hub <- hub_data |>
-    filter(model == forecast_model, 
-           horizon %in% h, 
-           target_type == type) 
-  
-  locations <- unique(filtered_hub$location) 
-  
-  filtered_scores <- scores |>
-    filter(model == forecast_model, 
-           horizon %in% h, 
-           location %in% locations,
-           target_type == type) 
-  
-  plot_natural  <- filtered_hub |>  
-    mutate(id = paste(type, "- natural")) |>
-    plot_predictions(x = "target_end_date") +
-    scale_y_continuous(labels = label_fn)  +
-    facet_wrap(~ id) +
-    theme(legend.position = "bottom", 
-          axis.text.x = element_blank(), 
-          axis.title.x = element_blank()) +
-    labs(y = "Predictions")
-  
-  plot_log <- filtered_hub |>
-    mutate(prediction = log(prediction + 1), 
-           true_value = log(true_value + 1)) |>
-    mutate(id = paste(type, "- log")) |>
-    plot_predictions(x = "target_end_date") +
-    scale_y_continuous(labels = label_fn)  +
-    facet_wrap(~ id) +
-    theme(legend.position = "bottom", 
-          axis.text.x = element_blank(), 
-          axis.title.x = element_blank()) +
-    labs(y = "Predictions")
-  
-  scores_natural <- filtered_scores |>
-    filter(scale == "natural") |>
-    summarise_scores("target_end_date") |>
-    mutate(target_end_date = factor(target_end_date)) |>
-    plot_wis(x = "target_end_date", flip = TRUE) +
-    scale_x_continuous(labels = label_fn) +
-    labs(y = "Target end date")
-  
-  scores_log <- filtered_scores |>
-    filter(scale == "log") |>
-    summarise_scores("target_end_date") |>
-    mutate(target_end_date = factor(target_end_date)) |>
-    plot_wis(x = "target_end_date", flip = TRUE) +
-    labs(y = "Target end date")
-  
-  if (remove_x_text) {
-    scores_natural <- scores_natural +
-      theme(axis.text.x = element_blank(), 
-            axis.title.x = element_blank())
-    # scores_log <- scores_log +
-    #   theme(axis.text.x = element_blank(), 
-    #         axis.title.x = element_blank())
-  }
-  
-  list(plot_natural, scores_natural, plot_log, scores_log )
-}
-
-
-put_plot_together <- function(modelname = "EuroCOVIDhub-ensemble", 
-                              locationname = "DE") {
-  
-  plot_cases <- plot_pred_score(hub_data |> filter(location == locationname), 
-                                  scores, modelname, 
-                                  remove_x_text = TRUE, 
-                                  type = "Cases")
-  
-  plot_deaths <- plot_pred_score(hub_data |> filter(location == locationname), 
-                                     scores, modelname, 
-                                     type = "Deaths")
-  
-  layout <- "
-AE
-BF
-CG
-DH"
-  
-  plot_cases[[1]] + plot_cases[[2]] + plot_cases[[3]] +
-    plot_cases[[4]] + plot_deaths[[1]] +
-    plot_deaths[[2]] + plot_deaths[[3]] + plot_deaths[[4]] +
-    plot_annotation(tag_levels = "A") +
-    plot_layout(guides = "collect", 
-                design = layout) &
-    theme(legend.position = "bottom")
-}
-
-put_plot_together("EuroCOVIDhub-ensemble")
-ggsave(filename = "output/figures/HUB-model-comparison-ensemble.png", width = 9, height = 7)
-
-put_plot_together("epiforecasts-EpiNow2")
-ggsave(filename = "output/figures/HUB-model-comparison-epinow.png", width = 9, height = 7)
-
-put_plot_together("EuroCOVIDhub-baseline", locationname = "DE")
-ggsave(filename = "output/figures/HUB-model-comparison-baseline.png", width = 9, height = 7)
-
-
-```
-
 
 ```{r}
 scores |>
@@ -889,66 +941,6 @@ s_summarised |>
 ```
 
 
-
-# Table with relevant values
-
-```{r}
-summary <- hub_data |>
-  filter(horizon == 2) |>
-  mutate(natural = true_value, 
-         log = log(pmax(0, true_value) +1)) |>
-  select(location, target_type, target_end_date, natural, log) |>
-  pivot_longer(cols = c(natural, log), values_to = "true_value", names_to = "scale") |>
-  unique() |>
-  group_by(target_type, scale) |>
-  summarise(mean = mean(true_value), 
-            sd = sd(true_value), 
-            var = var(true_value))
-  
-table_obs <- summary |>
-  pivot_longer(cols = c(mean, sd, var), names_to = "measure") |>
-  pivot_wider(values_from = value, names_from = scale) |>
-  select(target_type, measure, natural, log) |>
-  mutate(quantity = "Observations", 
-         natural = round(natural), 
-         log = round(log, 2)) |>
-  select(target_type, quantity, measure, natural, log)
-
-table_scores <- scores |> 
-  filter(model == "EuroCOVIDhub-ensemble", 
-         horizon == 2) |>
-  group_by(target_type, scale) |>
-  summarise(mean = mean(interval_score), 
-            sd = sd(interval_score), 
-            .groups = "drop_last") |>
-  pivot_longer(cols = c(mean, sd), names_to = "measure") |>
-  pivot_wider(values_from = value, names_from = scale) |>
- mutate(quantity = "WIS", 
-         natural = round(natural), 
-         log = round(log, 2)) |>
-  select(target_type, quantity, measure, natural, log)
-  
-table <- rbind(table_obs, 
-               table_scores) |>
-  arrange(quantity, target_type, measure)
-
-
-
-table |>
-  kable(format = "latex", booktabs = TRUE,
-        align = c("l", "l", "l", rep("c", 2)),
-        # col.names = c(" ", names(scores)[-(1:2)])) %>%
-  ) #|>
-  # collapse_rows(columns = 1) %>%
-  # kable_styling(latex_options = c("scale_down",
-  #                                 "hold_position")) %>%
-  # column_spec(1, background = "white") %>%
-  # pack_rows("Observations", 1, 6, indent = FALSE,
-  #           hline_after = TRUE) %>%
-  # pack_rows("WIS", 7, 10, indent = FALSE,
-  #           hline_after = TRUE)
-
-```
 
 
 

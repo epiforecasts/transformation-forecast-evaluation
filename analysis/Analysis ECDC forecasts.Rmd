@@ -21,6 +21,7 @@ library(kableExtra)
 library(performance)
 library(tidytext)
 library(grid)
+library(ggpubr)
 
 recompute_scores <- FALSE
 
@@ -88,6 +89,15 @@ filtermodels <- check$unique_values |>
          location == 32) |>
   pull(model)
 
+remove <- hub_data |> 
+  group_by(model, forecast_date, location, target_type) |>
+  summarise(q = length(unique(quantile))) |>
+  filter(q < 23) |>
+  pull(model) |>
+  unique() 
+
+filtermodels <- setdiff(filtermodels, remove)
+
 scores <- scores[model %in% filtermodels]
 scores[, type_and_scale := paste0(target_type, " - ", scale)]
 scores[, type_and_scale := factor(type_and_scale, 
@@ -95,6 +105,7 @@ scores[, type_and_scale := factor(type_and_scale,
                                              "Cases - log", "Deaths - log"))]
 
 hub_data <- hub_data[model %in% filtermodels]
+hub_data <- hub_data[forecast_date >= "2021-03-05"]
 hub_data[, true_value := pmax(true_value, 0)]
 
 ```
@@ -134,10 +145,28 @@ fwrite(scores_gr, here("output", "data", "all-scores-growth-rate-european-hub.cs
 ```
 
 
-General thoughts?
+## Basic data summary
+```{r}
+hub_data |>
+  summarise(min_date = min(forecast_date), 
+            max_date = max(forecast_date)) |>
+  mutate(week_diff = (max_date - min_date - 1) / 7)
 
-- Focus on Hub-ensemble or average across all models? 
-- Focus on two weeks ahead? 
+hub_data$location |> 
+  unique() |>
+  length()
+
+hub_data |> 
+  filter(horizon == 2) |>
+  avail_forecasts(by = c("target_end_date", "target_type", "model")) |>
+  mutate(forecast_date = as.Date(target_end_date) - 12) |>
+  plot_avail_forecasts(show_numbers = FALSE) +
+  facet_grid(~ target_type) + 
+  labs(y = "Model", x = "Forecast date") 
+
+ggsave(filename = "output/figures/number-avail-forecasts.png", height = 4, width = 10)
+```
+
 
 ## =============================================================================
 ## FIGURE 4
@@ -257,53 +286,8 @@ ggsave("output/figures/HUB-mean-obs-location.png", width = 10, height = 10)
 # This uses the ensemble, but alternatively, we could think about just summarising across all models for these plots? 
 ```
 
-Figure
-Currently discontinuoued and just there to discuss it. 
-that shows Variance vs. mean of the observations. Makes the point that the
-data looks neg. binomial. 
+## Figure 5 - Correlations between everything
 ```{r}
-# plot with mean vs. variance --------------------------------------------------
-plot_var_mean <- function(hub_data, log = FALSE) {
-  df <- hub_data |>
-    mutate("x" = true_value) |>
-    dplyr::select(location, target_type, target_end_date, true_value, x) |>
-    unique() |>
-    group_by(location, target_type)
-  
-  f <- function(x) {x + x^2}
-  
-  if (log) {
-    df <- mutate(df, true_value = log(pmax(true_value, 0) + 1))
-    
-    f <- function(x) {log(log(x) + log(x)^2 + 1)}
-  } 
-  
-  out <- df |>
-  summarise(mean_value = mean(x), 
-            sd_value = sd(true_value), 
-            var_value = var(true_value)) |>
-  ggplot(aes(y = var_value, x = mean_value)) +
-  geom_point() + 
-  facet_wrap(~ target_type, scales = "free") + 
-  scale_x_continuous(trans = "log10", labels = label_fn) +
-  scale_y_continuous(trans = "log10", labels = label_fn) +
-  labs(y = "Var observations", x = "Mean observations") + 
-  # geom_function(fun = f, linetype = "dashed", size = 0.5) +
-  theme_scoringutils() + 
-  geom_smooth(alpha = 0.2, size = 0.2)
-
-  if (log) {
-    out <- out +
-      labs(y = "Var log(observations)", x = "Mean observations")
-  }
-
-  return(out)
-}
-  
-p1 <- plot_var_mean(hub_data)
-p2 <- plot_var_mean(hub_data, log = TRUE)
-
-
 wis_vs_total <- function(scores, summary_fct = mean, fulldata = hub_data) {
   
   total_values <- 
@@ -338,23 +322,16 @@ wis_vs_total <- function(scores, summary_fct = mean, fulldata = hub_data) {
     labs(y = "REPLACE", x = "Total number of observed values")
 } 
 
-# log-log versions of that plot
 
 scatter_wis_obs <- wis_vs_total(scores) + 
   labs(y = "Mean WIS") + 
   scale_x_continuous(labels = scale_fn, trans = "log10") +
-  scale_y_continuous(labels = scale_fn, trans = "log10") 
-
-p1 / p2 / scatter_wis_obs + 
-  plot_layout(heights = c(1, 1, 2))
-
-ggsave("output/figures/HUB-mean-scores-vs-total-log-log.png", width = 7, height = 7)
-```
+  scale_y_continuous(labels = scale_fn, trans = "log10") + 
+  ggpubr::stat_cor(method = "spearman", p.accuracy = 0.001, 
+                   cor.coef.name = "rho", size = 3)
 
 
 
-## Figure 5 - Correlations between everything
-```{r}
 df <- scores |>
   filter(horizon < 5) |>
   select(-c(coverage_deviation, bias, ae_median, dispersion, underprediction, overprediction, type_and_scale)) |>
@@ -400,7 +377,7 @@ p_cor_skill <- correlation_rel_skill |>
 (scatter_wis_obs) / (p_cor_scores + p_cor_skill) +
   plot_layout(guides = "collect") +
   plot_annotation(tag_levels = "A") +
-  plot_layout(widths = c(1, 1), heights = c(2, 1)) &
+  plot_layout(widths = c(1, 1), heights = c(3, 1)) &
   theme(legend.position = "bottom")
 
 ggsave("output/figures/HUB-correlations.png", width = 7, height = 5.5)
@@ -882,6 +859,35 @@ plots <- lapply(cors, plot_correlation)
 
 correlation
 ```
+
+
+
+```{r}
+s <- hub_data |>
+  filter(model %in% c("EuroCOVIDhub-ensemble", "epiforecasts-EpiNow2")) |>
+  score()
+
+s_summarised <- s |>
+  summarise_scores(by = c("model", "range", "horizon"), metric = c("interval_score"))
+
+s_summarised |>
+  select(c(model, interval_score, range, horizon)) |>
+  pivot_wider(names_from = model, values_from = interval_score) |>
+  mutate(rel = `epiforecasts-EpiNow2` / `EuroCOVIDhub-ensemble`) |>
+  filter(horizon == 4)
+  ggplot(aes(y = rel, x = range, 
+             color = factor(horizon), group = factor(horizon))) +
+  geom_line()
+
+s_summarised |>
+  filter(horizon == 1) |>
+  select(c(model, interval_score, range, horizon)) |>
+  ggplot(aes(y = interval_score, x = range, 
+             color = model, group = model)) +
+  geom_line()
+
+```
+
 
 
 # Table with relevant values
@@ -1392,5 +1398,104 @@ performance::check_outliers(reg_gr_log)
 
 ```
 
+
+
+
+
+
+
+Figure
+Currently discontinuoued and just there to discuss it. 
+that shows Variance vs. mean of the observations. Makes the point that the
+data looks neg. binomial. 
+```{r}
+# plot with mean vs. variance --------------------------------------------------
+plot_var_mean <- function(hub_data, log = FALSE) {
+  df <- hub_data |>
+    mutate("x" = true_value) |>
+    dplyr::select(location, target_type, target_end_date, true_value, x) |>
+    unique() |>
+    group_by(location, target_type)
+  
+  f <- function(x) {x + x^2}
+  
+  if (log) {
+    df <- mutate(df, true_value = log(pmax(true_value, 0) + 1))
+    
+    f <- function(x) {log(log(x) + log(x)^2 + 1)}
+  } 
+  
+  out <- df |>
+  summarise(mean_value = mean(x), 
+            sd_value = sd(true_value), 
+            var_value = var(true_value)) |>
+  ggplot(aes(y = var_value, x = mean_value)) +
+  geom_point() + 
+  facet_wrap(~ target_type, scales = "free") + 
+  scale_x_continuous(trans = "log10", labels = label_fn) +
+  scale_y_continuous(trans = "log10", labels = label_fn) +
+  labs(y = "Var observations", x = "Mean observations") + 
+  # geom_function(fun = f, linetype = "dashed", size = 0.5) +
+  theme_scoringutils() + 
+  geom_smooth(alpha = 0.2, size = 0.2)
+
+  if (log) {
+    out <- out +
+      labs(y = "Var log(observations)", x = "Mean observations")
+  }
+
+  return(out)
+}
+  
+p1 <- plot_var_mean(hub_data)
+p2 <- plot_var_mean(hub_data, log = TRUE)
+
+
+wis_vs_total <- function(scores, summary_fct = mean, fulldata = hub_data) {
+  
+  total_values <- 
+    fulldata |> 
+    filter(!is.na(prediction)) |>
+    group_by(location, target_type, target_end_date) |>
+    summarise(true_value = unique(true_value)) |>
+    group_by(location, target_type) |>
+    summarise(total = mean(true_value))
+  
+  plot_df <- scores |> 
+    filter(model == "EuroCOVIDhub-ensemble", 
+           horizon == 2) |>
+    group_by(location, target_type, scale, type_and_scale) |>
+    summarise(wis = summary_fct(interval_score), 
+              .groups = "drop_last") |> 
+    inner_join(total_values) 
+  
+  plot_df |>
+    group_by(target_type, scale) |>
+    summarise(correlation = cor(wis, total)) |> 
+    print()
+  
+  plot_df |>
+    ggplot(aes(y = wis, x = total)) + 
+    geom_point() + 
+    facet_wrap(~ type_and_scale, scale = "free") + 
+    theme_scoringutils() + 
+    theme(legend.position = "none") + 
+    scale_x_continuous(labels = scale_fn) +
+    scale_y_continuous(labels = scale_fn) +
+    labs(y = "REPLACE", x = "Total number of observed values")
+} 
+
+# log-log versions of that plot
+
+scatter_wis_obs <- wis_vs_total(scores) + 
+  labs(y = "Mean WIS") + 
+  scale_x_continuous(labels = scale_fn, trans = "log10") +
+  scale_y_continuous(labels = scale_fn, trans = "log10") 
+
+p1 / p2 / scatter_wis_obs + 
+  plot_layout(heights = c(1, 1, 2))
+
+ggsave("output/figures/HUB-mean-scores-vs-total-log-log.png", width = 7, height = 7)
+```
 
 

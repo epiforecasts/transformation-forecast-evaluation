@@ -62,7 +62,7 @@ In the abstract, this article is a very good one. We did a very good job of the 
 Probabilistic forecasts play an important role in decision-making in epidemiology and public health \citep{reichCollaborativeMultiyearMultimodel2019, funkShorttermForecastsInform2020, cramerEvaluationIndividualEnsemble2021, bracherShorttermForecastingCOVID192021, europeancovid-19forecasthubEuropeanCovid19Forecast2021, sherrattPredictivePerformanceMultimodel2022}, as well as other areas as diverse as economics \citep{timmermannForecastingMethodsFinance2018, elliottForecastingEconomicsFinance2016} or meteorology \citep{gneitingWeatherForecastingEnsemble2005, kukkonenReviewOperationalRegionalscale2012}. Epidemiological modelling in particular has received widespread attention during the COVID-19 pandemic. Evaluations of forecasts can provide feedback for forecasters and researchers to improve their models, and help decision makers distinguish good from bad predictions and choosing forecasters and models that should inform future decisions.
 
 Probabilistic forecasts \citep{heldProbabilisticForecastingInfectious2017} are usually evaluated using so-called proper scoring rules \citep{gneitingStrictlyProperScoring2007}, which return a numerical score as a function of the forecast and the observed data. Forecasters, in expectation, optimise their score by providing a predictive distribution that is equal to the data-generating distribution, and will be penalised if they fail to do so. 
-This paper focuses on one particular proper scoring rule, the Weighted Interval Score (WIS, formulas given in Section XXX in the SI) \citep{bracherEvaluatingEpidemicForecasts2021}, which is commonly used in epidemiology and other fields. The WIS can be understood as an approximation of the Continuous Ranked Probability Score (CRPS) \citep{gneitingStrictlyProperScoring2007} for predictive distributions represented by a set of predictive quantiles. The WIS and the CRPS measure the absolute distance between the predictive distribution and the observed value and can be understood as a generalisation of the absolute error to full predictive distributions (see details in section XX in the SI). For simplicity, we will use "absolute error" and "absolute distance" interchangeably, even though the former applies only to point forecasts and the latter is more appropriate for predictive distributions. 
+This paper focuses on one particular proper scoring rule, the Weighted Interval Score (WIS, formulas given in Section \ref{wis} in the SI) \citep{bracherEvaluatingEpidemicForecasts2021}, which is commonly used in epidemiology and other fields. The WIS can be understood as an approximation of the Continuous Ranked Probability Score (CRPS) \citep{gneitingStrictlyProperScoring2007} for predictive distributions represented by a set of predictive quantiles. The WIS and the CRPS measure the absolute distance between the predictive distribution and the observed value and can be understood as a generalisation of the absolute error to full predictive distributions (see details in Sections \ref{wis} and \ref{crps} in the SI). For simplicity, we will use "absolute error" and "absolute distance" interchangeably, even though the former applies only to point forecasts and the latter is more appropriate for predictive distributions. 
 The WIS has been and is currently used by several Forecast Hubs for COVID-19 in the US \citep{cramerCOVID19ForecastHub2020, cramerEvaluationIndividualEnsemble2021}, Europe \citep{sherrattPredictivePerformanceMultimodel2022}, Germany and Poland \citep{bracherShorttermForecastingCOVID192021, bracherNationalSubnationalShortterm2021}, as well as the US Flu Forecasting Hub \citep{CdcepiFlusightforecastdata2022}. 
 
 Epidemiological processes are commonly understood and modeled to be inherently exponential in nature, as every infectious individual is assumed to lead to some number of additional infections [CITATION]. 
@@ -182,7 +182,7 @@ In practice, one issue with the log transformation is that it cannot readily be 
 As an empirical example for evaluating forecasts on the natural and on the log scale we use forecasts from the European Forecast Hub \citep{europeancovid-19forecasthubEuropeanCovid19Forecast2021, sherrattPredictivePerformanceMultimodel2022}. 
 The European COVID-19 Forecast Hub is one of several COVID-19 Forecast hubs (together with a Hub in the US \citep{cramerEvaluationIndividualEnsemble2021} and one in Germany and Poland \citep{bracherShorttermForecastingCOVID192021} that systematically collects, aggregated and evaluated forecasts of several COVID-19 targets created by different teams every week. Forecasts are made one to four weeks ahead into the future and follow a quantile-based format with a set of 22 quantiles plus the median ($0.01, 0.025, 0.05, ..., 0.5, ... 0.95, 0.975, 0.99$). 
 
-The forecasts used for the purpose of this illustrations are two-week-ahead forecasts submitted between February 8 2021 and October 18 2021 for reported cases and deaths from COVID-19. We filtered all forecasts submitted to the Hub to only include models which have submitted forecasts for both deaths and cases for 4 horizons in 32 locations on at least 16 forecast dates. Where not otherwise stated, we report results for a two-week-ahead forecast horizon. 
+ 2021 and October 18 2021 for reported cases and deaths from COVID-19. We filtered all forecasts submitted to the Hub to only include models which have submitted forecasts for both deaths and cases for 4 horizons in 32 locations on at least 16 forecast dates (see Figure \ref{fig:HUB-num-avail-models}. Where not otherwise stated, we report results for a two-week-ahead forecast horizon. 
 
 In addition to the WIS we use pairwise comparisons \citep{cramerEvaluationIndividualEnsemble2021} to evaluate models against each other. In a first step, score ratios are computed for all pairs of models by taking the set of overlapping forecasts between the two models and dividing the score of one model over the score achieved by the other model. The relative skill for a given model is then obtained by taking the geometric mean of all score ratios which involve that model. Low values are better, and the average model receives a relative skill score of 1. 
 
@@ -215,8 +215,8 @@ Across the dataset, the average number of observed cases and deaths varied consi
     \label{fig:HUB-cors}
 \end{figure}
 
-As expected on the natural scale, scores correlate strongly with the average number of observed cases and deaths (Spearman correlation: XX and XX) in a given country (see Fig \ref{fig:HUB-mean-locations}A, B).
-This relationship is not evident on the log scale, where correlation is much weaker and maybe slightly negative (Spearman correlation: XX and XX), implying larger scores for for countries with lower mean incidences. 
+As expected on the natural scale, scores correlate strongly with the average number of observed cases and deaths (Spearman rank correlation: 0.96 and 0.97) in a given country (see Fig \ref{fig:HUB-mean-locations}A, B).
+On the log scale correlation is much weaker and slightly negative, at least in terms of rank correlation (Spearman correlation: -0.33 and -0.36), implying larger scores for for countries with lower mean incidences. 
 
 
 \begin{figure}[h!]
@@ -229,12 +229,10 @@ This relationship is not evident on the log scale, where correlation is much wea
 \end{figure}
 
 
-For \textit{individual} forecasts, rankings between models for single forecasts are mostly preserved, with differences increasing across forecast horizons (see Figure \ref{fig:HUB-cors}). When evaluating performance \textit{across} different forecasts and forecast targets, relative skill scores of the models change considerably. The change is stronger for cases than for deaths (Figure \ref{fig:HUB-cors}XX) and tends to increase with increasing forecast horizon. 
+For \textit{individual} forecasts, rankings between models for single forecasts are mostly preserved, with differences increasing across forecast horizons (see Figure \ref{fig:HUB-cors}). When evaluating performance \textit{across} different forecasts and forecast targets, relative skill scores of the models change considerably. The change is stronger for cases than for deaths (Figure \ref{fig:HUB-cors}C) and tends to increase with increasing forecast horizon. 
 
-When comparing examples of forecasts on the natural scale with log-transformed ones (see Figures XX, XX, XX) a few interesting patterns emerge. Missing the peak, i.e. predicting increasing numbers while actual observations are already falling, tends to contribute a lot to overall scores on the natural scale (see forecasts in May in Figure XXA, B). On the log scale, these have less of an influence, as errors are smaller in relative terms (see panels C and D). We hypothesise that the larger divergence in scores for cases (compared to scores for deaths) displayed in Figure \ref{fig:HUB-pairwise}C is related to the fact that outlier forecasts missing the peak are more common for cases than for deaths. 
-Conversely, failure to predict an upswing while numbers are still low, is not severely punished on the natural scale (see forecasts in July in Figure XX A, B), as overall absolute errors are low. On the log scale, missing lower inflection points tends to lead to more severe penalties (see panels C and D). One can also observe that on the natural scale, scores tend to track the overall level of the target quantity (compare for example forecasts for March-July with forecasts for September-October in Figure XXE, F). On the log scale, scores increase whenever forecasts are far away from the truth in relative terms, regardless of the overall level of observations. 
-
-Furthermore, including very low numbers in the confidence intervals may lead to very high scores on the log-scale. This may be an issue especially when forecasting small quantities. Figure \ref{fig:HUB-model-comparison-baseline} shows forecasts and scores for the baseline model, which had zero included in its 50 percent intervals for the forecasts in XX to XX, leading to excessive dispersion values on the log scale. Notwithstanding the general concern, one can argue that in the specific example (at least for cases) including zero in the prediction intervals was unreasonable and rightly penalised given that case numbers were in the thousands. 
+When comparing examples of forecasts on the natural scale with log-transformed ones (see Figures \ref{fig:HUB-model-comparison-ensemble}, \ref{fig:HUB-model-comparison-baseline}, \ref{fig:HUB-model-comparison-epinow}) a few interesting patterns emerge. Missing the peak, i.e. predicting increasing numbers while actual observations are already falling, tends to contribute a lot to overall scores on the natural scale (see forecasts in May in Figure \ref{fig:HUB-model-comparison-ensemble}A, B). On the log scale, these have less of an influence, as errors are smaller in relative terms (see panels C and D). We hypothesise that the larger divergence in scores for cases (compared to scores for deaths) displayed in Figure \ref{fig:HUB-pairwise}C is related to the fact that outlier forecasts missing the peak are more common for cases than for deaths. 
+Conversely, failure to predict an upswing while numbers are still low, is less severely punished on the natural scale (see forecasts in July in Figure \ref{fig:HUB-model-comparison-ensemble} A, B), as overall absolute errors are low. On the log scale, missing lower inflection points tends to lead to more severe penalties (see panels C and D). One can also observe that on the natural scale, scores tend to track the overall level of the target quantity (compare for example forecasts for March-July with forecasts for September-October in Figure \ref{fig:HUB-model-comparison-ensemble}E, F). On the log scale, scores increase whenever forecasts are far away from the truth in relative terms, regardless of the overall level of observations. 
 
 \begin{figure}[h!]
     \centering
@@ -258,13 +256,15 @@ Evaluating the rank order of forecasts from the ECDC forecast hub we saw that sc
 In this paper we proposed a log transformation of forecasts and observed values prior to evaluation with the WIS (or CRPS) in order to address issues that arise when evaluating epidemiological forecasts based on a measure of absolute error. We gave a mathematical intuition for the transformation and showed that scores on the log scale can be interpreted as a) a measure of relative (multiplicative) prediction errors, as well as b) as an approximate score for a forecast of the multiplicative growth rate of the target quantity. 
 When applying this approach to forecasts from the European COVID-19 Forecast Hub, we found overall scores to be more equal across, time, location and target type (cases, deaths). Scores on the log scale were much less influenced by the overall incidence level in a country, and showed a slight tendency to be higher in locations with a very incidences. We found that model rankings changed noticeably, favouring models like epiforecasts-EpiNow2 which explicitly has an exponential error structure, and disfavouring models like MUNI-ARIMA which is purely statistical model with a linear error structure. On the natural scale, missing the peak and overshooting was more severely penalised, while missing the nadir and a following upswing in numbers tended to be more severely penalised on the log scale than on the natural scale. 
 
-\paragraph{strengths and weaknesses}
-
 Applying a log transformation prior to the WIS means that forecasts are evaluated in terms of relative errors and errors on the multiplicative growth rate, rather than absolute errors. The most important strength of this approach is that the evaluation better accommodates the exponential nature of epidemiological process and the types of errors forecasters who accurately model those processes are expected to make. The log transformation also helps avoid issues with scores being strongly influenced by the order of magnitude of the forecast quantity, which can be seen when evaluating forecasts on the natural scale. 
-A potential downside is that forecast evaluation is unreliable in situations where observed values are zero or very small. Similarly, locations with lower incidences may get disproportionate weight (i.e. high scores) when evaluating forecasts on the log scale. \cite{bracherEvaluatingEpidemicForecasts2021} argue that the large weight given to forecasts for locations with high incidences is a desirable property, as it reflects performance on the targets we should care about most. On the other hand, scoring forecasts on the log scale may be less influenced by single outliers and better reflect consistent performance across time, space, and forecast targets. It also gives higher weight to another type of situation one may care about, namely one in which numbers start to rise from a previously low level. 
+A potential downside is that forecast evaluation is unreliable in situations where observed values are zero or very small. Including very small values in prediction intervals (see e.g. Figure \ref{fig:HUB-model-comparison-baseline}) can lead to excessive dispersion values on the log scale. 
+Similarly, locations with lower incidences may get disproportionate weight (i.e. high scores) when evaluating forecasts on the log scale. \cite{bracherEvaluatingEpidemicForecasts2021} argue that the large weight given to forecasts for locations with high incidences is a desirable property, as it reflects performance on the targets we should care about most. On the other hand, scoring forecasts on the log scale may be less influenced by single outliers and better reflect consistent performance across time, space, and forecast targets. It also gives higher weight to another type of situation one may care about, namely one in which numbers start to rise from a previously low level. 
+
+
+
 While scores on the log scale can always be interpreted as a measure of relative (multiplicative) predictive performance, the interpretation as a score for a forecast of the multiplicative growth rate is only approximate. If one is explicitly interested in scoring a forecast of the growth rate, it may be better to use a different transformation, e.g. dividing every forecast and corresponding observed value by the previously last observed value when the forecast was made. 
 
-It is important to note that the log transformation is only one of many transformation that may be useful and appropriate in an epidemiological context. One easy transformation is to divide all forecasts by the population in a location, in order to obtain forecasts standardised incidences per e.g. 100,000 inhabitants. A second transformation was mentioned above, namely converting forecasts into forecasts for the multiplicative growth rate by dividing by the last observed value. One could also think about applying a Box-Cox or a square-root transformation in order to stabilise the variance of the forecasts. Another promising transformation would be to divide each forecast by the forecast of the previous week (and observations by the observation of the previous week), in order to obtain forecasts for week-to-week growth rates. This would be akin to evaluating the shape of the predicted trajectory against the shape of the observed trajectory (for a different approach to evaluation the shape of a forecast, see https://arxiv.org/abs/2209.04035). This, unfortunately is not well defined in the context of forecasts stored as predictive quantiles, as the growth rate of the $\alpha$-quantile may be different from the $\alpha$-quantile of the growth-rate, but may be an interesting approach if predictive samples are available. What makes this approach of transforming forecasts before scoring particularly interesting is the possibility to construct composite scores as a weighted sum of scores based on different transformations. This would allow forecast consumers to assign explicit weights to different qualities of the forecasts they might care about. 
+It is important to note that the log transformation is only one of many transformation that may be useful and appropriate in an epidemiological context. One easy transformation is to divide all forecasts by the population in a location, in order to obtain forecasts standardised incidences per e.g. 100,000 inhabitants. A second transformation was mentioned above, namely converting forecasts into forecasts for the multiplicative growth rate by dividing by the last observed value. One could also think about applying a Box-Cox or a square-root transformation in order to stabilise the variance of the forecasts. Another promising transformation would be to divide each forecast by the forecast of the previous week (and observations by the observation of the previous week), in order to obtain forecasts for week-to-week growth rates. This would be akin to evaluating the shape of the predicted trajectory against the shape of the observed trajectory (for a different approach to evaluation the shape of a forecast, see \citep{srivastavaShapebasedEvaluationEpidemic2022}). This, unfortunately is not well defined in the context of forecasts stored as predictive quantiles, as the growth rate of the $\alpha$-quantile may be different from the $\alpha$-quantile of the growth-rate, but may be an interesting approach if predictive samples are available. What makes this approach of transforming forecasts before scoring particularly interesting is the possibility to construct composite scores as a weighted sum of scores based on different transformations. This would allow forecast consumers to assign explicit weights to different qualities of the forecasts they might care about. 
 
 Exploring these different transformations is a promising avenue for future work that could help bridge the gap between modellers and policy makers by providing scoring rules that better reflect what forecast consumers actually care about. We have showed that the log transformation can lead to significant changes in the relative rankings of models against each other, with potentially important implications for decision makers who rely on the knowledge of past performance to make a decision about which forecasts should inform future decisions. We think it would therefore be a good idea to show different versions of the WIS in order to obtain a richer picture of model performance. While we have provided a small case study, more work needs to be done to better understand the effects of applying a log transformation in different contexts and how it might affect decision making. 
 
@@ -282,39 +282,29 @@ Exploring these different transformations is a promising avenue for future work 
 \begin{table}[h!]
     \centering
     
-    \begin{tabular}{lllcc}
-    \toprule
-    target\_type & quantity & measure & natural & log\\
-    \midrule
-    Cases & Observations & mean & 20308 & 8.39\\
-    Cases & Observations & sd & 43405 & 2.11\\
-    Cases & Observations & var & 1884002308 & 4.46\\
-    \addlinespace
-    Deaths & Observations & mean & 259 & 3.79\\
-    Deaths & Observations & sd & 532 & 2.11\\
-    Deaths & Observations & var & 283492 & 4.46\\
-    \addlinespace
-    \hline
-    \addlinespace
-    Cases & WIS & mean & 4544 & 0.28\\
-    Cases & WIS & sd & 17585 & 0.49\\
-    \addlinespace
-    Deaths & WIS & mean & 28 & 0.22\\
-    Deaths & WIS & sd & 67 & 0.26\\
-    \bottomrule
-    \end{tabular}
+   \begin{tabular}{lllcc}
+        \toprule
+        target\_type & quantity & measure & natural & log\\
+        \midrule
+        Cases & Observations & mean & 19941 & 8.33\\
+        Cases & Observations & sd & 43149 & 2.09\\
+        Cases & Observations & var & 1861850319 & 4.35\\
+        Deaths & Observations & mean & 222 & 3.65\\
+        Deaths & Observations & sd & 481 & 2.07\\
+        Deaths & Observations & var & 231025 & 4.29\\
+        \addlinespace
+        \hline
+        \addlinespace
+        Cases & WIS & mean & 4544 & 0.28\\
+        Cases & WIS & sd & 17585 & 0.49\\
+        Deaths & WIS & mean & 28 & 0.22\\
+        Deaths & WIS & sd & 67 & 0.26\\
+        \bottomrule
+        \end{tabular}
     \caption{Table with summary statistics for observations and scores for forecasts from the ECDC data set.}
     \label{tab:HUB-summary}
 \end{table}
 
-
-
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.99\textwidth]{output/figures/HUB-mean-scores-vs-total-log-log.png}
-    \caption{My current thinking is that the top row is helpful, as it explalins what the mean / var relationship is which is relevant for how much weight small countries get. I think the 2nd row is just completely useless. The 3rd and 4th row may be helpful. In some sense it is duplicated information from above, but it gives some nice intuiton for the correlations. I could alternatively also turn it into a correlation plot and add it to the other one. }
-    \label{fig:HUB-mean-scores-total-loglog}
-\end{figure}
 
 
 \subsection{Additional information on the WIS} \label{wis}
@@ -354,14 +344,21 @@ where $X$ and $X'$ are independent realisations from the predictive distribution
 
 \subsection{Additional figures}
 
-NUMBER OF AVAILABLE FORECASTS
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.99\textwidth]{output/figures/number-avail-forecasts.png}
+    \caption{
+    Number of forecasts available from different models for each forecast date. 
+    }
+    \label{fig:HUB-num-avail-models}
+\end{figure}
 
 
 \begin{figure}[h!]
     \centering
     \includegraphics[width=0.99\textwidth]{output/figures/HUB-model-comparison-baseline.png}
     \caption{
-    Forecasts and scores for two-week-ahead predictions from the EuroCOVIDhub-ensemble made in Germany. A, E: 50\% and 90\% prediction intervals and observed values for cases and deaths on the natural scale. B, F: Corresponding scores. C, G: Forecasts and observations on the log scale. D, H: Corresponding scores. 
+    Forecasts and scores for two-week-ahead predictions from the EuroCOVIDhub-baseline made in Germany. The model had zero included in some of its 50 percent intervals (e.g. for case forecasts in July), leading to excessive dispersion values on the log scale. One could argue that including zero in the prediction intervals constituted an unreasonable forecast that was rightly penalised, but in general care has to be taken with small numbers. A, E: 50\% and 90\% prediction intervals and observed values for cases and deaths on the natural scale. B, F: Corresponding scores. C, G: Forecasts and observations on the log scale. D, H: Corresponding scores. 
     }
     \label{fig:HUB-model-comparison-baseline}
 \end{figure}
@@ -370,7 +367,7 @@ NUMBER OF AVAILABLE FORECASTS
     \centering
     \includegraphics[width=0.99\textwidth]{output/figures/HUB-model-comparison-epinow.png}
     \caption{
-    Forecasts and scores for two-week-ahead predictions from the EuroCOVIDhub-ensemble made in Germany. A, E: 50\% and 90\% prediction intervals and observed values for cases and deaths on the natural scale. B, F: Corresponding scores. C, G: Forecasts and observations on the log scale. D, H: Corresponding scores. 
+    Forecasts and scores for two-week-ahead predictions from the epiforecasts-EpiNow2 model made in Germany. A, E: 50\% and 90\% prediction intervals and observed values for cases and deaths on the natural scale. B, F: Corresponding scores. C, G: Forecasts and observations on the log scale. D, H: Corresponding scores. 
     }
     \label{fig:HUB-model-comparison-epinow}
 \end{figure}

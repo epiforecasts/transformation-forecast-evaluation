@@ -65,8 +65,14 @@ Forecast evaluation plays an essential role in improving forecasting models can 
 
 Probabilistic forecasts \citep{heldProbabilisticForecastingInfectious2017} play an important role in decision-making in epidemiology and public health \citep{reichCollaborativeMultiyearMultimodel2019, funkShorttermForecastsInform2020, cramerEvaluationIndividualEnsemble2021, bracherShorttermForecastingCOVID192021, europeancovid-19forecasthubEuropeanCovid19Forecast2021, sherrattPredictivePerformanceMultimodel2022}, as well as other areas as diverse as economics \citep{timmermannForecastingMethodsFinance2018, elliottForecastingEconomicsFinance2016} or meteorology \citep{gneitingWeatherForecastingEnsemble2005, kukkonenReviewOperationalRegionalscale2012}. Epidemiological modelling in particular has received widespread attention during the COVID-19 pandemic. Evaluations of forecasts can provide feedback for forecasters and researchers to improve their models and train ensembles, and help decision makers distinguish good from bad predictions and choosing forecasters and models that should inform future decisions.
 
-Probabilistic forecasts are usually evaluated using so-called proper scoring rules \citep{gneitingStrictlyProperScoring2007}, which return a numerical score as a function of the forecast and the observed data. Proper scoring rules are constructed such that forecasters are incentivised to report their true belief about the future. Examples of proper scoring rules that have been used to assess epidemiological forecasts are the Continuous Ranked Probability Score~\citep[CRPS,][see formulas in Section \ref{crps}]{gneitingStrictlyProperScoring2007} or its discrete equivalent, the Ranked Probability Score~\citep[RPS,][]{funkAssessingPerformanceRealtime2019}, and the Weighted Interval Score \citep{bracherEvaluatingEpidemicForecasts2021}. 
-The WIS is an approximation of the CRPS for predictive distributions represented by a set of predictive quantiles and is currently used to assess forecasts in COVID-19 forecast hubs in the US \citep{cramerCOVID19ForecastHub2020, cramerEvaluationIndividualEnsemble2021}, Europe \citep{sherrattPredictivePerformanceMultimodel2022}, Germany and Poland \citep{bracherShorttermForecastingCOVID192021, bracherNationalSubnationalShortterm2021}, as well as the US Influenza Forecasting Hub \citep{CdcepiFlusightforecastdata2022}. The WIS and the CRPS measure the absolute distance between the predictive distribution and the observed value and can be understood as a generalisation of the absolute error to predictive distributions. 
+Probabilistic forecasts are usually evaluated using so-called proper scoring rules \citep{gneitingStrictlyProperScoring2007}, which return a numerical score as a function of the forecast and the observed data. Proper scoring rules are constructed such that forecasters are incentivised to report their true belief about the future. Examples of proper scoring rules that have been used to assess epidemiological forecasts are the Continuous Ranked Probability Score~\citep[CRPS,][]]{gneitingStrictlyProperScoring2007} or its discrete equivalent, the Ranked Probability Score~\citep[RPS,][]{funkAssessingPerformanceRealtime2019}, and the Weighted Interval Score \citep{bracherEvaluatingEpidemicForecasts2021}. 
+The CRPS measures the distance of the predictive distribution to the observed data as 
+\begin{linenomath*}
+\begin{equation*}
+    \text{CRPS}(F, y) = \int_{-\infty}^\infty \left( F(x) - 1(x \geq y) \right)^2 dx,
+\end{equation*}    
+\end{linenomath*}
+where y is the true observed value and F the cumulative distribution function (CDF) of predictive distribution. Both the WIS and the CRPS can be understood as a generalisation of the absolute error to predictive distributions. The WIS is itself an approximation of the CRPS for predictive distributions represented by a set of predictive quantiles and is currently used to assess forecasts in COVID-19 forecast hubs in the US \citep{cramerCOVID19ForecastHub2020, cramerEvaluationIndividualEnsemble2021}, Europe \citep{sherrattPredictivePerformanceMultimodel2022}, Germany and Poland \citep{bracherShorttermForecastingCOVID192021, bracherNationalSubnationalShortterm2021}, as well as the US Influenza Forecasting Hub \citep{CdcepiFlusightforecastdata2022}. 
 For a single prediction interval, the interval score is computed as the sum of three penalty components, dispersion (width of the prediction interval), underprediction and overprediction,  
 %
 \begin{linenomath*}
@@ -321,27 +327,6 @@ Exploring these different transformations is a promising avenue for future work 
     \caption{Summary statistics for observations and scores for forecasts from the ECDC data set.}
     \label{tab:HUB-summary}
 \end{table}
-
-
-\subsection{Additional information on the CRPS} \label{crps}
-
-The CRPS measures the distance of the predictive distribution to the observed data-generating distribution as 
-
-\begin{equation*}
-    \text{CRPS}(F, y) = \int_{-\infty}^\infty \left( F(x) - 1(x \geq y) \right)^2 dx,
-\end{equation*}
-
-where y is the true observed value and F the CDF of predictive distribution. Often the following alternative representation is used
-\begin{equation*}
-    \text{CRPS}(F, y) = \frac{1}{2} \mathbb{E}_{F} |X - X'| - \mathbb{E}_P |X - y|,
-\end{equation*}
-  
-where $X$ and $X'$ are independent realisations from the predictive distributions $F$ with finite first moment and $y$ is the true value. In this representation we can simply replace $X$ and $X'$ by samples sum over all possible combinations to obtain the CRPS.  
-
-
-
-
-\subsection{Additional figures}
 
 \begin{figure}[h!]
     \centering

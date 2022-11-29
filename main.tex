@@ -94,7 +94,7 @@ We first outline the motivation for transforming forecasts prior to scoring and 
 \section{Transforming forecasts and observations}
 \label{sec:methods}
 
-Our aim in transforming forecasts and observations is to shift the focus of the evaluation in a way that may be more appropriate for epidemiological forecasts, while preserving the propriety of the score.  Instead of a score representing the magnitude of absolute errors this approach makes it possible to obtain a score which a) measures relative error and at the same time b) provides an approximate measure for how well a forecast captures the multiplicative growth rate of the target quantity (see Section \ref{sec:methods:growthrate}. The interpretation of the log-transformed score as an approximate score for a forecast of the growth rate of a given quantity aligns the evaluation with our understanding of how epidemiological processes should be modeled and the kinds of errors models would typically make. 
+Our aim in transforming forecasts and observations is to shift the focus of the evaluation in a way that may be more appropriate for epidemiological forecasts, while preserving the propriety of the score. A particularly relevant transformation in the context of epidemic phenomena is the natural logarithm. Instead of a score representing the magnitude of absolute errors this approach makes it possible to obtain a score which a) measures relative error and at the same time b) provides an approximate measure for how well a forecast captures the multiplicative growth rate of the target quantity (see Section \ref{sec:methods:growthrate}. The interpretation of the log-transformed score as an approximate score for a forecast of the growth rate of a given quantity aligns the evaluation with our understanding of how epidemiological processes should be modeled and the kinds of errors models would typically make. 
 
 
 \subsection{Interpretation as a score based on multiplicative (relative) errors}
@@ -125,7 +125,12 @@ The analogy between the WIS on the log scale and the absolute error of a point f
 \begin{figure}[h!]
     \centering
     \includegraphics[width=0.99\textwidth]{output/figures/SIM-effect-log-score.png}
-    \caption{Illustration of the weighted interval score (black line) for a $\mathcal{N}(1, 0.2)$ predictive distribution (density represented by the grey area) as a function of the observed value. A: Score on the natural scale, linear x-axis. B: Score on the natural scale, logarithmic x-axis. C: Score on the log scale, linear x-axis. D: Score on the log scale, logarithmic x-axis.} 
+    \caption{Illustration of the weighted interval score (black line) for a $\mathcal{N}(1, 0.2)$ predictive distribution (density represented by the grey area) as a function of the observed value. 
+    
+    A: Scores computed on the natural scale (without prior transformation of the predictive distribution and the observed values). 
+    Scores as a function of observed values (x-axis) on a linear scale. 
+    
+    Score on the natural scale, linear x-axis. B: Score on the natural scale, logarithmic x-axis. C: Score on the log scale, linear x-axis. D: Score on the log scale, logarithmic x-axis.} 
     \label{fig:change-in-scores}
 \end{figure}
 

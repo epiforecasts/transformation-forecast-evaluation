@@ -100,5 +100,5 @@ p4 <- filter(scores, scale == "log") |>
   plot_annotation(tag_levels = "A")
 
 ggsave("output/figures/SIM-effect-log-score.png", width = 7, 
-       height = 3)
+       height = 4)
 

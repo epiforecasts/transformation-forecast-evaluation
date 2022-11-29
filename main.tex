@@ -94,7 +94,7 @@ We first outline the motivation for transforming forecasts prior to scoring and 
 \section{Transforming forecasts and observations}
 \label{sec:methods}
 
-Our aim in transforming forecasts and observations is to shift the focus of the evaluation in a way that may be more appropriate for epidemiological forecasts, while preserving the propriety of the score. A particularly relevant transformation in the context of epidemic phenomena is the natural logarithm. Instead of a score representing the magnitude of absolute errors this approach makes it possible to obtain a score which a) measures relative error and at the same time b) provides an approximate measure for how well a forecast captures the multiplicative growth rate of the target quantity (see Section \ref{sec:methods:growthrate}. The interpretation of the log-transformed score as an approximate score for a forecast of the growth rate of a given quantity aligns the evaluation with our understanding of how epidemiological processes should be modeled and the kinds of errors models would typically make. 
+Our aim in transforming forecasts and observations is to shift the focus of the evaluation in a way that may be more appropriate for epidemiological forecasts, while preserving the propriety of the score. A particularly relevant transformation in the context of epidemic phenomena is the natural logarithm. Instead of a score representing the magnitude of absolute errors this approach makes it possible to obtain a score which a) measures relative error and atx the same time b) provides an approximate measure for how well a forecast captures the multiplicative growth rate of the target quantity (see Section \ref{sec:methods:growthrate}. The interpretation of the log-transformed score as an approximate score for a forecast of the growth rate of a given quantity aligns the evaluation with our understanding of how epidemiological processes should be modeled and the kinds of errors models would typically make. 
 
 
 \subsection{Interpretation as a score based on multiplicative (relative) errors}
@@ -125,16 +125,11 @@ The analogy between the WIS on the log scale and the absolute error of a point f
 \begin{figure}[h!]
     \centering
     \includegraphics[width=0.99\textwidth]{output/figures/SIM-effect-log-score.png}
-    \caption{Illustration of the weighted interval score (black line) for a $\mathcal{N}(1, 0.2)$ predictive distribution (density represented by the grey area) as a function of the observed value. 
-    
-    A: Scores computed on the natural scale (without prior transformation of the predictive distribution and the observed values). 
-    Scores as a function of observed values (x-axis) on a linear scale. 
-    
-    Score on the natural scale, linear x-axis. B: Score on the natural scale, logarithmic x-axis. C: Score on the log scale, linear x-axis. D: Score on the log scale, logarithmic x-axis.} 
+    \caption{Illustration of the weighted interval score on the natural and the log scale. The WIS
+    (black line) is shown for a $\mathcal{N}(1, 0.2)$ predictive distribution (truncated at 0, density represented by the grey area) as a function of the observed value. 
+    A: Scores computed on the natural scale (without prior transformation of the predictive distribution and the observed values). The x-axis is shown on a linear scale. C: Scores computed on the logarithmic scale (log-transforming the predictive distribution and the observed values prior to scoring). The x-axis is shown on a linear scale. B, D: Like A, C, but the x-axis is shown on a relative scale.} 
     \label{fig:change-in-scores}
 \end{figure}
-
-
 
 
 
@@ -168,15 +163,12 @@ Now consider a forecast of $\log y_{t+1}$, where again, the score is determined 
                     &\approx g_{t, t+1} - \hat{g}_{t, t+1} \quad \text{for small } \hat{g}_{t, t+1} \text{ and } g_{t, t+1}. \nonumber
 \end{align}
 
-The score is determined by the size of $\varepsilon^*_{t+1}$, which is approximately equal to the difference between the observed and the predicted growth rate. Note that this approximation becomes increasingly inaccurate when the difference between the predicted and the actual growth rate grows (although forecasts can still be interpreted in terms of relative errors as shown above). %If this is of great concern one may want to use a different transformation such as dividing forecasts and observations by the last known values in order to score the growth rate explicitly (although this lacks the elegance of having one single transformation per time point). 
-
-% Conveniently, the decomposition of the WIS into dispersion, overprediction and underprediction is preserved. The interpretation of the components has now changed in that they now (approximately) represent uncertainty, over-prediction, and under-prediction with the growth rate and so are independent of current incidence. 
+The score is determined by the size of $\varepsilon^*_{t+1}$, which is approximately equal to the difference between the observed and the predicted growth rate. Note that this approximation becomes increasingly inaccurate when the difference between the predicted and the actual growth rate grows (although forecasts can still be interpreted in terms of relative errors as shown above). 
 
 \subsection{Effects on model rankings}
 \label{sec:methods:rankings}
 Rankings between different forecasters based on their scores may change through the log-transformation both when looking at aggregate scores as well as when looking at a single forecast. As an example for the effect on a single forecast, consider two forecasters, A and B. Both issue a single 50\%-prediction interval for a target which later resolves as 1. Forecaster A issues the interval [0.5, 2], while forecaster B issues [0.9. 2.5]. On the natural scale, the score would equal the dispersion of the forecast, i.e. the length of this interval (since the observed value falls within the prediction interval). Forecaster A would receive a score of $2 - 0.5$ = 1.5, beating forecaster B who would receive a score of $2.5 - 0.9 = 1.6$. When we transform the forecast, forecaster A receives a score of $\log (\frac{2}{0.5}) = 1.39$, while forecaster B obtains a score of $\log (\frac{2.5}{0.9}) = 1.02$ and now wins over forecaster A. The main difference between forecaster A and B is that forecaster A has issued a prediction interval ([0.5, 2]) that was more symmetric around the true value than the interval issued by forecaster B ([0.9. 2.6], which was more skewed). This means that in relative terms, Forecaster B was noticeably closer to the true value with the lower bound of their prediction interval, while only being slightly further away with the upper interval. This implies that scores on the log scale may treat (one-sided) outlier forecasts more leniently. 
 
-% PARAGRAPH NEEDS SOME WORK
 Overall model rankings would be expected to differ even more when scores are averaged across multiple forecasts or targets. The change in rankings of aggregate scores is not mainly driven by the kinds of changes in model rankings for single forecasts just discussed. Rather, as observations from exponential processes are likely to be on very different absolute scales, large observations will account for the majority of absolute score but will not dominate relative scores in the same way. Evaluating forecasts based on relative errors may help with comparing performance across different targets. However, log-transforming forecasts and observations may also result in the opposite extreme because small absolute errors (e.g. predicting 9, rather than 3 deaths) may be large in relative terms if the quantity to forecast is very small. This can be exacerbated when forecasts are restricted to discrete values, where relative steps between possible values become greater for values closer to zero. 
 
 \begin{figure}[h!]
@@ -188,7 +180,6 @@ Overall model rankings would be expected to differ even more when scores are ave
 \end{figure}
 
 Whether or not forecast targets with smaller quantities receive higher scores than those for targets with larger quantities, depends on the exact relationship between the mean and the variance of the quantity of interest. To provide a better intuition, we simulated count data following a negative binomial distribution. For these simulated data, log predictions for small quantities received on average higher scores than forecasts for large quantities if the mean and the variance grew at the same rate $\sigma^2 = \mu$, about equal scores when the variance grew at a rate of $\sigma^2 = \mu + \mu^2$, and smaller scores when the variance grew faster than that (Figure \ref{fig:SIM-wis-state-size-mean}). 
-% To illustrate this with count data we sampled forecasts from different negative binomial distributions. The negative binomial distribution has mean $\mu$ and variance $\sigma^2 = \mu + \mu ^2 / \theta$ and for $\lim_{\theta \to \infty}$ converges to the Poisson distribution. For large values of $\theta$, resulting in a variance approximately equal to the mean, forecasts for lower quantities on average received higher scores on the log scale (see Figure \ref{fig:SIM-wis-state-size-mean}. For $\theta = 1$ (and correspondingly, $\sigma^2 = \mu + \mu^2$, we found that scores on the log scale remained approximately constant regardless of the size of the quantity to forecast. For $\theta = 0.1$ (and $\sigma^2 = \mu + 10 \cdot \mu^2$), scores on the log scale increased with the quantity to forecast. When scored on the natural scale, a higher quantity to forecast always lead to higher scores regardless of the chosen distribution (as long as the variance grows together with the mean). 
 
 \subsection{Practical considerations}
 \label{sec:methods:considerations}
@@ -198,7 +189,7 @@ The log-transformation (among many other transformations) is permissible (in the
 \begin{figure}[h!]
     \centering
     \includegraphics[width=0.99\textwidth]{output/figures/example-log-first.png}
-    \caption{Scores for different forecasts evaluated using the WIS and the log WIS. We simulated 1000 observations $Y_i = {\rm e}^{x_i}$, with $x_i \text{ iid} \sim \mathcal{N}(0, 1)$. We then simulated 20 forecasters who would issue a predictive distribution $F = {\rm e}^{x_i}$, with $x \sim \mathcal{N}(0, \sigma)$, with values of $\sigma$ ranging from 0.1 to 2.}
+    \caption{Scores for different forecasts evaluated using the WIS, the WIS on the log-scale and the logarithm of the WIS. We simulated 1000 observations $Y_i = {\rm e}^{x_i}$, with $x_i \text{ iid} \sim \mathcal{N}(0, 1)$. We then simulated 20 forecasters who would issue a predictive distribution $F = {\rm e}^{x_i}$, with $x \sim \mathcal{N}(0, \sigma)$, with values of $\sigma$ ranging from 0.1 to 2. For forecasts evaluated by the WIS and the WIS on log-transformed values, the score is minimised when the predictive distribution equals the data-generating distribution. When taking the logarithm of the WIS, scores are minimised for a predictive distribution that is too narrow compared to the data-generating distribution.}
     \label{fig:log-improper}
 \end{figure}
 
@@ -216,23 +207,11 @@ The forecasts used for the purpose of this illustration are forecasts submitted 
 
 In addition to the WIS we use pairwise comparisons \citep{cramerEvaluationIndividualEnsemble2021} to evaluate the relative performance of models across countries in the presence of missingness. In a first step, score ratios are computed for all pairs of models by taking the set of overlapping forecasts between the two models and dividing the score of one model over the score achieved by the other model. The relative skill for a given model compared to others is then obtained by taking the geometric mean of all score ratios which involve that model. Low values are better, and the average model receives a relative skill score of 1. 
 
-% SECTION STRUCUTRE / IMPORTANT THINGS
-% \begin{itemize}
-% \item X variation gets smaller / more even
-% \item X relationship with country size changes
-% \item X inndividual rankings stay similar
-% \item X relative skill scores change a lot
-% \item deep dive into what happens for individual models
-% \item scores increase across forecast horizons
-% \end{itemize}
-% 
-% Maybe look at correlation between bias and score?
-% Correlation between relative WIS contributions on the log vs. the natural scale.?
-
 \begin{figure}[h!]
     \centering
     \includegraphics[width=0.99\textwidth]{output/figures/HUB-mean-obs-location.png}
-    \caption{Observations and scores across locations and forecast horizons. A: Average (across all time points) of observed cases and deaths for different locations. B: Corresponding boxplot (y-axis on log-scale) of all cases and deaths. C: Scores for two-week-ahead forecasts from the EuroCOVIDhub-ensemble (averaged across all forecast dates) for different locations, evaluated on the natural as well as the logarithmic scale. D: Corresponding boxplots of all individual scores for two-week-ahead predictions. E: Boxplots for the relative change of scores for the EuroCOVIDhub-ensemble across forecast horizons. For any given forecast date and location, forecasts were made for four different forecast horizons, resulting in four scores. All scores were divided by the score for forecast horizon one.}
+    \caption{Observations and scores across locations and forecast horizons for the European COVID-19 Forecast Hub data. Locations are sorted according to the mean observed value in that location. 
+    A: Average (across all time points) of observed cases and deaths for different locations. B: Corresponding boxplot (y-axis on log-scale) of all cases and deaths. C: Scores for two-week-ahead forecasts from the EuroCOVIDhub-ensemble (averaged across all forecast dates) for different locations, evaluated on the natural as well as the logarithmic scale. D: Corresponding boxplots of all individual scores for two-week-ahead predictions. E: Boxplots for the relative change of scores for the EuroCOVIDhub-ensemble across forecast horizons. For any given forecast date and location, forecasts were made for four different forecast horizons, resulting in four scores. All scores were divided by the score for forecast horizon one.}
     \label{fig:HUB-mean-locations}
 \end{figure}
 
@@ -241,7 +220,7 @@ Across the dataset, the average number of observed cases and deaths varied consi
 \begin{figure}[h!]
     \centering
     \includegraphics[width=0.99\textwidth]{output/figures/HUB-correlations.png}
-    \caption{Correlations between observations and scores. A: Mean WIS for two-week-ahead predictions of the EuroCOVIDhub-ensemble against the average number of observations in a location. B: Average Spearman CHECK AGAIN (rank-) correlation of scores for individual forecasts from \textit{all} models. For every individual target (defined by a combination of forecast date, target type, horizon, location), one score was obtained per model. Then, the rank correlation was computed between the scores for all models on the natural scale vs. on the log scale. All rank correlations were averaged and stratified by horizon and target type. C: Correlation between relative skill scores. For every forecast horizon and target type, a separate rel. skill score was computed per model using pairwise comparisons. The plot shows the correlation between the rel. skill scores on the natural vs. on the log scale.}
+    \caption{Correlations between observations and scores. A: Mean WIS for two-week-ahead predictions of the EuroCOVIDhub-ensemble against the average number of observations in a location. B: Average Spearman rank correlation of scores for individual forecasts from all models. For every individual target (defined by a combination of forecast date, target type, horizon, location), one score was obtained per model. Then, the rank correlation was computed between the scores for all models on the natural scale vs. on the log scale. All rank correlations were averaged and stratified by horizon and target type. C: Correlation between relative skill scores. For every forecast horizon and target type, a separate rel. skill score was computed per model using pairwise comparisons. The plot shows the correlation between the rel. skill scores on the natural vs. on the log scale.}
     \label{fig:HUB-cors}
 \end{figure}
 
@@ -267,18 +246,12 @@ Conversely, failure to predict an upswing while numbers are still low, is less s
 \begin{figure}[h!]
     \centering
     \includegraphics[width=0.99\textwidth]{output/figures/HUB-pairwise-comparisons.png}
-    \caption{Changes in model ratings as measured by relative skill for two-week-ahead predictions. Top row: cases, bottom row: deaths. NEED TO CHANGE THE ANNOTATION LEVELS.}
+    \caption{Changes in model ratings as measured by relative skill for two-week-ahead predictions for cases (top row) and deaths (bottom row). A: Relative skill scores for case forecasts from different models submitted to the European COVID-19 Forecast Hub computed on the natural scale. B: Change in rankings as determined by relative skill scores when moving from an evaluation on the natural scale to one on the logarithmic scale. C: Relative skill scores based on scores on the log scale. D: Difference in relative skill scores computed on the natural and on the logarithmic scale. E: Relative contributions of the different WIS components (overprediction, underprediction, and dispersion) to overall model scores on the natural and the logarithmic scale. F, G, H, I, J, K: Analogously for deaths.}
     \label{fig:HUB-rank-order}
 \end{figure}
 
 
 The rank order of different forecasting models (see Figure \ref{fig:HUB-rank-order} indicates that models that do not make use of a exponential error model and thus would be biased towards under-prediction during periods of exponential growth, such as the MUNI-ARMA model, were ranked lower when using a log-transform. The epiforecasts-EpiNow2 forecast model, on the other hand~(created by co-authors of this study), which makes forecasts based on the behaviour of the reproduction number and thus implicitly uses an exponential error model, was the most impacted by the change to log-scale scoring moving from last place for reported cases to 4th place. Other models that are based on modelling the growth rate, such as the LANL-GrowthRate forecaster, do less well after a log-transform, indicating that this potential association between model structure and score under different approximations does not hold strictly. Encouragingly for the European Forecast Hub, the Hub ensemble, which is the forecast the organisers suggest forecast consumers make use of, remains one of the top forecasts across scoring schemes and indeed ranks higher for reported cases when a log-transform is used.
-
-% Observations were overdispersed, meaning that for a given location, the variance in observations exceeds the mean of all observed values (see Figure \ref{fig:HUB-variance-mean}). 
-%Could fit a model var = alpha * x2 + beta *x
-%This is in line with the observation that the association between variance is smaller than mu^2 + mu, meaning that we would expect this. 
-
-
 
 \section{Discussion}
 \label{sec:discussion}
@@ -294,12 +267,6 @@ While scores on the log scale can always be interpreted as a measure of relative
 The log-transformation is only one of many transformation that may be useful and appropriate in an epidemiological context. One easy transformation is to divide all forecasts by the population in a location, in order to obtain forecasts of standardised incidences per e.g. 100,000 inhabitants. A second transformation was mentioned above, namely converting forecasts into forecasts for the multiplicative growth rate by dividing numbers by the last observed value. One could also think about applying a Box-Cox or a square-root transformation in order to stabilise the variance of the forecasts. Another promising transformation would be to divide each forecast by the forecast of the previous week (and observations by the observation of the previous week), in order to obtain forecasts for week-to-week multiplicative growth rates, or alternatively, to ask forecasters to provide estimates of the weekly relative change applied to the latest data and subsequent forecast points directly. This would be akin to evaluating the shape of the predicted trajectory against the shape of the observed trajectory \citep[for a different approach to evaluation the shape of a forecast, see][]{srivastavaShapebasedEvaluationEpidemic2022}. This, unfortunately is not well defined in the context of forecasts stored as predictive quantiles, as the growth rate of the $\alpha$-quantile may be different from the $\alpha$-quantile of the growth-rate, but may be an interesting approach if predictive samples are available. What makes this approach of transforming forecasts before scoring particularly interesting is the possibility to construct composite scores as a weighted sum of scores based on different transformations. This would allow forecast consumers to assign explicit weights to different qualities of the forecasts they might care about. 
 
 Exploring these different transformations is a promising avenue for future work that could help bridge the gap between modellers and policy makers by providing scoring rules that better reflect what forecast consumers actually care about. We have showed that the log-transformation can lead to significant changes in the relative rankings of models against each other, with potentially important implications for decision makers who rely on the knowledge of past performance to make a decision about which forecasts should inform future decisions. While it is commonly accepted that multiple proper scoring rules should usually be considered when comparing forecasts, we think this should be supplemented by considering different transformations of the data to obtain a richer picture of model performance. While we have produced this work as an initial case study, more work needs to be done to better understand the effects of applying a logarithmic or other transformations more comprehensively and in different contexts, and how it might affect decision making. 
-
-
-
- %COULD ALSO MAKE A NICE PLOT ABOUT OUTLIERS, where we look at the effect of outliers. but maybe that is already included in the plot in Figure 1. 
-% could make an analysis re outliers: how do scores change if we remove the 1 or 2 worst forecasts? The one or two best forecasts?
-
 
 \newpage
 
@@ -328,7 +295,7 @@ Exploring these different transformations is a promising avenue for future work 
         Deaths & WIS & sd & 67 & 0.26\\
         \bottomrule
         \end{tabular}
-    \caption{Table with summary statistics for observations and scores for forecasts from the ECDC data set.}
+    \caption{Summary statistics for observations and scores for forecasts from the ECDC data set.}
     \label{tab:HUB-summary}
 \end{table}
 
@@ -404,100 +371,3 @@ where $X$ and $X'$ are independent realisations from the predictive distribution
 
 
 \end{document}
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Idea parking lot 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-% \section{Other ideas}
-% \begin{itemize}
-%     \item Compare different predictive distributions and the score as a function of an outcome.
-%     \item ...
-% \end{itemize}
-
-
-%Score different things from the European / US Forecast Hub and plot the relationship between mean and variance. Plot log-scale scores for different things and see which of these influence average scores most \\
-% What happens to the decomposition of the WIS if we log? 
-
-%\begin{itemize}
-%    \item Optional: Discussion of parallels to point forecasts and the point that you're still incentivised to report the median\\
-%\end{itemize}
-
-
-
-
-% NOT SO CONVINCED ANYMORE THAT THIS WORKS. MY INTUITION IS IF YOU WANT THE GROWTH RATE YOU SHOULD ACTUALLY SCORE THE GROWTH RATE AND DIVIDE BY THE LAST OBSERVED VALUE. 
-% 
-% WELL MAYBE IT WORKS AFTER ALL AND IT WOULD BE THE EQUIVALENT OF LOGGING FIRST AND THEN SUBTRACTING THE LAST OBSERVED VALUE WAIT A MINUTE THAT'S A DIFFERENT TRANSFORMATION AND ALSO THAT's SCORING THE LOG GROWTH RATE. 
-% 
-% BUT THEN AGAIN I'M STILL CONFUSED, BECAUSE ANY RELATIVE ERROR ON A QUANTITY Y\_t+1 IS AUTOMATICALLY AN ABSOLUTE ERROR ON THE GROWTH RATE IF WE KNOW Y\_t. AH BUT YOU DON'T KNOW WHAT THE ABSOLUTE ERROR ON THE GROWTH RATE IS (E.G. FOR Y\_t+1 of 10 IF YOU DON'T SPECIFICALLY LOOK AT THE LAST VALUE. BUT WE ARE ASSUMING THAT THIS IS WHAT THE MODEL DOES WHEN IT MAKES A FORECAST INTERNALLY
-
-
-
-
-% The WIS can be thought of as an approximation of the CRPS for forecasts where the predictive distribution is represented through a set of quantiles. The CRPS, and by extension the WIS, represents a generalisation of the absolute error to continuous distributions, meaning that forecasters are evaluated on the absolute distance of their predictive distribution to the observed value (i.e. some form of absolute error). For simplicity, we will use absolute error and absolute distance between forecast and observation interchangeably, even though the former applies to point predictions and the latter is used for probabilistic forecasts. 
-
-
-% 
-% 
-% 
-% We argue that when dealing with epidemiological processes it makes sense to shift the evaluation towards multiplicative errors by either taking the logarithm of both the forecast and the observations or by dividing them by the last known observation before scoring. 
-
-% What kinds of transformations can be considered meaningful depends on the context. We will illustrate the idea of transforming forecasts by focussing on the WIS as it is currently used in epidemiological settings such as the COVID-19 Forecast hubs. 
-% In this paper we focus on the WIS due to its simplicity and widespread use by the COVID-19 Forecast Hubs, but arguments apply analogously to the CRPS. Another proper scoring rule commonly used is the log score [CITATION], which we will not discuss further in this paper. 
-
-
-% \paragraph{Problems with the WIS and CRPS in an epidemiological setting}
-% Their relation to the absolute error means that both the WIS and the CRPS usually scale with the prediction target. Forecasts of COVID-19 cases, for example typically have higher scores than forecasts of hospitalisations of death. Similarly, when looking at performance across different locations or over time, average scores will be dominated by locations and times with high incidences. Outliers also can have a disproportionate effect on aggregate scores. One can argue that this is meaningful and that we should care most about places and periods when incidence is high (maybe cite Bracher et al.). However, this may not always be true and is clearly not desirable when comparing performance of a model on different prediction targets: case numbers are not necessarily more important than hospitalisations, just because observed values tend be an order of magnitude higher. This makes forecasts often hard or impossible to compare. 
-
-
-% not sure this plot is really meaningful
-%\begin{figure}[h!]
-%    \centering
-%    \includegraphics[width=0.99\textwidth]{output/figures/HUB-sd-vs-mean-scores.png}
-%    \caption{CAPTION}
-%    \label{fig:HUB-mean-sd-scores}
-%\end{figure}
-
-%\begin{itemize}
-%    \item idea of scores on logged data: interpretation as a measure of relative improvement, just as when you log the absolute error
-%\end{itemize}
-
-%\paragraph{What's there in the literature}
-
-%\paragraph{Current problems / questions about scoring an epidemiological setting}
-%probably narrow down to the ones we really want to discuss%
-%There are limitations with what we can do with scores on a natural scale and open questions whether we can do these things on a log-scale and also whether a log-scale might be inherently more appropriate
-%\begin{itemize}
-    %\item Can't really model score on a natural scale as errors are heavily skewed. Is there a way to model scores to get insight about different factors that systematically influence scores
- %   \item make a plot somewhere that shows the distribution of scores
-  %  \item Maybe epidemiological forecasts are inherently better suited to be scored on an absolute scale due to the multiplicative nature of processes (related to over-prediction > under-prediction)? Does the log-scale imply we are scoring the growth rate? 
-   % \item unclear what trade-offs of logging / not logging are
-    %\item what score (log, not log) matches closest what our intuition (or policymakers) think is good? 
-    %\item are we better at forecasting deaths than cases? --> relative measure would help
-    %\item There exists confusion about what can be done to a score in general (e.g. people want to take the median, which they shouldn't) %maybe don't add as an extra point
-%\end{itemize}
-
-
-%\paragraph{Over- and under-prediction}
-%If we want to keep this in, we could: 
-%\begin{itemize}
-%    \item Check whether there is actually a problem with over-prediction and under-prediction in the Hub. This could be the case because we are most interested in certain scenarios in which this might arise. 
-%    \item Discuss this in light of Johannes' analysis of how the decomposition of WIS values differs if the data are skewed
-%    \item compare this to the PIT-value-like relative bias scores we used for the German / Polish paper, which capture a relative tendency to over- or under-predict, rather than absolute penalties. 
-%\end{itemize}
-
-
- % Pooled across all time points and locations, the mean WIS on the natural scale for cases (deaths) was 8855 (59.3) with an overall standard deviation of 51274 (156) (see Table \ref{tab:HUB-summary}). On the log scale, scores were much closer to each other (see Figure \ref{fig:HUB-average-scores}), with a mean WIS for cases (deaths) of 0.507 (0.362) with an overall standard deviation of 0.745 (0.407). 
-
-% When evaluated on the natural scale, there is  strong relationship between the mean of the weighted interval score and the total number of observed cases (correlation: 0.913) or deaths (cor: 0.849) in a location (see Figure \ref{fig:HUB-mean-scores-total-loglog} and Figure \ref{fig:HUB-mean-scores-total} in the SI). The relationship is less pronounced for scores on the log scale (cor: -0.019 for cases, -0.395 for deaths) and negative, meaning that locations with fewer observed cases or deaths tend to receive higher scores. 
-
-
-%Whether or not a log-transformation is appropriate depends on whether one believes that differences in absolute values are meaningful. This may be the case for example when comparing forecasts across locations or time points, rather than different forecasts targets. \cite{bracherEvaluatingEpidemicForecasts2021} for example argue that in epidemiological settings it is a desirable property of the CRPS / WIS that it assigns large scores to forecasts where counts are high, as this naturally reflects the situations we should most care about and helps us identify the models that perform best in similar situations. If, on the other hand, we believe that good models should do consistently well and that situations with high incidences do not provide significantly more information about which models perform well or badly, then scoring on the log scale may be more appropriate. For example, it may be reasonable not to think that predictive performance in a country like Germany would have a hundred times more importance than performance in a country like Luxembourg when determining the best model for future decision making. Similarly, we may not necessarily believe that predictive performance during the January 2022 wave of COVID-19 should carry three times as much weight than predictive performance during the January 2021 wave, just because numbers where three times as high. 
-
-
-% Divide by the latest known value = score forecast on the growth rate
-% - WHAT KINDS OF DATA CAN I CONDITION ON? 
-% - WOULD DIVIDING A FORECAST BY ITS RESOLUTION WORK? 
-% - CAN I SCORE THE TRAJECTORY / WEEK-TO-WEEK GROWTH RATE BY DIVIDING the 4 week ahead forecast by the three week ahead forecast? 

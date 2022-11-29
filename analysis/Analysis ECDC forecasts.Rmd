@@ -146,6 +146,22 @@ fwrite(scores_gr, here("output", "data", "all-scores-growth-rate-european-hub.cs
 
 
 ## =============================================================================
+## FIGURE 1
+# illustration-effect-log-score.R
+
+
+## =============================================================================
+## FIGURE 2
+# Simulation poisson-mean-sd.R
+
+
+## =============================================================================
+## FIGURE 3
+# example-log-first-Johannes.R
+
+
+
+## =============================================================================
 ## FIGURE 4
 ## Mean vs. sd of observed values + boxplots for distribution across target type + location
 
@@ -268,13 +284,13 @@ ggsave("output/figures/HUB-mean-obs-location.png", width = 10, height = 10)
 ```{r}
 wis_vs_total <- function(scores, summary_fct = mean, fulldata = hub_data) {
   
-  total_values <- 
+  mean_values <- 
     fulldata |> 
     filter(!is.na(prediction)) |>
     group_by(location, target_type, target_end_date) |>
     summarise(true_value = unique(true_value)) |>
     group_by(location, target_type) |>
-    summarise(total = mean(true_value))
+    summarise(mean_obs = mean(true_value))
   
   plot_df <- scores |> 
     filter(model == "EuroCOVIDhub-ensemble", 
@@ -282,22 +298,22 @@ wis_vs_total <- function(scores, summary_fct = mean, fulldata = hub_data) {
     group_by(location, target_type, scale, type_and_scale) |>
     summarise(wis = summary_fct(interval_score), 
               .groups = "drop_last") |> 
-    inner_join(total_values) 
+    inner_join(mean_values) 
   
   plot_df |>
     group_by(target_type, scale) |>
-    summarise(correlation = cor(wis, total)) |> 
+    summarise(correlation = cor(wis, mean_obs)) |> 
     print()
   
   plot_df |>
-    ggplot(aes(y = wis, x = total)) + 
+    ggplot(aes(y = wis, x = mean_obs)) + 
     geom_point() + 
     facet_wrap(~ type_and_scale, scale = "free") + 
     theme_scoringutils() + 
     theme(legend.position = "none") + 
     scale_x_continuous(labels = scale_fn) +
     scale_y_continuous(labels = scale_fn) +
-    labs(y = "REPLACE", x = "Total number of observed values")
+    labs(y = "REPLACE", x = "Mean observed value")
 } 
 
 
@@ -307,7 +323,6 @@ scatter_wis_obs <- wis_vs_total(scores) +
   scale_y_continuous(labels = scale_fn, trans = "log10") + 
   ggpubr::stat_cor(method = "spearman", p.accuracy = 0.001, 
                    cor.coef.name = "rho", size = 3)
-
 
 
 df <- scores |>
@@ -323,12 +338,14 @@ df <- scores |>
   rename(`Target type` = target_type)
 
 p_cor_scores <- df |>
-  ggplot(aes(x = horizon, y = cor, 
-             fill = `Target type`, color = `Target type`)) + 
-  geom_histogram(stat = "identity", position = "dodge") +
+  ggplot(aes(x = horizon, y = cor, fill = `Target type`, color = `Target type` )) + 
+  scale_fill_brewer(palette = "Set1", name = "Target type") + 
+  scale_color_brewer(palette = "Set1", name = "Target type") +
+  geom_histogram(stat = "identity", position = "dodge", alpha = 0.4) +
   theme_scoringutils() + 
   coord_cartesian(ylim = c(0, 1)) +
-  labs(y = "Avg. Spearman cor(scores)", x = "Forecast horizon")
+  labs(y = "Avg. rank cor(scores)", x = "Forecast horizon") + 
+  theme(axis.title.y = element_text(size=8.5))
 
 
 # Correlation between pairwise comparisons
@@ -346,7 +363,9 @@ correlation_rel_skill <- scores |>
 p_cor_skill <- correlation_rel_skill |>
   rename(`Target type` = target_type) |>
   ggplot(aes(x = horizon, y = cor, fill = `Target type`, color = `Target type` )) + 
-  geom_histogram(stat = "identity", position = "dodge") +
+  scale_fill_brewer(palette = "Set1", name = "Target type") + 
+  scale_color_brewer(palette = "Set1", name = "Target type") + 
+  geom_histogram(stat = "identity", position = "dodge", alpha = 0.4) +
   theme_scoringutils() + 
   coord_cartesian(ylim = c(0, 1)) +
   labs(y = "Cor(rel. skill)", x = "Forecast horizon")
@@ -358,7 +377,7 @@ p_cor_skill <- correlation_rel_skill |>
   plot_layout(widths = c(1, 1), heights = c(3, 1)) &
   theme(legend.position = "bottom")
 
-ggsave("output/figures/HUB-correlations.png", width = 7, height = 5.5)
+ggsave("output/figures/HUB-correlations.png", width = 7, height = 7)
 
 ```
 
@@ -463,13 +482,13 @@ DH"
 }
 
 put_plot_together("EuroCOVIDhub-ensemble")
-ggsave(filename = "output/figures/HUB-model-comparison-ensemble.png", width = 10, height = 7)
+ggsave(filename = "output/figures/HUB-model-comparison-ensemble.png", width = 10, height = 8.5)
 
 put_plot_together("epiforecasts-EpiNow2")
-ggsave(filename = "output/figures/HUB-model-comparison-epinow.png", width = 10, height = 7)
+ggsave(filename = "output/figures/HUB-model-comparison-epinow.png", width = 10, height = 8.5)
 
 put_plot_together("EuroCOVIDhub-baseline", locationname = "DE")
-ggsave(filename = "output/figures/HUB-model-comparison-baseline.png", width = 10, height = 7)
+ggsave(filename = "output/figures/HUB-model-comparison-baseline.png", width = 10, height = 8.5)
 
 
 ```
@@ -590,12 +609,13 @@ ABCDE
 FGHIJ"
 
 ranking_cases[[2]] + ranking_cases[[1]] + 
-ranking_cases[[3]] + ranking_cases[[4]] + ranking_cases[[5]] + 
-  ranking_deaths[[2]] + ranking_deaths[[1]] + 
+ranking_cases[[3]] + ranking_cases[[4]] + ranking_cases[[5]] +
+ranking_deaths[[2]] + ranking_deaths[[1]] + 
 ranking_deaths[[3]] + ranking_deaths[[4]] + ranking_deaths[[5]] +
   plot_annotation(tag_levels = "A") +
   plot_layout(design = layout, 
-              guides = "collect") &
+              guides = "collect", 
+              widths = c(1, 1, 1, 1, 2.5)) &
   theme(legend.position = "bottom")
 
 ggsave("output/figures/HUB-pairwise-comparisons.png", width = 10.5, height = 6)
@@ -1445,13 +1465,13 @@ p2 <- plot_var_mean(hub_data, log = TRUE)
 
 wis_vs_total <- function(scores, summary_fct = mean, fulldata = hub_data) {
   
-  total_values <- 
+  mean_values <- 
     fulldata |> 
     filter(!is.na(prediction)) |>
     group_by(location, target_type, target_end_date) |>
     summarise(true_value = unique(true_value)) |>
     group_by(location, target_type) |>
-    summarise(total = mean(true_value))
+    summarise(mean_obs = mean(true_value))
   
   plot_df <- scores |> 
     filter(model == "EuroCOVIDhub-ensemble", 
@@ -1459,22 +1479,22 @@ wis_vs_total <- function(scores, summary_fct = mean, fulldata = hub_data) {
     group_by(location, target_type, scale, type_and_scale) |>
     summarise(wis = summary_fct(interval_score), 
               .groups = "drop_last") |> 
-    inner_join(total_values) 
+    inner_join(mean_values) 
   
   plot_df |>
     group_by(target_type, scale) |>
-    summarise(correlation = cor(wis, total)) |> 
+    summarise(correlation = cor(wis, mean_obs)) |> 
     print()
   
   plot_df |>
-    ggplot(aes(y = wis, x = total)) + 
+    ggplot(aes(y = wis, x = mean_obs)) + 
     geom_point() + 
     facet_wrap(~ type_and_scale, scale = "free") + 
     theme_scoringutils() + 
     theme(legend.position = "none") + 
     scale_x_continuous(labels = scale_fn) +
     scale_y_continuous(labels = scale_fn) +
-    labs(y = "REPLACE", x = "Total number of observed values")
+    labs(y = "REPLACE", x = "Mean observed value")
 } 
 
 # log-log versions of that plot

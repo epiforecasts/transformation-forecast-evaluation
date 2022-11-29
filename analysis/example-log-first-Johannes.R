@@ -2,6 +2,7 @@ library(dplyr)
 library(tidyr)
 library(scoringutils)
 library(ggplot2)
+library(patchwork)
 
 n_sim <- 1000
 epsilon <- rnorm(n_sim)
@@ -39,20 +40,25 @@ summary <- scores |>
   group_by(sigma) |>
   summarise(log_wis = sum(log_wis, na.rm = TRUE), 
             wis_log = sum(log, na.rm = TRUE), 
-            wis = sum(natural, na.rm = TRUE))
-
-summary |> 
+            wis = sum(natural, na.rm = TRUE)) |>
   pivot_longer(cols = c(wis, log_wis, wis_log), values_to = "score", names_to = "type") |>
   mutate(type = factor(type, 
                        levels = c("wis", "wis_log", "log_wis"), 
-                       labels = c("WIS", "WIS (log scale)", "log(WIS)"))) |>
-  ggplot(aes(x = sigma, y = score)) +
-  geom_vline(xintercept = 1, linetype = "dashed", size = 0.3, color = "grey80") +
-  geom_point() + 
-  facet_wrap(~type, scales = "free_y") + 
-  theme_scoringutils() +
-  labs(y = "Score", x = "Standard deviation of predictive distribution") + 
-  theme(panel.spacing = unit(1, "lines"))
+                       labels = c("WIS", "WIS (log scale)", "log(WIS)")))
+
+
+score_plot <- function(summary) {
+  summary |>
+    ggplot(aes(x = sigma, y = score)) +
+    geom_vline(xintercept = 1, linetype = "dashed", size = 0.3, color = "grey80") +
+    geom_point() + 
+    facet_wrap(~type, scales = "free_y") + 
+    theme_scoringutils() +
+    labs(y = "Score", x = "Standard deviation of predictive distribution") + 
+    theme(panel.spacing = unit(1, "lines"))
+}
+
+score_plot(summary)
 
 ggsave("output/figures/example-log-first.png", width = 7, height = 2.1)
 

@@ -44,39 +44,60 @@ scores <- vals |>
 
 scale_factor <- 3 # scale factor for the density
 
-p1 <- scores |>
-  ggplot(aes(x = id, y = interval_score/scale_factor)) + 
-  geom_area(stat = "function", 
-            fun = function(x) {dnorm(x, mean = 1, sd = 0.4)}, 
-            color = "grey", fill = "grey", alpha = 0.5) +
-  geom_line() + 
-  labs(y = "WIS", x = "Observed value") + 
-  scale_y_continuous(label = function(x) {paste(scale_factor * x)}) + 
-  facet_wrap(~ scale, ncol = 1, scales = "free") + 
-  theme_scoringutils() + 
-  theme(panel.spacing = unit(1, "lines"))
+plot_linear_x <- function(scores) {
+  scores |>
+    ggplot(aes(x = id, y = interval_score/scale_factor)) + 
+    geom_area(stat = "function", 
+              fun = function(x) {dnorm(x, mean = 1, sd = 0.4)}, 
+              color = "grey", fill = "grey", alpha = 0.5) +
+    geom_line() + 
+    labs(y = "WIS", x = "Observed value") + 
+    scale_y_continuous(label = function(x) {paste(scale_factor * x)}) + 
+    facet_wrap(~ scale, ncol = 1, scales = "free") + 
+    theme_scoringutils() + 
+    theme(panel.spacing = unit(1, "lines"))
+}
+
+p1 <- filter(scores, scale == "natural") |>
+  plot_linear_x()
+
+p2 <- filter(scores, scale == "log") |>
+  plot_linear_x()
+
+
+
+
 
 scale_factor2 <- 3
-p2_log <- scores |>
-  ggplot(aes(x = id, y = interval_score/scale_factor2)) + 
-  geom_area(stat = "function", 
-            fun = function(x) {dnorm(x, mean = 1, sd = 0.4)}, 
-            color = "grey", fill = "grey", alpha = 0.5) +
-  geom_line() + 
-  labs(y = "WIS", x = "Observed value") + 
-  scale_y_continuous(label = function(x) {paste(scale_factor2 * x)}) + 
-  scale_x_continuous(trans = "log", 
-                     label = function(x) {
-                       ifelse(x < 1, 
-                              paste0("1/", (1 / x)), 
-                              paste(x))
-                     }, 
-                     breaks = c(0.2, 1/2, 1, 2, 5)) + 
-  facet_wrap(~ scale, ncol = 1, scales = "free") + 
-  theme_scoringutils() + 
-  theme(panel.spacing = unit(1, "lines"))
+plot_log_x <- function(scores) {
+  scores |>
+    ggplot(aes(x = id, y = interval_score/scale_factor2)) + 
+    geom_area(stat = "function", 
+              fun = function(x) {dnorm(x, mean = 1, sd = 0.4)}, 
+              color = "grey", fill = "grey", alpha = 0.5) +
+    geom_line() + 
+    labs(y = "WIS", x = "Observed value") + 
+    scale_y_continuous(label = function(x) {paste(scale_factor2 * x)}) + 
+    scale_x_continuous(trans = "log", 
+                       label = function(x) {
+                         ifelse(x < 1, 
+                                paste0("1/", (1 / x)), 
+                                paste(x))
+                       }, 
+                       breaks = c(0.2, 1/2, 1, 2, 5)) + 
+    facet_wrap(~ scale, ncol = 1, scales = "free") + 
+    theme_scoringutils() + 
+    theme(panel.spacing = unit(1, "lines"))
+}
 
-p1 + p2_log
+p3 <- filter(scores, scale == "natural") |>
+  plot_log_x()
+
+p4 <- filter(scores, scale == "log") |>
+  plot_log_x()
+
+(p1 + p3) / (p2 + p4) +
+  plot_annotation(tag_levels = "A")
 
 ggsave("output/figures/SIM-effect-log-score.png", width = 7, 
        height = 3)

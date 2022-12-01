@@ -71,11 +71,105 @@ ggsave("output/figures/different-relative-errors.png", width = 7, height = 3)
 
 
 
+## ========================================================================== ##
+## FIGURE 2
+## ========================================================================== ##
+
+quantile <- seq(0.005, 0.995, 0.005)
+mu <- 10
+theta_1 <- 0.5
+theta_2 <- 10
+
+data <- data.table(
+  quantile = quantile,
+  model_A = qnbinom(p = quantile, size = theta_1, mu = mu), 
+  model_B = qnbinom(p = quantile, size = theta_2, mu = mu)
+) |>
+  pivot_longer(cols = c(model_A, model_B), names_to = "model", values_to = "prediction") |>
+  mutate(true_value = list(1:50), 
+         id = list(1:50)) |>
+  unnest(cols = c(true_value, id))
+
+scores_natural <- data |>
+  score(metrics = "interval_score") |>
+  summarise_scores(by = c("model", "id")) |>
+  mutate(scale = "natural")
+
+scores_log <- data |>
+  mutate(true_value = log(true_value), 
+         prediction = log(prediction)) |>
+  score(metrics = "interval_score") |>
+  summarise_scores(by = c("model", "id"), na.rm = TRUE) |>
+  mutate(scale = "log")
+
+scores <- rbind(scores_natural, scores_log) |>
+  mutate(scale = factor(scale, levels = c("natural", "log")), 
+         Forecaster = ifelse(model == "model_A", "A", "B"))
+
+nbinom_natural <- data.table(
+  A = rnbinom(100000, mu = 10, size = theta_1), 
+  B = rnbinom(100000, mu = 10, size = theta_2)
+) |>
+  pivot_longer(cols = c(A, B), names_to = "Forecaster") |>
+  mutate(scale = "natural")
+
+nbinom_log <- nbinom |>
+  mutate(value = log(value), 
+         scale = "log")
+
+nbinom <- rbind(nbinom_natural, nbinom_log)
+
+nbinom <- filter(nbinom, scale == "natural") |> 
+  select(-scale)
+
+plot_fct <- function(scores, scale_factor, nbinom, filter_scale = "natural") {
+  
+  scores <- filter(scores, scale == filter_scale)
+  # nbinom <- filter(nbinom, scale == filter_scale)
+  
+  scores |>
+    ggplot(aes(x = id, y = interval_score / scale_factor, color = Forecaster)) + 
+    geom_histogram(data = filter(nbinom, Forecaster == "A"), inherit.aes = FALSE,
+                   aes(y = after_stat(density),
+                       x = value, color = NULL,
+                       fill = Forecaster),
+                   alpha = 0.2,
+                   binwidth = 1) +
+    geom_histogram(data = filter(nbinom, Forecaster == "B"), inherit.aes = FALSE,
+                   aes(y = after_stat(density),
+                       x = value, color = NULL,
+                       fill = Forecaster),
+                   alpha = 0.2,
+                   binwidth = 1) +
+    geom_line() +
+    # facet_wrap(~ scale, scales = "free", ncol = 2) + 
+    theme_scoringutils() + 
+    scale_y_continuous(label = function(x) {paste(scale_factor * x)}) + 
+    labs(y = "CRPS / WIS", x = "Observed value") + 
+    coord_cartesian(xlim = c(0, 50))
+}
+
+p1 <- scores |>
+  plot_fct(scale_factor = 200, nbinom = nbinom, filter_scale = "natural") + 
+  ylab("CRPS / WIS (natural scale)")
+
+p2 <- scores |>
+  plot_fct(scale_factor = 11, nbinom = nbinom, filter_scale = "log") + 
+  ylab("CRPS / WIS (log scale)")  
+
+p1 + p2 + 
+  plot_layout(guides = "collect") &
+  theme(legend.position = "bottom") 
+
+ggsave(filename = "output/figures/illustration-effect-log-ranking-crps.png", 
+       width = 7, height = 3)
+
+
 
 
 
 ## ========================================================================== ##
-## FIGURE 2
+## FIGURE 3
 ## ========================================================================== ##
 
 
@@ -163,7 +257,7 @@ ggsave("output/figures/SIM-mean-state-size.png", width = 7, height = 4.1)
 
 
 ## ========================================================================== ##
-## FIGURE 3
+## FIGURE 4
 ## ========================================================================== ##
 
 n_sim <- 1000
@@ -225,98 +319,6 @@ score_plot(summary)
 ggsave("output/figures/example-log-first.png", width = 7, height = 2.1)
 
 
-## ========================================================================== ##
-## FIGURE X
-## ========================================================================== ##
-
-quantile <- seq(0.005, 0.995, 0.005)
-mu <- 10
-theta_1 <- 0.5
-theta_2 <- 10
-
-data <- data.table(
-  quantile = quantile,
-  model_A = qnbinom(p = quantile, size = theta_1, mu = mu), 
-  model_B = qnbinom(p = quantile, size = theta_2, mu = mu)
-) |>
-  pivot_longer(cols = c(model_A, model_B), names_to = "model", values_to = "prediction") |>
-  mutate(true_value = list(1:50), 
-         id = list(1:50)) |>
-  unnest(cols = c(true_value, id))
-
-scores_natural <- data |>
-  score(metrics = "interval_score") |>
-  summarise_scores(by = c("model", "id")) |>
-  mutate(scale = "natural")
-
-scores_log <- data |>
-  mutate(true_value = log(true_value), 
-         prediction = log(prediction)) |>
-  score(metrics = "interval_score") |>
-  summarise_scores(by = c("model", "id"), na.rm = TRUE) |>
-  mutate(scale = "log")
-
-scores <- rbind(scores_natural, scores_log) |>
-  mutate(scale = factor(scale, levels = c("natural", "log")), 
-         Forecaster = ifelse(model == "model_A", "A", "B"))
-
-nbinom_natural <- data.table(
-  A = rnbinom(100000, mu = 10, size = theta_1), 
-  B = rnbinom(100000, mu = 10, size = theta_2)
-) |>
-  pivot_longer(cols = c(A, B), names_to = "Forecaster") |>
-  mutate(scale = "natural")
-
-nbinom_log <- nbinom |>
-  mutate(value = log(value), 
-         scale = "log")
-
-nbinom <- rbind(nbinom_natural, nbinom_log)
-
-nbinom <- filter(nbinom, scale == "natural") |> 
-  select(-scale)
-
-plot_fct <- function(scores, scale_factor, nbinom, filter_scale = "natural") {
-  
-  scores <- filter(scores, scale == filter_scale)
-  # nbinom <- filter(nbinom, scale == filter_scale)
-  
-  scores |>
-    ggplot(aes(x = id, y = interval_score / scale_factor, color = Forecaster)) + 
-    geom_histogram(data = filter(nbinom, Forecaster == "A"), inherit.aes = FALSE,
-                   aes(y = after_stat(density),
-                       x = value, color = NULL,
-                       fill = Forecaster),
-                   alpha = 0.2,
-                   binwidth = 1) +
-    geom_histogram(data = filter(nbinom, Forecaster == "B"), inherit.aes = FALSE,
-                   aes(y = after_stat(density),
-                       x = value, color = NULL,
-                       fill = Forecaster),
-                   alpha = 0.2,
-                   binwidth = 1) +
-    geom_line() +
-    # facet_wrap(~ scale, scales = "free", ncol = 2) + 
-    theme_scoringutils() + 
-    scale_y_continuous(label = function(x) {paste(scale_factor * x)}) + 
-    labs(y = "CRPS / WIS", x = "Observed value") + 
-    coord_cartesian(xlim = c(0, 50))
-}
-
-p1 <- scores |>
-  plot_fct(scale_factor = 200, nbinom = nbinom, filter_scale = "natural") + 
-  ylab("CRPS / WIS (natural scale)")
-
-p2 <- scores |>
-  plot_fct(scale_factor = 11, nbinom = nbinom, filter_scale = "log") + 
-  ylab("CRPS / WIS (log scale)")
-
-p1 + p2 + 
-  plot_layout(guides = "collect") &
-  theme(legend.position = "bottom")
-  
-ggsave(filename = "output/figures/illustration-effect-log-ranking-crps.png", 
-       width = 7, height = 3.5)
 
 
 

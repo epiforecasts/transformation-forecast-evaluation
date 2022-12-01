@@ -135,7 +135,7 @@ As Figure \ref{fig:SAPE} shows, the alignment with the SAPE is in fact the close
 
 \begin{figure}[h!]
 \centering
-\includegraphics[width = 0.8\textwidth]{output/figures/SAPE.png}
+\includegraphics[width = 1\textwidth]{output/figures/different-relative-errors.png}
 \caption{Numerical comparison of different measures of relative error/ We consider a prediction of $\hat{y} = 1$ and for different observed values show the  absolute percentage error (APE), relative error (RE), symmetric absolute percentage error (SAPE) and the absolute error applied to log-transformed predictions and observations. $\hat{y}$ denotes the predicted value. A: Error measures as a function of the observed value with the x-axis shown on a linear scale. B: Same, but x-axis shown on a logarithmic scale.}
 \label{fig:SAPE}
 \end{figure}
@@ -145,10 +145,10 @@ As Figure \ref{fig:SAPE} shows, the alignment with the SAPE is in fact the close
 
 
 
-\subsection{Interpretation as scoring the exponential growth rate}
+\subsection*{Interpretation as scoring the exponential growth rate}
 \label{sec:methods:growthrate}
 
-Another interpretation can be based around viewing the process to be forecast as exponential with time-varying growth rate $r(t)$ (see e.g. \cite{wallingaHowGenerationIntervals2007}), i.e.
+Another interpretation can be based around viewing the process to be forecast as exponential with time-varying growth rate $r(t)$~\citep[see, e.g.,][]{wallingaHowGenerationIntervals2007}, i.e.
 \begin{linenomath*}
 \begin{equation*}
 \frac{d}{dt}y(t) = r(t)y(t)
@@ -176,12 +176,21 @@ If a forecast $y$ of the time series at time $t$ starts at time 0 with the data 
 %
 We thus evaluate the error in the mean exponential growth rate, scaled by the length of the time period considered. 
 
-For small $t$ and $\bar{r}$, $ y_0 \exp (\bar{r}t)$ is approximately equivalent to $ y_0 (1 + \bar{r}t)$, which is sometimes used as an alternative definition (r in this second formulation is then called the multiplicative growth rate). 
+For small $\bar{r}t$, $ y_0 \exp (\bar{r}t)$ is approximately equivalent to $ y_0 (1 + \bar{r}t)$, which is sometimes used as an alternative definition (r in this second formulation is then called the multiplicative growth rate). 
 
 
 \subsection{Effects on model rankings}
 \label{sec:methods:rankings}
-Rankings between different forecasters based on their scores may change through the log-transformation both when looking at aggregate scores as well as when looking at a single forecast. As an example for the effect on a single forecast, consider two forecasters, A and B. Both issue a single 50\%-prediction interval for a target which later resolves as 1. Forecaster A issues the interval [0.5, 2], while forecaster B issues [0.9. 2.5]. On the natural scale, the score would be determined  the dispersion of the forecast, i.e. the length of this interval (since the observed value falls within the prediction interval). Forecaster A would receive a score of $2 - 0.5$ = 1.5, beating forecaster B who would receive a score of $2.5 - 0.9 = 1.6$. When we transform the forecast, forecaster A receives a score of $\log (\frac{2}{0.5}) = 1.39$, while forecaster B obtains a score of $\log (\frac{2.5}{0.9}) = 1.02$ and now wins over forecaster A. The main difference between forecaster A and B is that forecaster A has issued a prediction interval ([0.5, 2]) that was more symmetric around the true value than the interval issued by forecaster B ([0.9. 2.6], which was more skewed). This means that in relative terms, Forecaster B was noticeably closer to the true value with the lower bound of their prediction interval, while only being slightly further away with the upper interval. This implies that scores on the log scale may treat (one-sided) outlier forecasts more leniently. 
+Rankings between different forecasters based on their scores may change through the log-transformation both when looking at aggregate scores as well as when looking at a single forecast. We illustrate this in Figure \ref{fig:illustration-ranking} with two forecasters issuing a negative binomial distribution with different dispersion. When showing the obtained score as a function of the observed value, it can be seen that the ranking between the two forecasters may change when scoring the forecast on the logarithmic, rather than the natural scale. 
+
+As an example for the effect on a single forecast, consider two forecasters, A and B. Both issue a single 50\%-prediction interval for a target which later resolves as 1. Forecaster A issues the interval [0.5, 2], while forecaster B issues [0.9. 2.5]. On the natural scale, the score would be determined  the dispersion of the forecast, i.e. the length of this interval (since the observed value falls within the prediction interval). Forecaster A would receive a score of $2 - 0.5$ = 1.5, beating forecaster B who would receive a score of $2.5 - 0.9 = 1.6$. When we transform the forecast, forecaster A receives a score of $\log (\frac{2}{0.5}) = 1.39$, while forecaster B obtains a score of $\log (\frac{2.5}{0.9}) = 1.02$ and now wins over forecaster A. The main difference between forecaster A and B is that forecaster A has issued a prediction interval ([0.5, 2]) that was more symmetric around the true value than the interval issued by forecaster B ([0.9. 2.6], which was more skewed). This means that in relative terms, Forecaster B was noticeably closer to the true value with the lower bound of their prediction interval, while only being slightly further away with the upper interval. This implies that scores on the log scale may treat (one-sided) outlier forecasts more leniently. 
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width = 1\textwidth]{output/figures/illustration-effect-log-ranking-crps.png}
+\caption{Illustration of the effect of the log-transformation of the ranking for a single forecast. Shown are CRPS (or WIS, respectively) values as a function of the observed value for two forecasters. Model A issues a negative binomial forecast with mean = 10 and $\theta = 0.5$ (resulting in a variance of 210), while Model B issues a negative binomial forecast with mean = 10 and $\theta = 10$ (resulting in a variance of 20).}
+\label{fig:illustration-ranking}
+\end{figure}
 
 Overall model rankings would be expected to differ even more when scores are averaged across multiple forecasts or targets. The change in rankings of aggregate scores is not mainly driven by the kinds of changes in model rankings for single forecasts just discussed. Rather, as observations from exponential processes are likely to be on very different absolute scales, large observations will account for the majority of absolute score but will not dominate relative scores in the same way. Evaluating forecasts based on relative errors may help with comparing performance across different targets. However, log-transforming forecasts and observations may also result in the opposite extreme because small absolute errors (e.g. predicting 9, rather than 3 deaths) may be large in relative terms if the quantity to forecast is very small. This can be exacerbated when forecasts are restricted to discrete values, where relative steps between possible values become greater for values closer to zero. 
 

@@ -67,7 +67,7 @@ p2 <- plot_fct(data) +
   plot_layout(guides = "collect") &
   theme(legend.position = "bottom")
 
-ggsave("output/figures/different-relative-errors.png", width = 10, height = 3)
+ggsave("output/figures/different-relative-errors.png", width = 7, height = 3)
 
 
 
@@ -164,8 +164,65 @@ ggsave("output/figures/SIM-mean-state-size.png", width = 7, height = 4.1)
 
 ## ========================================================================== ##
 ## FIGURE 3
-# example-log-first-Johannes.R
 ## ========================================================================== ##
+
+n_sim <- 1000
+epsilon <- rnorm(n_sim)
+Y <- exp(epsilon)
+
+forecasts <- expand.grid(
+  sigma = 1:20/10, 
+  quantile = c(0.01, 0.025, 1:19/20, 0.975, 0.99)
+)
+
+forecasts <- forecasts |>
+  as_tibble() |>
+  mutate(model = 10 * sigma, 
+         prediction = exp(qnorm(quantile, sd = sigma)), 
+         true_value = list(Y), 
+         sample_id = list(1:length(Y))) |>
+  unnest(c(true_value, sample_id))
+
+forecasts <- forecasts |>
+  mutate(scale = "natural") |>
+  rbind(forecasts |>
+          mutate(prediction = log(prediction + 1), 
+                 true_value = log(true_value + 1), 
+                 scale = "log"))
+
+scores <- score(forecasts)
+
+summary <- scores |>
+  mutate(log_wis = log(interval_score +1)) |>
+  group_by(sigma, scale) |>
+  summarise(wis = mean(interval_score), 
+            log_wis = mean(log_wis)) |>
+  mutate(log_wis = ifelse(scale == "log", log_wis, NA)) |>
+  pivot_wider(values_from = wis, names_from = scale) |>
+  group_by(sigma) |>
+  summarise(log_wis = sum(log_wis, na.rm = TRUE), 
+            wis_log = sum(log, na.rm = TRUE), 
+            wis = sum(natural, na.rm = TRUE)) |>
+  pivot_longer(cols = c(wis, log_wis, wis_log), values_to = "score", names_to = "type") |>
+  mutate(type = factor(type, 
+                       levels = c("wis", "wis_log", "log_wis"), 
+                       labels = c("WIS", "WIS (log scale)", "log(WIS)")))
+
+
+score_plot <- function(summary) {
+  summary |>
+    ggplot(aes(x = sigma, y = score)) +
+    geom_vline(xintercept = 1, linetype = "dashed", size = 0.3, color = "grey80") +
+    geom_point() + 
+    facet_wrap(~type, scales = "free_y") + 
+    theme_scoringutils() +
+    labs(y = "Score", x = "Standard deviation of predictive distribution") + 
+    theme(panel.spacing = unit(1, "lines"))
+}
+
+score_plot(summary)
+
+ggsave("output/figures/example-log-first.png", width = 7, height = 2.1)
 
 
 ## ========================================================================== ##
@@ -201,28 +258,63 @@ scores_log <- data |>
 
 scores <- rbind(scores_natural, scores_log) |>
   mutate(scale = factor(scale, levels = c("natural", "log")), 
-         Forecaster = ifelse(model == "model_A", "Model A", "Model B"))
+         Forecaster = ifelse(model == "model_A", "A", "B"))
 
-nbinom = data.table(
-  A = rnbinom(5000, mu = 10, size = theta_1), 
-  B = rnbinom(5000, mu = 10, size = theta_2)
+nbinom_natural <- data.table(
+  A = rnbinom(100000, mu = 10, size = theta_1), 
+  B = rnbinom(100000, mu = 10, size = theta_2)
 ) |>
-  pivot_longer(cols = c(A, B), names_to = "Forecaster")
+  pivot_longer(cols = c(A, B), names_to = "Forecaster") |>
+  mutate(scale = "natural")
 
-scale_factor <- 1
+nbinom_log <- nbinom |>
+  mutate(value = log(value), 
+         scale = "log")
 
-scores |>
-  ggplot(aes(x = id, y = interval_score / scale_factor, color = Forecaster)) + 
-  geom_line() +
-  # geom_density(data = nbinom, inherit.aes = FALSE, 
-  #              aes(y = after_stat(count / sum(count)), 
-  #                  x = value, color = Forecaster,
-  #                  fill = Forecaster)) +
-  facet_wrap(~ scale, scales = "free", ncol = 2) + 
-  theme_scoringutils() + 
-  scale_y_continuous(label = function(x) {paste(5 * x)}) + 
-  labs(y = "CRPS / WIS", x = "Observed value")
+nbinom <- rbind(nbinom_natural, nbinom_log)
 
+nbinom <- filter(nbinom, scale == "natural") |> 
+  select(-scale)
+
+plot_fct <- function(scores, scale_factor, nbinom, filter_scale = "natural") {
+  
+  scores <- filter(scores, scale == filter_scale)
+  # nbinom <- filter(nbinom, scale == filter_scale)
+  
+  scores |>
+    ggplot(aes(x = id, y = interval_score / scale_factor, color = Forecaster)) + 
+    geom_histogram(data = filter(nbinom, Forecaster == "A"), inherit.aes = FALSE,
+                   aes(y = after_stat(density),
+                       x = value, color = NULL,
+                       fill = Forecaster),
+                   alpha = 0.2,
+                   binwidth = 1) +
+    geom_histogram(data = filter(nbinom, Forecaster == "B"), inherit.aes = FALSE,
+                   aes(y = after_stat(density),
+                       x = value, color = NULL,
+                       fill = Forecaster),
+                   alpha = 0.2,
+                   binwidth = 1) +
+    geom_line() +
+    # facet_wrap(~ scale, scales = "free", ncol = 2) + 
+    theme_scoringutils() + 
+    scale_y_continuous(label = function(x) {paste(scale_factor * x)}) + 
+    labs(y = "CRPS / WIS", x = "Observed value") + 
+    coord_cartesian(xlim = c(0, 50))
+}
+
+p1 <- scores |>
+  plot_fct(scale_factor = 200, nbinom = nbinom, filter_scale = "natural") + 
+  ylab("CRPS / WIS (natural scale)")
+
+p2 <- scores |>
+  plot_fct(scale_factor = 11, nbinom = nbinom, filter_scale = "log") + 
+  ylab("CRPS / WIS (log scale)")
+
+p1 + p2 + 
+  plot_layout(guides = "collect") &
+  theme(legend.position = "bottom")
+  
 ggsave(filename = "output/figures/illustration-effect-log-ranking-crps.png", 
        width = 7, height = 3.5)
 

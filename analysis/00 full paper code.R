@@ -20,86 +20,54 @@ recompute_scores <- FALSE
 
 # situations with negative values: France 2021-05-22, CZ 2021-08-07, ES 2021-03-06
 
-
-
 ## ========================================================================== ##
 ## FIGURE 1
 ## ========================================================================== ##
-figure_1 <- function() {
-  true_values <- seq(0.2, 5, length.out = 1000)
-  quantiles <- c(0.01, 0.025, seq(0.05, 0.95, 0.05), 0.975, 0.99)
-  
-  vals <- expand.grid(
-    true_value = true_values, 
-    quantile = quantiles
-  ) |>
-    mutate(id = true_value) |>
-    arrange(true_value, quantile) |>
-    mutate(prediction = qnorm(p = quantile, mean = 1, sd = 0.4), 
-           model = "Model")
-  
-  scores <- vals |>
-    mutate(scale = "natural") |>
-    score() |> 
-    summarise_scores(by = c("scale", "id")) 
-  
-  scores_log <- vals |>
-    mutate(true_value = log(true_value), 
-           prediction = log(prediction), 
-           scale = "log") |>
-    score() |>
-    summarise_scores(by = c("scale", "id"))
-  
-  scores <- scores |>
-    rbind(scores_log) |>
-    group_by(scale) |>
-    mutate(score = interval_score / min(interval_score), 
-           scale = factor(scale, levels = c("natural", "log"))) 
-  
-  # scale factor for the density in the plot to make it look nicer
-  scale_factor <- 3
-  
-  plot_fct <- function(scores, filter = "natural", relative_x = FALSE) {
-    p <- scores |>
-      filter(scale == filter) |>
-      ggplot(aes(x = id, y = interval_score/scale_factor)) + 
-      geom_area(stat = "function", 
-                fun = function(x) {dnorm(x, mean = 1, sd = 0.4)}, 
-                color = "grey", fill = "grey", alpha = 0.5) +
-      geom_line() + 
-      labs(y = "WIS", x = "Observed value") + 
-      scale_y_continuous(label = function(x) {paste(scale_factor * x)}) + 
-      facet_wrap(~ scale, ncol = 1, scales = "free") + 
-      theme_scoringutils() + 
-      theme(panel.spacing = unit(1, "lines"))
-    
-    if (relative_x) {
-      p <- p +
-        scale_x_continuous(
-          trans = "log", 
-          label = function(x) {
-            ifelse(x < 1, 
-                   paste0("1/", (1 / x)), 
-                   paste(x))
-          }, 
-          breaks = c(0.2, 1/2, 1, 2, 5)
-        )
-    }
-    return(p)
-  }
-  
-  p1 <- plot_fct(scores, filter = "natural")
-  p2 <- plot_fct(scores, filter = "log")
-  p3 <- plot_fct(scores, filter = "natural", relative_x = TRUE)
-  p4 <- plot_fct(scores, filter = "log", relative_x = TRUE)
-  
-  (p1 + p3) / (p2 + p4) +
-    plot_annotation(tag_levels = "A")
-  
-  ggsave("output/figures/SIM-effect-log-score.png", width = 7, 
-         height = 4)
+
+y_hat <- 1
+grid_y <- (20:500)/100
+
+data <- data.table(
+  APE = abs((y_hat - grid_y)/grid_y),
+  RE = abs((y_hat - grid_y)/y_hat),
+  SAPE = abs((y_hat - grid_y)/(grid_y/2 + y_hat/2)),
+  `AE after log transformation` = abs(log(y_hat) - log(grid_y)),
+  x = grid_y / y_hat
+) |>
+  pivot_longer(cols = c(APE, RE, SAPE, `AE after log transformation`), 
+               names_to = "Metric") 
+
+plot_fct <- function(data) {
+  data |>
+    ggplot(aes(x = x, y = value, color = Metric)) +
+    theme_scoringutils() + 
+    geom_vline(xintercept = 1, linetype = "dashed", color = "grey60") + 
+    geom_line() +
+    labs(y = "Error", 
+         x = "Observed value")
 }
-figure_1()
+
+label_fn <- function(x) {
+  ifelse(x%%1 == 0, x, 
+         paste0("1/", 1/x))
+}
+
+p1 <- plot_fct(data) +
+  scale_x_continuous(breaks = c(1/4, 0.5, 1, 2, 4), 
+                     labels = label_fn) + 
+  scale_color_brewer(palette = "Set1")
+
+p2 <- plot_fct(data) +
+  scale_x_continuous(trans = "log10", breaks = c(1/4, 0.5, 1, 2, 4), 
+                     labels = label_fn) + 
+  scale_color_brewer(palette = "Set1")
+
+(p1 + p2) +
+  plot_annotation(tag_levels = "A") +
+  plot_layout(guides = "collect") &
+  theme(legend.position = "bottom")
+
+ggsave("output/figures/different-relative-errors.png", width = 10, height = 3)
 
 
 
@@ -111,9 +79,10 @@ figure_1()
 ## ========================================================================== ##
 
 
-time_points <- 1000
+time_points <- 5000
 q = c(0.01, 0.025, seq(0.05, 0.95, 0.05), 0.975, 0.99)
-means = 100 * 10^seq(0, 2, 0.01)
+n_means <- 100
+means = 100 * (10^seq(0, 2, length.out = n_means))
 thetas <- c(0.1, 1, 1e9)
 model_names <- c("theta_0.1", "theta_1", "theta_1e9")
 
@@ -129,7 +98,8 @@ if (file.exists("output/data/simulation-negative-binom.Rda")) {
     mutate(theta = list(thetas), 
            model = list(model_names)) |>
     unnest(cols = c("theta", "model")) |>
-    mutate(true_value = rnbinom(n = 1, size = theta,
+    mutate(true_value = rnbinom(n = time_points * n_means * length(thetas), 
+                                size = theta,
                                 mu = mean)) |>
     mutate(quantile = list(q)) |>
     unnest(quantile) |>
@@ -156,66 +126,32 @@ if (file.exists("output/data/simulation-negative-binom.Rda")) {
 }
 
 
-label_fn <- function(x) {
-  return(100*x)
-}
 
-make_plot <- function(scores, summary_fct = mean) {
-  p1 <- scores |>
-    rename(Theta = theta) |>
-    group_by(mean, scale, Theta) |>
-    summarise(interval_score = summary_fct(interval_score)) |>
-    group_by(Theta, scale) |>
-    mutate(interval_score = interval_score / mean(interval_score), 
-           Theta = as.character(Theta),
-           Variance = as.factor(as.character(Theta)),
-           Variance = recode_factor(Variance, 
-                                    "0.1" = "\u03C3 = \u03BC + 10 \u00B7 \u03BC^2", 
-                                    "1" = "\u03C3 = \u03BC + \u03BC^2", 
-                                    "1e+09" = "\u03C3 = \u03BC"),
-           Theta = ifelse(Theta == 1e+09, "1b", Theta)) |>
-    ggplot(aes(y = interval_score, x = mean, colour = Variance)) +
-    geom_point(size = 0.4) +  
-    labs(y = "WIS", x = "Mean") +
-    scale_x_continuous(labels = label_fn) +
-    theme_scoringutils() + 
-    facet_wrap(~ scale, scales = "free_y")
-  
-  p2 <- p1 + 
-    scale_x_continuous(trans = "log10") + 
-    scale_y_continuous(trans = "log10")
-  
-  p1 / p2 +
-    plot_annotation(tag_levels = "A")
-}
+p1 <- scores |>
+  rename(Theta = theta) |>
+  group_by(mean, scale, Theta) |>
+  summarise(interval_score = mean(interval_score)) |>
+  group_by(Theta, scale) |>
+  mutate(interval_score = interval_score / mean(interval_score), 
+         Theta = as.character(Theta),
+         Variance = as.factor(as.character(Theta)),
+         Variance = recode_factor(Variance, 
+                                  "0.1" = "\u03C3 = \u03BC + 10 \u00B7 \u03BC^2", 
+                                  "1" = "\u03C3 = \u03BC + \u03BC^2", 
+                                  "1e+09" = "\u03C3 = \u03BC"),
+         Theta = ifelse(Theta == 1e+09, "1b", Theta)) |>
+  ggplot(aes(y = interval_score, x = mean, colour = Variance)) +
+  geom_point(size = 0.4) +  
+  labs(y = "WIS", x = "Mean") +
+  theme_scoringutils() + 
+  facet_wrap(~ scale, scales = "free_y")
 
+p2 <- p1 + 
+  scale_x_continuous(trans = "log10") + 
+  scale_y_continuous(trans = "log10")
 
-
-
-# sample Negative Binomial -----------------------------------------------------
-# var = mu + mu^2/size --> increases a lot with mu
-# theta = size very high --> poisson distribution
-mean_county <- 100
-thetas <- c(0.1, 1, 1e9)
-
-res <- list()
-for (theta in thetas) {
-  df <- setup_df(time_points = 1000) |>
-    mutate(true_value = rnbinom(n = 1, size = theta,
-                                mu = mean),
-           prediction = qnbinom(p = quantile, size = theta,
-                                mu = mean))
-
-  scores <- score_states(df) |>
-    mutate(Theta = as.character(theta))
-
-  res[[paste(theta)]] <- scores
-}
-
-
-out <- rbindlist(res) 
-
-make_plot(out, summary_fct = mean) +
+p1 / p2 +
+  plot_annotation(tag_levels = "A") +   
   plot_layout(guides = "collect") & 
   theme(legend.position = "bottom") &
   labs(y = "Normalised WIS") 
@@ -226,9 +162,69 @@ ggsave("output/figures/SIM-mean-state-size.png", width = 7, height = 4.1)
 
 
 
-## =============================================================================
+## ========================================================================== ##
 ## FIGURE 3
 # example-log-first-Johannes.R
+## ========================================================================== ##
+
+
+## ========================================================================== ##
+## FIGURE X
+## ========================================================================== ##
+
+quantile <- seq(0.005, 0.995, 0.005)
+mu <- 10
+theta_1 <- 0.5
+theta_2 <- 10
+
+data <- data.table(
+  quantile = quantile,
+  model_A = qnbinom(p = quantile, size = theta_1, mu = mu), 
+  model_B = qnbinom(p = quantile, size = theta_2, mu = mu)
+) |>
+  pivot_longer(cols = c(model_A, model_B), names_to = "model", values_to = "prediction") |>
+  mutate(true_value = list(1:50), 
+         id = list(1:50)) |>
+  unnest(cols = c(true_value, id))
+
+scores_natural <- data |>
+  score(metrics = "interval_score") |>
+  summarise_scores(by = c("model", "id")) |>
+  mutate(scale = "natural")
+
+scores_log <- data |>
+  mutate(true_value = log(true_value), 
+         prediction = log(prediction)) |>
+  score(metrics = "interval_score") |>
+  summarise_scores(by = c("model", "id"), na.rm = TRUE) |>
+  mutate(scale = "log")
+
+scores <- rbind(scores_natural, scores_log) |>
+  mutate(scale = factor(scale, levels = c("natural", "log")), 
+         Forecaster = ifelse(model == "model_A", "Model A", "Model B"))
+
+nbinom = data.table(
+  A = rnbinom(5000, mu = 10, size = theta_1), 
+  B = rnbinom(5000, mu = 10, size = theta_2)
+) |>
+  pivot_longer(cols = c(A, B), names_to = "Forecaster")
+
+scale_factor <- 1
+
+scores |>
+  ggplot(aes(x = id, y = interval_score / scale_factor, color = Forecaster)) + 
+  geom_line() +
+  # geom_density(data = nbinom, inherit.aes = FALSE, 
+  #              aes(y = after_stat(count / sum(count)), 
+  #                  x = value, color = Forecaster,
+  #                  fill = Forecaster)) +
+  facet_wrap(~ scale, scales = "free", ncol = 2) + 
+  theme_scoringutils() + 
+  scale_y_continuous(label = function(x) {paste(5 * x)}) + 
+  labs(y = "CRPS / WIS", x = "Observed value")
+
+ggsave(filename = "output/figures/illustration-effect-log-ranking-crps.png", 
+       width = 7, height = 3.5)
 
 
 
@@ -1726,3 +1722,85 @@ ggsave("output/figures/HUB-mean-scores-vs-total-log-log.png", width = 7, height 
 ```
 
 
+
+
+
+
+## ========================================================================== ##
+## OLD FIGURE 1
+## ========================================================================== ##
+figure_1 <- function() {
+  true_values <- seq(0.2, 5, length.out = 1000)
+  quantiles <- c(0.01, 0.025, seq(0.05, 0.95, 0.05), 0.975, 0.99)
+  
+  vals <- expand.grid(
+    true_value = true_values, 
+    quantile = quantiles
+  ) |>
+    mutate(id = true_value) |>
+    arrange(true_value, quantile) |>
+    mutate(prediction = qnorm(p = quantile, mean = 1, sd = 0.4), 
+           model = "Model")
+  
+  scores <- vals |>
+    mutate(scale = "natural") |>
+    score() |> 
+    summarise_scores(by = c("scale", "id")) 
+  
+  scores_log <- vals |>
+    mutate(true_value = log(true_value), 
+           prediction = log(prediction), 
+           scale = "log") |>
+    score() |>
+    summarise_scores(by = c("scale", "id"))
+  
+  scores <- scores |>
+    rbind(scores_log) |>
+    group_by(scale) |>
+    mutate(score = interval_score / min(interval_score), 
+           scale = factor(scale, levels = c("natural", "log"))) 
+  
+  # scale factor for the density in the plot to make it look nicer
+  scale_factor <- 3
+  
+  plot_fct <- function(scores, filter = "natural", relative_x = FALSE) {
+    p <- scores |>
+      filter(scale == filter) |>
+      ggplot(aes(x = id, y = interval_score/scale_factor)) + 
+      geom_area(stat = "function", 
+                fun = function(x) {dnorm(x, mean = 1, sd = 0.4)}, 
+                color = "grey", fill = "grey", alpha = 0.5) +
+      geom_line() + 
+      labs(y = "WIS", x = "Observed value") + 
+      scale_y_continuous(label = function(x) {paste(scale_factor * x)}) + 
+      facet_wrap(~ scale, ncol = 1, scales = "free") + 
+      theme_scoringutils() + 
+      theme(panel.spacing = unit(1, "lines"))
+    
+    if (relative_x) {
+      p <- p +
+        scale_x_continuous(
+          trans = "log", 
+          label = function(x) {
+            ifelse(x < 1, 
+                   paste0("1/", (1 / x)), 
+                   paste(x))
+          }, 
+          breaks = c(0.2, 1/2, 1, 2, 5)
+        )
+    }
+    return(p)
+  }
+  
+  p1 <- plot_fct(scores, filter = "natural")
+  p2 <- plot_fct(scores, filter = "log")
+  p3 <- plot_fct(scores, filter = "natural", relative_x = TRUE)
+  p4 <- plot_fct(scores, filter = "log", relative_x = TRUE)
+  
+  (p1 + p3) / (p2 + p4) +
+    plot_annotation(tag_levels = "A")
+  
+  ggsave("output/figures/SIM-effect-log-score.png", width = 7, 
+         height = 4)
+}
+figure_1()

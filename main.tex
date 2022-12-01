@@ -181,9 +181,8 @@ For small $\bar{r}t$, $ y_0 \exp (\bar{r}t)$ is approximately equivalent to $ y_
 
 \subsection{Effects on model rankings}
 \label{sec:methods:rankings}
-Rankings between different forecasters based on their scores may change through the log-transformation both when looking at aggregate scores as well as when looking at a single forecast. We illustrate this in Figure \ref{fig:illustration-ranking} with two forecasters issuing a negative binomial distribution with different dispersion. When showing the obtained score as a function of the observed value, it can be seen that the ranking between the two forecasters may change when scoring the forecast on the logarithmic, rather than the natural scale. 
+Rankings between different forecasters based on their scores may change through the log-transformation both when looking at aggregate scores as well as when looking at a single forecast. We illustrate this in Figure \ref{fig:illustration-ranking} with two forecasters, A and B, issuing a negative binomial distribution with different dispersion. When showing the obtained score as a function of the observed value, it can be seen that the ranking between the two forecasters may change when scoring the forecast on the logarithmic, rather than the natural scale. In particular, on the natural scale, forecaster A, who issues a more uncertain distribution, receives a better score for observed values far away from the centre of the respective predictive distribution than forecaster B. On the log scale, however, forecaster A receives a lower score for larger observed values, being more heavily penalised for assigning large probability to small values (which, in relative terms, are far away from the actual observation). Similarly, we would expect assigning large probability to very large values to be less severely penalised on the log scale than on the natural scale, as usually the distance between the observation and forecast that overpredicts tends to be large in absolute terms, but small in relative terms. 
 
-As an example for the effect on a single forecast, consider two forecasters, A and B. Both issue a single 50\%-prediction interval for a target which later resolves as 1. Forecaster A issues the interval [0.5, 2], while forecaster B issues [0.9. 2.5]. On the natural scale, the score would be determined  the dispersion of the forecast, i.e. the length of this interval (since the observed value falls within the prediction interval). Forecaster A would receive a score of $2 - 0.5$ = 1.5, beating forecaster B who would receive a score of $2.5 - 0.9 = 1.6$. When we transform the forecast, forecaster A receives a score of $\log (\frac{2}{0.5}) = 1.39$, while forecaster B obtains a score of $\log (\frac{2.5}{0.9}) = 1.02$ and now wins over forecaster A. The main difference between forecaster A and B is that forecaster A has issued a prediction interval ([0.5, 2]) that was more symmetric around the true value than the interval issued by forecaster B ([0.9. 2.6], which was more skewed). This means that in relative terms, Forecaster B was noticeably closer to the true value with the lower bound of their prediction interval, while only being slightly further away with the upper interval. This implies that scores on the log scale may treat (one-sided) outlier forecasts more leniently. 
 
 \begin{figure}[h!]
 \centering
@@ -350,7 +349,7 @@ Exploring these different transformations is a promising avenue for future work 
     \label{fig:HUB-model-comparison-epinow}
 \end{figure}
 
-\subsection{WIS}
+\subsection{Alternative Formulation of the WIS}
 For a single prediction interval, the interval score is computed as the sum of three penalty components, dispersion (width of the prediction interval), underprediction and overprediction,  
 %
 \begin{linenomath*}
@@ -368,45 +367,6 @@ where $1()$ is the indicator function, $y$ is the observed value, and $l$ and $u
 \end{linenomath*}
 where $w_k$ is a weight for every interval. Usually, $w_k = \frac{\alpha_k}{2}$ and $w_0 = 0.5$. 
 
-
-
-
-
-Computing a score based on the logarithm of the forecast and the observation is also equivalent to scoring a forecast of the exponential growth rate of the forecast target. The exponential growth rate $r$ governs epidemic growth via (see e.g. \cite{wallingaHowGenerationIntervals2007})
-%
-\begin{linenomath*}
-\begin{equation*}
-y_{t + \Delta t} = y_t \cdot \exp(r \cdot \Delta t).
-\end{equation*}
-\end{linenomath*}
-For small $\Delta t$ and $r$ this is approximately equivalent to
-\begin{linenomath*}
-\begin{equation*}
- y_{t + \Delta t} = y_t \cdot (1 + r \cdot \Delta t),
-%y(t) \cdot \exp(r \cdot \Delta t) \approx y(t) \cdot (1 + r \cdot \Delta t),
-\end{equation*}
-\end{linenomath*}
-%
-which is sometimes used as an alternative definition ($r$ in this formulation is then called the multiplicative growth rate). Now assume that we predict one step time step ahead, i.e., at time $t$ we predict $y_{t + 1} = \hat{y}_{t + 1} + \varepsilon^*_{t+1}$. Moreover assume that $r$ is time-constant between $t$ and $t + 1$. The score is determined by the size of $\left|\varepsilon^*_{t+1}\right|$, the absolute error of the log-transformed incidence. 
-%
-\begin{linenomath*}
-\begin{align*}
-%\varepsilon^*_{t+1} & = \left|\log \hat{y}_{t + 1} - \log y_{t + 1} \right|\\
-\varepsilon^*_{t+1} & = \log \hat{y}_{t + 1} - \log y_{t + 1} \\
-& = \log \left[\exp(\hat{r}) \cdot y_t\right] - \log \left[\exp(r) \cdot y_t\right] \\
-& = \hat{r} - r,
-\end{align*}
-\end{linenomath*}
-where $\hat{r}$ is the predicted exponential growth rate as implied by $\hat{y}(t + 1)$. By log-transforming both the predicted value and the observation prior to applying the absolute error we thus just assess the error in the predicted exponential growth rate. If we apply the same reasoning to an $n$-week-ahead forecast and assume that the growth rate is piece-wise constant with value $r_t$ on $[t, t + 1)$, we get
-%
-\begin{linenomath*}
-\begin{align*}
-\epsilon^* & = \log \hat{y}_{t + n} - \log y_{t + n}\\
-& = \log\left[\exp\left(\sum_{i = 0}^{n - 1}\hat{r}_{t + i}\right) \cdot y_t\right] - \log\left[\exp\left(\sum_{i = 0}^{n - 1}r_{t + i} \right) \cdot y_t\right]\\
-& =   \sum_{i = 0}^{n - 1}\hat{r}_{t + i} \ - \ \sum_{i = 0}^{n - 1}r_{t + i}.
-\end{align*}
-\end{linenomath*}
-We thus evaluate the error in the cumulative growth over the considered $n$-week period.
 
 
 

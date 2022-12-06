@@ -14,6 +14,8 @@ library(tidytext)
 library(grid)
 library(ggpubr)
 library(latex2exp)
+library(gh)
+library(covidHubUtils) # remotes::install_github("https://github.com/reichlab/covidHubUtils")
 
 set.seed(1234)
 
@@ -224,7 +226,7 @@ p1 <- scores |>
   labs(y = "WIS", x = "Mean") +
   theme_scoringutils() + 
   scale_colour_discrete(
-    labels=c(TeX(r'($\sigma^2 = \mu + \mu^2$)'), 
+    labels=c(TeX(r'($\sigma^2 = \mu + 0.1 \cdot \mu^2$)'), 
              TeX(r'($\sigma^2 = \mu + \frac{\mu^{2.5}}{1000}$)'), 
              TeX(r'($\sigma^2 = \mu$)'))
   ) +
@@ -250,7 +252,7 @@ scores |>
   ungroup() |>
   mutate(
     model = factor(model, 
-                   labels = c(TeX(r'($\sigma^2 = \mu + \mu^2$)'), 
+                   labels = c(TeX(r'($\sigma^2 = \mu + 0.1 \cdot \mu^2$)'), 
                               TeX(r'($\sigma^2 = \mu + \mu^{2.5}/1000$)'), 
                               TeX(r'($\sigma^2 = \mu$)')))
   ) |>
@@ -260,53 +262,13 @@ scores |>
   facet_wrap(scale ~ model, scales = "free", labeller = label_parsed) + 
   theme_scoringutils() + 
   scale_colour_discrete(
-    labels=c(TeX(r'($\sigma^2 = \mu + \mu^2$)'), 
+    labels=c(TeX(r'($\sigma^2 = \mu + 0.1 \cdot \mu^2$)'), 
              TeX(r'($\sigma^2 = \mu + \frac{\mu^{2.5}}{1000}$)'), 
              TeX(r'($\sigma^2 = \mu$)'))
   ) + 
   scale_x_continuous(trans = "log10")
 
 ggsave("output/figures/SIM-score-approximation.png", width = 7, height = 4.1)
-
-
-
-
-
-
-
-
-p1 <- scores |>
-  rename(Theta = theta) |>
-  group_by(mean, scale, Theta) |>
-  summarise(interval_score = mean(interval_score)) |>
-  group_by(Theta, scale) |>
-  mutate(interval_score = interval_score / mean(interval_score), 
-         Theta = as.character(Theta),
-         Variance = as.factor(as.character(Theta)),
-         Variance = recode_factor(Variance, 
-                                  "0.1" = "\u03C3\u00B2 = \u03BC + 10 \u00B7 \u03BC^2", 
-                                  "1" = "\u03C3\u00B2 = \u03BC + \u03BC^2", 
-                                  "1e+09" = "\u03C3\u00B2 = \u03BC"),
-         Theta = ifelse(Theta == 1e+09, "1b", Theta)) |>
-  ggplot(aes(y = interval_score, x = mean, colour = Variance)) +
-  geom_point(size = 0.4) +  
-  labs(y = "WIS", x = "Mean") +
-  theme_scoringutils() + 
-  facet_wrap(~ scale, scales = "free_y")
-
-p2 <- p1 + 
-  scale_x_continuous(trans = "log10") + 
-  scale_y_continuous(trans = "log10")
-
-p1 / p2 +
-  plot_annotation(tag_levels = "A") +   
-  plot_layout(guides = "collect") & 
-  theme(legend.position = "bottom") &
-  labs(y = "Normalised WIS") 
-
-
-
-
 
 
 
@@ -377,6 +339,225 @@ ggsave("output/figures/example-log-first.png", width = 7, height = 2.1)
 
 
 
+## ========================================================================== ##
+## Loading ECDC Forecast Hub Data
+## ========================================================================== ##
+
+start_date <- "2021-03-08"
+end_date <- "2021-10-18"
+
+hub_data <- rbindlist(list(
+  fread(here("data", "full-data-european-forecast-hub-1.csv")), 
+  fread(here("data", "full-data-european-forecast-hub-2.csv")),
+  fread(here("data", "full-data-european-forecast-hub-3.csv"))
+)) |>
+  unique()
+
+refetch_data <- function() {
+  
+  # download folder using SVN
+  # svn checkout https://github.com/epiforecasts/covid19-forecast-hub-europe/trunk/data-processed
+  
+  # load truth data using the covidHubutils package ------------------------------
+  truth <- covidHubUtils::load_truth(hub = "ECDC") |>
+    filter(target_variable %in% c("inc case", "inc death")) |>
+    mutate(target_variable = ifelse(target_variable == "inc case", 
+                                    "Cases", "Deaths")) |>
+    rename(target_type = target_variable, 
+           true_value = value) |>
+    select(-model)
+  
+  fwrite(truth, "data/weekly-truth-Europe.csv")
+  
+  
+  # get the correct file paths to all forecasts ----------------------------------
+  folders <- here("data-processed", list.files("data-processed"))
+  folders <- folders[
+    !(grepl("\\.R", folders) | grepl(".sh", folders) | grepl(".csv", folders))
+  ]
+  
+  file_paths <- purrr::map(folders, 
+                           .f = function(folder) {
+                             files <- list.files(folder)
+                             out <- here::here(folder, files)
+                             return(out)}) %>%
+    unlist()
+  file_paths <- file_paths[grepl(".csv", file_paths)]
+  
+  # load all past forecasts ------------------------------------------------------
+  # ceate a helper function to get model name from a file path
+  get_model_name <- function(file_path) {
+    split <- str_split(file_path, pattern = "/")[[1]]
+    model <- split[length(split) - 1]
+    return(model)
+  }
+  
+  # load forecasts
+  prediction_data <- map_dfr(file_paths, 
+                             .f = function(file_path) {
+                               data <- fread(file_path)
+                               data[, `:=`(
+                                 target_end_date = as.Date(target_end_date),
+                                 quantile = as.numeric(quantile),
+                                 forecast_date = as.Date(forecast_date), 
+                                 model = get_model_name(file_path)
+                               )]
+                               return(data)
+                             }) %>%
+    filter(grepl("case", target) | grepl("death", target)) %>%
+    mutate(target_type = ifelse(grepl("death", target), 
+                                "Deaths", "Cases"), 
+           horizon = as.numeric(substr(target, 1, 1))) %>%
+    rename(prediction = value) %>%
+    filter(type == "quantile", 
+           grepl("inc", target)) %>%
+    select(location, forecast_date, quantile, prediction, 
+           model, target_end_date, target, target_type, horizon)
+  
+  # merge forecast data and truth data and save
+  hub_data <- merge_pred_and_obs(prediction_data, truth, 
+                                 by = c("location", "target_end_date", 
+                                        "target_type")) |>
+    filter(target_end_date >= "2021-01-01") |>
+    select(-location_name, -population, -target)
+  
+  # split forecast data into two to reduce file size
+  split <- floor(nrow(hub_data) / 2)
+  
+  # harmonise forecast dates to be the date a submission was made
+  hub_data <- mutate(hub_data, 
+                     forecast_date = calc_submission_due_date(forecast_date))
+  
+  # function that performs some basic filtering to clean the data
+  filter_hub_data <- function(hub_data) {
+    
+    # define the unit of a single forecast
+    unit_observation <- c("location", "forecast_date", "horizon", "model", "target_type")
+    
+    h <- hub_data |>
+      # filter out unnecessary horizons and dates
+      filter(horizon <= 4, 
+             forecast_date > "2021-03-08") |>
+      # filter out all models that don't have all quantiles
+      group_by_at(unit_observation) |>
+      mutate(n = n()) |>
+      ungroup() |>
+      filter(n == max(n)) |>
+      # filter out models that don't have all horizons
+      group_by_at(unit_observation) |>
+      ungroup(horizon) |>
+      mutate(n = length(unique(horizon))) |>
+      ungroup() |>
+      filter(n == max(n)) 
+    
+    return(h)
+  }
+  
+  hub_data <- filter_hub_data(hub_data)
+  
+  fwrite(hub_data[1:split, ], 
+         file = "data/full-data-european-forecast-hub-1.csv")
+  fwrite(hub_data[(split + 1):nrow(hub_data), ], 
+         file = "data/full-data-european-forecast-hub-2.csv")
+  
+}
+
+filter_out_anomalies <- function(hub_data) {
+  anomalies_file <- here::here("data", "anomalies.csv")
+  if (file.exists(anomalies_file)) {
+    anomalies <- data.table::fread(file = anomalies_file)
+  } else {
+    ## get anomalies file at date of last data made
+    owner <- "covid19-forecast-hub-europe"
+    repo <- "covid19-forecast-hub-europe"
+    path <- "data-truth/anomalies/anomalies.csv"
+    commit <- gh::gh(
+      "/repos/{owner}/{repo}/commits?path={path}&until={date}",
+      owner = owner,
+      repo = repo,
+      path = path,
+      until = max(hub_data$target_end_date),
+      .limit = 1
+    )
+    anomalies <- data.table::fread(input = URLencode(URL = paste(
+      "https://raw.githubusercontent.com", owner, repo, commit[[1]]$sha, path, sep = "/"
+    )))
+    data.table::fwrite(x = anomalies, file = anomalies_file)
+  }
+  
+  ## prepare for mergeing into hub_data
+  anomalies <- anomalies[, list(
+    target_end_date,
+    location,
+    target_type = paste0(stringr::str_to_title(stringr::str_remove(
+      string = target_variable, pattern = "^inc ")), "s")
+  )]
+  
+  hub_data <- hub_data[!anomalies, on = .(target_end_date, location, target_type)]
+  hub_data <- hub_data[true_value < 0, true_value := NA][]
+  return(hub_data)
+}
+hub_data <- filter_out_anomalies(hub_data)
+
+filter_models <- function(hub_data) {
+  check <- hub_data |> 
+    check_forecasts()
+  
+  filtermodels <- check$unique_values |>
+    filter(horizon >= 4, 
+           target_type == 2,
+           true_value > 900,
+           quantile == 23, 
+           forecast_date > 16,
+           location == 32) |>
+    pull(model)
+  
+  remove <- hub_data |> 
+    group_by(model, forecast_date, location, target_type) |>
+    summarise(q = length(unique(quantile))) |>
+    filter(q < 23) |>
+    pull(model) |>
+    unique() 
+  
+  filtermodels <- setdiff(filtermodels, remove)
+  
+  hub_data |>
+    filter(model %in% filtermodels)
+}
+hub_data <- filter_models(hub_data)
+
+hub_data <- filter(hub_data, 
+                   forecast_date >= (as.Date(start_date) - 3))
+
+get_scores <- function(hub_data) {
+  if (file.exists(here("output", "data", "all-scores-european-hub.csv"))) {
+    scores <- fread(here("output", "data", "all-scores-european-hub.csv"))
+    return(scores)
+  } else {
+    scores <- hub_data |>
+      mutate(scale = "natural") |>
+      rbind(hub_data |>
+              mutate(
+                scale = "log", 
+                true_value = log(true_value + 1), 
+                prediction = log(pmax(prediction, 0))
+              )) |>
+      score(metrics = c("interval_score")) |>
+      summarise_scores(by = c("model", "location",
+                              "target_end_date", "forecast_date",
+                              "horizon", "target_type", "scale"), 
+                       na.rm = TRUE)
+    
+    scores[, type_and_scale := paste0(target_type, " - ", scale)]
+    scores[, type_and_scale := factor(type_and_scale, 
+                                      levels = c("Cases - natural", "Deaths - natural",
+                                                 "Cases - log", "Deaths - log"))]
+    scores[, scale := factor(scale, levels = c("natural", "log"))]
+    fwrite(scores, here("output", "data", "all-scores-european-hub.csv"))
+    return(scores)
+  }
+}
+scores <- get_scores(hub_data)
 
 
 
@@ -386,8 +567,15 @@ ggsave("output/figures/example-log-first.png", width = 7, height = 2.1)
 
 
 
-# helper functions
-# ------------------------------------------------------------------------------
+
+## ========================================================================== ##
+## Figure 5
+## ========================================================================== ##
+
+
+
+
+
 
 make_table <- function(x, caption = "") {
   x %>%
@@ -396,15 +584,6 @@ make_table <- function(x, caption = "") {
     mutate_if(is.numeric, round, 2) %>%
     kable(caption = caption) %>%
     kable_styling()
-}
-
-# format plot scales
-scale_fn <- function(x) {
-  ifelse(x >= 1000000, 
-         paste0(x / 1000000, "m"), 
-         ifelse(x >= 1000,
-                paste0(x / 1000, "k"),
-                x))
 }
 
 label_fn <- function(x) {
@@ -420,112 +599,14 @@ label_fn <- function(x) {
 }
 
 
-# load data 
-# ------------------------------------------------------------------------------
-hub_data <- rbindlist(list(
-  fread(here("data", "full-data-european-forecast-hub-1.csv")), 
-  fread(here("data", "full-data-european-forecast-hub-2.csv")),
-  fread(here("data", "full-data-european-forecast-hub-3.csv"))
-)) |>
-  unique()
-
-scores <- fread(here("output", "data", "all-scores-european-hub.csv"))
-scores[, scale := factor(scale, levels = c("natural", "log"))]
-data.table::setnames(scores, old = c("aem", "sharpness"), new = c("ae_median", "dispersion"))
-
-scores_gr <- fread(here("output", "data", "all-scores-growth-rate-european-hub.csv"))
-scores_gr[, scale := factor(scale, levels = c("natural", "log"))]
-
-check <- hub_data |> 
-  check_forecasts()
-
-filtermodels <- check$unique_values |>
-  filter(horizon >= 4, 
-         target_type == 2,
-         true_value > 900,
-         quantile == 23, 
-         forecast_date > 16,
-         location == 32) |>
-  pull(model)
-
-remove <- hub_data |> 
-  group_by(model, forecast_date, location, target_type) |>
-  summarise(q = length(unique(quantile))) |>
-  filter(q < 23) |>
-  pull(model) |>
-  unique() 
-
-filtermodels <- setdiff(filtermodels, remove)
-
-scores <- scores[model %in% filtermodels]
-scores[, type_and_scale := paste0(target_type, " - ", scale)]
-scores[, type_and_scale := factor(type_and_scale, 
-                                  levels = c("Cases - natural", "Deaths - natural",
-                                             "Cases - log", "Deaths - log"))]
-
-hub_data <- hub_data[model %in% filtermodels]
-hub_data <- hub_data[forecast_date >= "2021-03-05"]
-hub_data[, true_value := pmax(true_value, 0)]
-
-```
-
-```{r eval = recompute_scores}
-# score forecasts
-# ------------------------------------------------------------------------------
-
-# helper function
-score_forecasts <- function(data,
-                            summarise_by = c("model", "location", 
-                                             "target_end_date", "forecast_date",
-                                             "horizon", "target_type"), 
-                            scale = c("natural", "log")) {
-  if (scale[1] == "log") {
-    data <- data |>
-      mutate(prediction = log(pmax(prediction, 0) + 1), 
-             true_value = log(pmax(true_value, 0) + 1))
-  }
-  
-  data |>
-    eval_forecasts(summarise_by = summarise_by) |>
-    mutate(scale = scale[1])
-}
-
-scores_natural <- score_forecasts(hub_data)
-scores_log <- score_forecasts(hub_data, scale = "log")
-
-scores_gr_natural <- score_forecasts(growth_data)
-scores_gr_log <- score_forecasts(growth_data, scale = "log")
-
-scores <- bind_rows(scores_natural, scores_log)
-fwrite(scores, here("output", "data", "all-scores-european-hub.csv"))
-
-scores_gr <- bind_rows(scores_gr_natural, scores_gr_log)
-fwrite(scores_gr, here("output", "data", "all-scores-growth-rate-european-hub.csv"))
-```
-
-
-## =============================================================================
-## FIGURE 1
-# illustration-effect-log-score.R
-
-
-## =============================================================================
-## FIGURE 2
-# Simulation poisson-mean-sd.R
-
-
-## =============================================================================
-## FIGURE 3
-# example-log-first-Johannes.R
 
 
 
-## =============================================================================
-## FIGURE 4
-## Mean vs. sd of observed values + boxplots for distribution across target type + location
 
-```{r}
-# average number of cases and deaths
+
+
+
+
 
 # plot with means across locations ---------------------------------------------
 label_fn_within <- function(x) {
@@ -562,7 +643,7 @@ box_plot_obs <- hub_data |>
   scale_fill_brewer(palette = "Set1", name = "Forecast target") + 
   theme_scoringutils() + 
   theme(legend.position = "none") + 
-  scale_y_continuous(labels = scale_fn, trans = "log10") + 
+  scale_y_continuous(labels = label_fn, trans = "log10") + 
   labs(y = "Observations", x = "")  +
   theme(axis.title.x = element_blank())
 
@@ -583,7 +664,7 @@ plot_mean_scores <- plot_df |>
   facet_wrap(~ type_and_scale, scale = "free") + 
   theme_scoringutils() + 
   theme(legend.position = "none") + 
-  scale_y_continuous(labels = scale_fn) + 
+  scale_y_continuous(labels = label_fn) + 
   scale_x_discrete(guide = guide_axis(n.dodge=2), labels = label_fn_within) +
   labs(y = "Mean interval score", x = "Loaction") 
 
@@ -600,15 +681,25 @@ box_plot_scores <- scores |>
   facet_wrap(~ scale, scale = "free", nrow = 2) + 
   theme_scoringutils() + 
   theme(legend.position = "none") + 
-  scale_y_continuous(labels = scale_fn, trans = "log10") + 
+  scale_y_continuous(labels = label_fn, trans = "log10") + 
   labs(y = "Interval score", x = "Target type")
 
+
+fct = function(x, x2) {
+  if(length(x2) == 0) {
+    return(NA)
+  } else {
+    return(x / x2)
+  }
+}
 
 box_plot_horizon <- scores |> 
   filter(model == "EuroCOVIDhub-ensemble", 
          horizon <= 4) |>
-  group_by(forecast_date, model, location, target_type, scale) |>
-  mutate(interval_score = interval_score / interval_score[horizon == 1]) |>
+  group_by(forecast_date, model, location, target_type, scale, type_and_scale) |>
+  mutate(
+    interval_score = fct(interval_score, interval_score[horizon ==1])
+      ) |>
   ggplot(aes(y = interval_score,
              x = as.factor(horizon), fill = target_type)) + 
   geom_hline(aes(yintercept = 1), linetype = "dashed", color = "grey40") +
@@ -618,7 +709,7 @@ box_plot_horizon <- scores |>
   facet_wrap(~ scale, nrow = 1) + 
   theme_scoringutils() + 
   theme(legend.position = "none") + 
-  scale_y_continuous(labels = scale_fn, trans = "log10") +
+  scale_y_continuous(labels = label_fn, trans = "log10") +
   labs(y = "Rel. change in WIS", x = "Forecast horizon (weeks)")
 
 layout <- "
@@ -635,8 +726,11 @@ plot_means_obs  + box_plot_obs + plot_mean_scores + box_plot_scores + box_plot_h
 
 ggsave("output/figures/HUB-mean-obs-location.png", width = 10, height = 10)
 
-# This uses the ensemble, but alternatively, we could think about just summarising across all models for these plots? 
-```
+
+
+
+
+
 
 ## =============================================================================
 ## Figure 5 - Correlations between everything

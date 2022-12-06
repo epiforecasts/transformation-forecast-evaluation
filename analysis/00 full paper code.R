@@ -13,6 +13,7 @@ library(performance)
 library(tidytext)
 library(grid)
 library(ggpubr)
+library(latex2exp)
 
 set.seed(1234)
 
@@ -171,53 +172,106 @@ ggsave(filename = "output/figures/illustration-effect-log-ranking-crps.png",
 ## ========================================================================== ##
 ## FIGURE 3
 ## ========================================================================== ##
-
-
-time_points <- 5000
-q = c(0.01, 0.025, seq(0.05, 0.95, 0.05), 0.975, 0.99)
-n_means <- 100
-means = 100 * (10^seq(0, 2, length.out = n_means))
-thetas <- c(0.1, 1, 1e9)
-model_names <- c("theta_0.1", "theta_1", "theta_1e9")
-
 if (file.exists("output/data/simulation-negative-binom.Rda")) {
   scores <- readRDS(file = "output/data/simulation-negative-binom.Rda")
 } else {
+  
+  time_points <- 1e5
+  n_means <- 60
+  means = 100 * (10^seq(0, 1.2, length.out = n_means))
+  model_names <- c("theta_1000_sqrt_mu", "theta_1", "theta_1e9")
+  
   df <- data.table(
     state = 1:length(mean),
     mean = means
   ) |>
     mutate(date = list(1:time_points)) |>
     unnest(cols = date) |>
-    mutate(theta = list(thetas), 
+    rowwise() |>
+    mutate(theta = list(c(1000/sqrt(mean), 10, 1e9)), 
            model = list(model_names)) |>
+    ungroup() |>
     unnest(cols = c("theta", "model")) |>
-    mutate(true_value = rnbinom(n = time_points * n_means * length(thetas), 
-                                size = theta,
-                                mu = mean)) |>
-    mutate(quantile = list(q)) |>
-    unnest(quantile) |>
-    mutate(prediction = qnbinom(p = quantile, size = theta, mu = mean))
+    mutate(predictive_sample = rnbinom(n = time_points * n_means * length(model_names), 
+                                        size = theta,
+                                        mu = mean)) 
   
-  scores_natural <- df |>
-    score(metrics = c("interval_score")) |>
-    summarise_scores(c("model", "mean", "theta")) |>
-    mutate(scale = "natural")
-  
-  scores_log <- df |>
-    mutate(true_value = log(true_value + 1), 
-           prediction = log(prediction + 1)) |>
-    score(metrics = c("interval_score")) |>
-    summarise_scores(c("model", "mean", "theta")) |>
-    mutate(scale = "log")
-  
-  scores <- 
-    rbind(scores_natural, 
-          scores_log) |>
-    mutate(scale = factor(scale, levels = c("natural", "log")))
+  scores <- df |>
+    group_by(mean, theta, model) |> 
+    summarise(
+      crps = mean(abs(predictive_sample[-1] - predictive_sample[-length(predictive_sample)]))/2,
+      crps_log = mean(abs(log(predictive_sample[-1]) - log(predictive_sample[-length(predictive_sample)])))/2
+    ) |>
+    pivot_longer(cols = c(crps, crps_log), values_to = "crps", names_to = "scale") |>
+    mutate(scale = ifelse(scale == "crps", "natural", "log"), 
+           scale = factor(scale, levels = c("natural", "log"))) |> 
+    mutate(var = mean + mean^2 / theta, 
+           approximation = ifelse(scale == "natural", 
+                                  sqrt(var / pi),  
+                                  sqrt(var / pi) / (mean)))
   
   saveRDS(scores, file = "output/data/simulation-negative-binom.Rda")
 }
+
+p1 <- scores |>
+  group_by(model, scale) |>
+  filter(mean <= 1500) |>
+  mutate(crps = crps / mean(crps), 
+         approximation = approximation / mean(approximation)) |>
+  ggplot(aes(y = crps, x = mean, colour = model)) +
+  geom_line(aes(y = approximation)) +
+  geom_point(size = 0.4) +  
+  labs(y = "WIS", x = "Mean") +
+  theme_scoringutils() + 
+  scale_colour_discrete(
+    labels=c(TeX(r'($\sigma^2 = \mu + \mu^2$)'), 
+             TeX(r'($\sigma^2 = \mu + \frac{\mu^{2.5}}{1000}$)'), 
+             TeX(r'($\sigma^2 = \mu$)'))
+  ) +
+  facet_wrap(~ scale, scales = "free_y") 
+
+p2 <- p1 + 
+  scale_x_continuous(trans = "log10") + 
+  scale_y_continuous(trans = "log10")
+
+p1 / p2 +
+  plot_annotation(tag_levels = "A") +   
+  plot_layout(guides = "collect") & 
+  theme(legend.position = "bottom") &
+  labs(y = "Normalised CRPS") 
+
+ggsave("output/figures/SIM-mean-state-size.png", width = 7, height = 4.1)
+
+
+## FIGURE 3 - Appendix version
+## ========================================================================== ##
+
+scores |>
+  ungroup() |>
+  mutate(
+    model = factor(model, 
+                   labels = c(TeX(r'($\sigma^2 = \mu + \mu^2$)'), 
+                              TeX(r'($\sigma^2 = \mu + \mu^{2.5}/1000$)'), 
+                              TeX(r'($\sigma^2 = \mu$)')))
+  ) |>
+  ggplot(aes(y = crps, x = mean, color = model)) +
+  geom_line(aes(y = approximation)) +
+  geom_point(aes(color = model), alpha = 0.3) + 
+  facet_wrap(scale ~ model, scales = "free", labeller = label_parsed) + 
+  theme_scoringutils() + 
+  scale_colour_discrete(
+    labels=c(TeX(r'($\sigma^2 = \mu + \mu^2$)'), 
+             TeX(r'($\sigma^2 = \mu + \frac{\mu^{2.5}}{1000}$)'), 
+             TeX(r'($\sigma^2 = \mu$)'))
+  ) + 
+  scale_x_continuous(trans = "log10")
+
+ggsave("output/figures/SIM-score-approximation.png", width = 7, height = 4.1)
+
+
+
+
+
 
 
 
@@ -230,9 +284,9 @@ p1 <- scores |>
          Theta = as.character(Theta),
          Variance = as.factor(as.character(Theta)),
          Variance = recode_factor(Variance, 
-                                  "0.1" = "\u03C3 = \u03BC + 10 \u00B7 \u03BC^2", 
-                                  "1" = "\u03C3 = \u03BC + \u03BC^2", 
-                                  "1e+09" = "\u03C3 = \u03BC"),
+                                  "0.1" = "\u03C3\u00B2 = \u03BC + 10 \u00B7 \u03BC^2", 
+                                  "1" = "\u03C3\u00B2 = \u03BC + \u03BC^2", 
+                                  "1e+09" = "\u03C3\u00B2 = \u03BC"),
          Theta = ifelse(Theta == 1e+09, "1b", Theta)) |>
   ggplot(aes(y = interval_score, x = mean, colour = Variance)) +
   geom_point(size = 0.4) +  
@@ -250,7 +304,7 @@ p1 / p2 +
   theme(legend.position = "bottom") &
   labs(y = "Normalised WIS") 
 
-ggsave("output/figures/SIM-mean-state-size.png", width = 7, height = 4.1)
+
 
 
 

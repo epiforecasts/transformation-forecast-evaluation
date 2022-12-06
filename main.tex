@@ -35,7 +35,8 @@
 \begin{document}
 
 
-\title{Transformations of forecasts for evaluation in an epidemiological context}
+
+\title{Transformation of forecasts for evaluating predictive performance in an epidemiological context}
   \author{Nikos I. Bosse\thanks{Department of Infectious Disease Epidemiology, London School of Hygiene \& Tropical Medicine, London, United Kingdom} $^{,}$\thanks{Centre for the Mathematical Modelling of Infectious Diseases, London, United Kingdom} $^{,*}$, 
   Sam Abbott\footnotemark[1] $^{,}$\footnotemark[2]$ ^{}$, 
   Anne Cori\thanks{MRC Centre for Outbreak Analysis and Modelling, Department of Infectious Disease Epidemiology, School of Public Health, Imperial College London, London, United Kingdom} $^{}$, \\
@@ -78,7 +79,7 @@ where $y$ is the true observed value and $F$ the cumulative distribution functio
     \text{WIS}(F, y) = \frac{1}{2K + 1} \times \sum_{k = 1}^{2K + 1} \times 2 \left[ 1(y \leq q_{\tau_k}) - \tau_k \right] \times ( q_{\tau_k} - y), 
 \end{equation*}
 \end{linenomath*}
-where $q_{\tau}$ is the $\tau$ quantile of the forecast $F$, $y$ is the observed outcome, $K$ is the number of central prediction intervals provided, and $m$ is the median forecast. 
+where $q_{\tau}$ is the $\tau$ quantile of the forecast $F$, $y$ is the observed outcome, $K$ is the number of predictive quantiles provided, and $m$ is the median forecast. 
 
 The dynamics of infectious processes are often described by the complementary concepts of the reproduction number R \citep{gosticPracticalConsiderationsMeasuring2020} and growth rate r \citep{wallingaHowGenerationIntervals2007}, where R describes the strength and r the speed of epidemic growth \citep{dushoffSpeedStrengthEpidemic2021}.
 In the absence of changes in immunity, behaviour or other factors that may affect the intensity of transmission, the reproduction number would be expected to remain approximately constant.
@@ -93,7 +94,7 @@ In the example of COVID-19 where case numbers underwent drastic changes over tim
 
 In this paper, we discuss how transforming the forecasts and observations prior to applying the WIS (or CRPS) may be an appropriate way to address the aforementioned issues. Many different transformations may be appropriate and useful, depending on the exact context, the desired focus of the evaluation, and specific aspects of the forecasts that forecast consumers care most about (see a broader discussion in Section \ref{sec:discussion}). For conceptual clarity and to allow for a more in-depth discussion, we focus most of our attention on the log-transformation as one example of many possible transformations, chosen for its simplicity and usefulness in an epidemiological context. We further focus on the WIS as evaluation metric, given its widespread use throughout the COVID-19 pandemic. 
 
-We first outline the motivation for transforming forecasts prior to scoring and specifically the motivation for applying a log-transformation (Section \ref{sec:methods}). We provide a mathematical intuition of the impact of the log-transformation, its interpretation (Section \ref{sec:methods:relative} and \ref{sec:methods:growthrate}) and effects on forecast rankings (section \ref{sec:methods:rankings} and provide some discuss some practical considerations relevant for applying transformations in general and the log-transformation in particular (Section \ref{sec:methods:considerations}). We illustrate our the effect of the log-transformation using forecasts submitted to the European COVID-19 Forecast Hub  \citep{europeancovid-19forecasthubEuropeanCovid19Forecast2021, sherrattPredictivePerformanceMultimodel2022} (Section \ref{sec:results}). Finally, we provide scoring recommendations, discuss alternative transformations that may be useful in different contexts, and suggest further research avenues on the use of transformed scores in the evaluation of infectious disease forecasts (Section \ref{sec:discussion}). 
+We first outline the motivation for transforming forecasts prior to scoring and specifically the motivation for applying a log-transformation (Section \ref{sec:methods}). We provide a mathematical intuition of the impact of the log-transformation, its interpretation (Section \ref{sec:methods:relative} and \ref{sec:methods:growthrate}) and effects on forecast rankings (section \ref{sec:methods:rankings} and provide some discuss some practical considerations relevant for applying transformations in general and the log-transformation in particular (Section \ref{sec:methods:considerations}). We illustrate the effect of the log-transformation using forecasts submitted to the European COVID-19 Forecast Hub  \citep{europeancovid-19forecasthubEuropeanCovid19Forecast2021, sherrattPredictivePerformanceMultimodel2022} (Section \ref{sec:results}). Finally, we provide scoring recommendations, discuss alternative transformations that may be useful in different contexts, and suggest further research avenues on the use of transformed scores in the evaluation of infectious disease forecasts (Section \ref{sec:discussion}). 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -103,7 +104,7 @@ We first outline the motivation for transforming forecasts prior to scoring and 
 Our aim in transforming forecasts and observations is to shift the focus of the evaluation in a way that may be more appropriate for epidemiological forecasts, while preserving the propriety of the score. A particularly relevant transformation in the context of epidemic phenomena is the natural logarithm. Instead of a score representing the magnitude of absolute errors this approach makes it possible to obtain a score which a) measures relative error and at the same time b) provides an a measure for how well a forecast captures the exponential growth rate of the target quantity (see Section \ref{sec:methods:growthrate}. The interpretation of the log-transformed score as a score for a forecast of the exponential growth rate of a given quantity aligns the evaluation with our understanding of how epidemiological processes should be modeled and the kinds of errors models would typically make. 
 
 
-\subsection*{Interpretation as a relative error}
+\subsection{Interpretation as a relative error}
 \label{sec:methods:relative}
 
 To illustrate the effect of applying the logarithm prior to evaluating forecasts we consider the absolute error, which the CRPS and WIS generalize to probabilistic forecasts. When considering a point forecast $\hat{y}$ for a quantity of interest $y$, such that 
@@ -145,7 +146,7 @@ As Figure \ref{fig:SAPE} shows, the alignment with the SAPE is in fact the close
 
 
 
-\subsection*{Interpretation as scoring the exponential growth rate}
+\subsection{Interpretation as scoring the exponential growth rate}
 \label{sec:methods:growthrate}
 
 Another interpretation can be based around viewing the process to be forecast as exponential with time-varying growth rate $r(t)$~\citep[see, e.g.,][]{wallingaHowGenerationIntervals2007}, i.e.
@@ -164,7 +165,7 @@ y(t) = y_0 \exp \left( \int_0^t r(t') dt' \right) = y_0 \exp (\bar{r}t)
 \end{linenomath*}
 where $y_0$ is an initial data point and $\bar{r}$ is the mean of the growth rate between the initial time point $0$ and time $t$.
 
-If a forecast $y$ of the time series at time $t$ starts at time 0 with the data point $y_0$ then the absolute error after log transformation at time $t$ is
+If a forecast $\hat{y}(t)$ for the value of the time series at time $t$ is issued at time 0 based on the data point $y_0$ then the absolute error after log transformation is
 %
 \begin{linenomath*}
 \begin{align*}
@@ -174,14 +175,34 @@ If a forecast $y$ of the time series at time $t$ starts at time 0 with the data 
 \end{align*}
 \end{linenomath*}
 %
-We thus evaluate the error in the mean exponential growth rate, scaled by the length of the time period considered. 
+We thus evaluate the error in the mean exponential growth rate, scaled by the length of the time period considered. For small $\bar{r}t$, $ y_0 \exp (\bar{r}t)$ is approximately equivalent to $ y_0 (1 + \bar{r}t)$, which is sometimes used as an alternative definition of the growth rate (then called the multiplicative growth rate). 
 
-For small $\bar{r}t$, $ y_0 \exp (\bar{r}t)$ is approximately equivalent to $ y_0 (1 + \bar{r}t)$, which is sometimes used as an alternative definition (r in this second formulation is then called the multiplicative growth rate). 
+\subsection{Interpretation as a variance-stabilising transformation}
+
+In epidemiological contexts, the variance of the variable of interest usually scales with its mean. For a poisson-distributed variable, for example, the variance equals its mean, and for a negative-binomially distributed variable the relationship can be described by $\sigma^2 = \mu = \frac{\mu^2}{\theta}$. A variance transformation (VST, CITATION) is a transformation that serves to make the variance of a variable independent of its mean. 
+
+If the predictive distribution for the quantity $Y$ equals the true data-generating process $F$, the expected CRPS is given by \citep{gneitingStrictlyProperScoring2007}
+$$
+\mathbb{E}[\text{CRPS}(F, y)] = 0.5\times\mathbb{E}|Y - Y'|,
+$$
+where $Y$ and $Y'$ are independent samples from $F$. This corresponds to half the \textit{mean absolute difference}, which is a measure of dispersion. If $F$ is well-approximated by a normal distribution $\text{N}(\mu, \sigma^2)$, the approximation
+$$
+\mathbb{E}_F[\text{CRPS}(F, y)] \approx \frac{\sigma}{\sqrt{\pi}}
+$$
+can be used, meaning that the expected CRPS scales roughly with the standard deviation. Denoting by $F^*$ the predictive distribution for $\log(Y)$, the delta method implies that
+$$
+\mathbb{E}_F[\text{CRPS}\{F^*, \log(y)\}] \approx \frac{\sigma/\mu}{\sqrt{\pi}}.
+$$
+The expected CRPS for the log-transformed outcome thus scales with the coefficient of variation. In instances where the variance scales with the square of the mean, the log-transformation serves as a variance-stabilising transformation, making the expected CRPS independent of the mean of the forecast quantity. If the observations follow a poisson-distribution where the variance equals the mean, then a square-root-transformation can serve as VST. 
+
+RUN REGRESSIONS
+
+
 
 
 \subsection{Effects on model rankings}
 \label{sec:methods:rankings}
-Rankings between different forecasters based on their scores may change through the log-transformation both when looking at aggregate scores as well as when looking at a single forecast. We illustrate this in Figure \ref{fig:illustration-ranking} with two forecasters, A and B, issuing a negative binomial distribution with different dispersion. When showing the obtained score as a function of the observed value, it can be seen that the ranking between the two forecasters may change when scoring the forecast on the logarithmic, rather than the natural scale. In particular, on the natural scale, forecaster A, who issues a more uncertain distribution, receives a better score for observed values far away from the centre of the respective predictive distribution than forecaster B. On the log scale, however, forecaster A receives a lower score for larger observed values, being more heavily penalised for assigning large probability to small values (which, in relative terms, are far away from the actual observation). Similarly, we would expect assigning large probability to very large values to be less severely penalised on the log scale than on the natural scale, as usually the distance between the observation and forecast that overpredicts tends to be large in absolute terms, but small in relative terms. 
+Rankings between different forecasters based on their scores may change through the log-transformation both when looking at aggregate scores as well as when looking at a single forecast. We illustrate this in Figure \ref{fig:illustration-ranking} with two forecasters, A and B, issuing a negative binomial distribution with different dispersion. When showing the obtained score as a function of the observed value, it can be seen that the ranking between the two forecasters may change when scoring the forecast on the logarithmic, rather than the natural scale. In particular, on the natural scale, forecaster A, who issues a more uncertain distribution, receives a better score than forecaster B for observed values far away from the centre of the respective predictive distribution. On the log scale, however, forecaster A receives a lower score for large observed values, being more heavily penalised for assigning large probability to small values (which, in relative terms, are far away from the actual observation). 
 
 
 \begin{figure}[h!]
@@ -196,12 +217,17 @@ Overall model rankings would be expected to differ even more when scores are ave
 \begin{figure}[h!]
     \centering
     \includegraphics[width=0.99\textwidth]{output/figures/SIM-mean-state-size.png}
-    \caption{Simulation showing how the relationship between mean and variance of the forecast quantity affects scores. 1,000 samples were drawn from different negative binomial distributions and scores were computed assuming an ideal forecaster (forecast distribution equal to data-generating distribution). Observations were simulated for different means of the negative-binomial distributions (representing, for example, the number of cases in differently sized states) as well as different relationships between mean and variance (representing, for example, three different infectious processes). The variance of the negative binomial is given as $\sigma^2 = \mu + \mu^2 / \theta$, meaning that for large theta the negative binomial distribution is equal to the Poisson distribution. We used values of $\theta = 0.1$ (red), 1 (green) and 1b (blue). To make the scores for the different distributions comparable, scores were normalised to one, meaning that the mean score for every distribution (red, green, blue) is one. 
+    \caption{Simulation showing how the relationship between mean and variance of the forecast quantity affects scores. 1,000 samples were drawn from different negative binomial distributions and scores were computed assuming an ideal forecaster (forecast distribution equal to data-generating distribution). Observations were simulated for different means of the negative-binomial distributions (representing, for example, the number of cases in differently sized states) as well as different relationships between mean and variance (representing, for example, three different infectious processes). The variance of the negative binomial is given as $\sigma^2 = \mu + \mu^2 / \theta$, meaning that for large theta the negative binomial distribution is equal to the Poisson distribution. We used values of $\theta = 0.1$ (red), 1 (green) and 1 billion (blue). To make the scores for the different distributions comparable, scores were normalised to one, meaning that the mean score for every distribution (red, green, blue) is one. 
     A: Normalised WIS for ideal forecasts with increasing means of three distribution with different relationships between mean and variance. B: A but with log scale axis.}
     \label{fig:SIM-wis-state-size-mean}
 \end{figure}
 
-Whether or not forecast targets with smaller quantities receive higher scores than those for targets with larger quantities, depends on the exact relationship between the mean and the variance of the quantity of interest. To provide a better intuition, we simulated count data following a negative binomial distribution. For these simulated data, log predictions for small quantities received on average higher scores than forecasts for large quantities if the mean and the variance grew at the same rate $\sigma^2 = \mu$, about equal scores when the variance grew at a rate of $\sigma^2 = \mu + \mu^2$, and smaller scores when the variance grew faster than that (Figure \ref{fig:SIM-wis-state-size-mean}). 
+Whether forecast targets of small or high order of magnitude receive higher scores depends on the relationship between the mean and the variability of the quantity of interest. 
+
+MENTION EXAMPLE
+
+
+To provide a better intuition, we simulated count data following a negative binomial distribution. For these simulated data, log predictions for small quantities received on average higher scores than forecasts for large quantities if the mean and the variance grew at the same rate $\sigma^2 = \mu$, about equal scores when the variance grew at a rate of $\sigma^2 = \mu + \mu^2$, and smaller scores when the variance grew faster than that (Figure \ref{fig:SIM-wis-state-size-mean}). 
 
 \subsection{Practical considerations}
 \label{sec:methods:considerations}
@@ -212,6 +238,7 @@ The log-transformation (among many other transformations) is permissible (in the
     \centering
     \includegraphics[width=0.99\textwidth]{output/figures/example-log-first.png}
     \caption{Scores for different forecasts evaluated using the WIS, the WIS on the log-scale and the logarithm of the WIS. We simulated 1000 observations $Y_i = {\rm e}^{x_i}$, with $x_i \text{ iid} \sim \mathcal{N}(0, 1)$. We then simulated 20 forecasters who would issue a predictive distribution $F = {\rm e}^{x_i}$, with $x \sim \mathcal{N}(0, \sigma)$, with values of $\sigma$ ranging from 0.1 to 2. For forecasts evaluated by the WIS and the WIS on log-transformed values, the score is minimised when the predictive distribution equals the data-generating distribution. When taking the logarithm of the WIS, scores are minimised for a predictive distribution that is too narrow compared to the data-generating distribution.}
+    \caption{\textbf{Alternative suggestions for legend:} Illustration of impropriety of log-transformed CRPS. We assume $Y \sim \text{LogNormal}(0, 1)$ and evaluate the expected CRPS for predictive distributions $\text{LogNormal}(0, \sigma)$ with varying values of $\sigma \in [0.1, 2]$. For the regular CRPS (left) and CRPS applied to log-transformed outcomes (middle), the lowest expectation is achieved for the true value $\sigma = 1$. For the log-transformed CRPS, the optimal value is \textbf{XXX}, i.e. there is an incentive to report a too sharp forecast.}
     \label{fig:log-improper}
 \end{figure}
 
@@ -278,10 +305,10 @@ The rank order of different forecasting models (see Figure \ref{fig:HUB-rank-ord
 \section{Discussion}
 \label{sec:discussion}
 
-In this paper we proposed a log-transformation of forecasts and observed values prior to evaluation with the WIS (or CRPS) in order to address issues that arise when evaluating epidemiological forecasts based on a measure of absolute error. We gave a mathematical intuition for the transformation and showed that scores on the log scale can be interpreted as a) a measure of relative (multiplicative) prediction errors, as well as b) a score for a forecast of the exponential growth rate of the target quantity. 
+In this paper we proposed a log-transformation of forecasts and observed values prior to evaluation with the WIS (or CRPS) in order to address issues that arise when evaluating epidemiological forecasts based on a measure of absolute error. We gave a mathematical intuition for the transformation and showed that scores on the log scale can be interpreted as a) a measure of relative prediction errors, as well as b) a score for a forecast of the exponential growth rate of the target quantity. 
 When applying this approach to forecasts from the European COVID-19 Forecast Hub, we found overall scores on the log scale to be more equal across, time, location and target type (cases, deaths) than scores on the natural scale. Scores on the log scale were much less influenced by the overall incidence level in a country, and showed a slight tendency to be higher in locations with very low incidences. We found that model rankings changed noticeably, favouring models like epiforecasts-EpiNow2 which explicitly has an exponential error structure, and disfavouring models like MUNI-ARIMA which is a purely statistical model with a linear error structure. On the natural scale, missing the peak and overshooting was more severely penalised than missing the nadir and a following upswing in numbers. Both failure modes tended to be more equally penalised on the log scale (with undershooting receiving slightly higher penalties in our example). 
 
-Applying a log-transformation prior to the WIS means that forecasts are evaluated in terms of relative errors and errors on the multiplicative growth rate, rather than absolute errors. The most important strength of this approach is that the evaluation better accommodates the exponential nature of epidemiological process and the types of errors forecasters who accurately model those processes are expected to make. The log-transformation also helps avoid issues with scores being strongly influenced by the order of magnitude of the forecast quantity, which can be an issue when evaluating forecasts on the natural scale. 
+Applying a log-transformation prior to the WIS means that forecasts are evaluated in terms of relative errors and errors on the exponential growth rate, rather than absolute errors. The most important strength of this approach is that the evaluation better accommodates the exponential nature of epidemiological process and the types of errors forecasters who accurately model those processes are expected to make. The log-transformation also helps avoid issues with scores being strongly influenced by the order of magnitude of the forecast quantity, which can be an issue when evaluating forecasts on the natural scale. 
 A potential downside is that forecast evaluation is unreliable in situations where observed values are zero or very small. Including very small values in prediction intervals (see e.g. Figure \ref{fig:HUB-model-comparison-baseline}) can lead to excessive dispersion values on the log scale. 
 Similarly, locations with lower incidences may get disproportionate weight (i.e. high scores) when evaluating forecasts on the log scale. \cite{bracherEvaluatingEpidemicForecasts2021} argue that the large weight given to forecasts for locations with high incidences is a desirable property, as it reflects performance on the targets we should care about most. On the other hand, scoring forecasts on the log scale may be less influenced by outliers and better reflect consistent performance across time, space, and forecast targets. It also gives higher weight to another type of situation one may care about, namely one in which numbers start to rise from a previously low level. 
 If one is interested in scoring a forecast of the multiplicative, rather than the exponential  growth rate, it may be better to use a different transformation, e.g. dividing every forecast and corresponding observed value by the previously last observed value when the forecast was made. 

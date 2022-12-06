@@ -22,6 +22,7 @@ library(performance)
 library(tidytext)
 library(grid)
 library(ggpubr)
+library(gh)
 
 recompute_scores <- FALSE
 
@@ -69,6 +70,39 @@ hub_data <- rbindlist(list(
   fread(here("data", "full-data-european-forecast-hub-3.csv"))
 )) |>
   unique()
+
+## load anomalies (retrospecrtively revised data)
+anomalies_file <- here::here("data", "anomalies.csv")
+if (file.exists(anomalies_file)) {
+  anomalies <- data.table::fread(file = anomalies_file)
+} else {
+  ## get anomalies file at date of last data made
+  owner <- "covid19-forecast-hub-europe"
+  repo <- "covid19-forecast-hub-europe"
+  path <- "data-truth/anomalies/anomalies.csv"
+  commit <- gh::gh(
+    "/repos/{owner}/{repo}/commits?path={path}&until={date}",
+    owner = owner,
+    repo = repo,
+    path = path,
+    until = max(hub_data$target_end_date),
+    .limit = 1
+  )
+  anomalies <- data.table::fread(input = URLencode(URL = paste(
+    "https://raw.githubusercontent.com", owner, repo, commit[[1]]$sha, path, sep = "/"
+  )))
+  data.table::fwrite(x = anomalies, file = anomalies_file)
+}
+
+## prepare for mergeing into hub_data
+anomalies <- anomalies[, list(
+  target_end_date,
+  location,
+  target_type = paste0(stringr::str_to_title(stringr::str_remove(
+    string = target_variable, pattern = "^inc ")), "s")
+)]
+
+hub_data <- hub_data[!anomalies, on = .(target_end_date, location, target_type)]
 
 scores <- fread(here("output", "data", "all-scores-european-hub.csv"))
 scores[, scale := factor(scale, levels = c("natural", "log"))]

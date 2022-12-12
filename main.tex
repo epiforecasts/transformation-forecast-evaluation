@@ -380,6 +380,17 @@ Deaths & WIS & sd & 70 & 0.19\\
     \label{fig:HUB-model-comparison-epinow}
 \end{figure}
 
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.99\textwidth]{output/figures/SIM-score-approximation.png}
+    \caption{
+    Forecasts and scores for two-week-ahead predictions from the epiforecasts-EpiNow2 model made in Germany. A, E: 50\% and 90\% prediction intervals and observed values for cases and deaths on the natural scale. B, F: Corresponding scores. C, G: Forecasts and observations on the log scale. D, H: Corresponding scores. 
+    }
+    \label{fig:HUB-model-comparison-epinow}
+\end{figure}
+
+
 \subsection{Alternative Formulation of the WIS}
 
 Instead of defining the WIS as an average of scores for individual quantiles, we can define it using an average of scores for symmetric predictive intervals. For a single prediction interval, the interval scoren (IS) is computed as the sum of three penalty components, dispersion (width of the prediction interval), underprediction and overprediction,  

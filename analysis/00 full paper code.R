@@ -125,7 +125,6 @@ nbinom <- filter(nbinom, scale == "natural") |>
 plot_fct <- function(scores, scale_factor, nbinom, filter_scale = "natural") {
   
   scores <- filter(scores, scale == filter_scale)
-  # nbinom <- filter(nbinom, scale == filter_scale)
   
   scores |>
     ggplot(aes(x = id, y = interval_score / scale_factor, color = Forecaster)) + 
@@ -142,7 +141,6 @@ plot_fct <- function(scores, scale_factor, nbinom, filter_scale = "natural") {
                    alpha = 0.2,
                    binwidth = 1) +
     geom_line() +
-    # facet_wrap(~ scale, scales = "free", ncol = 2) + 
     theme_scoringutils() + 
     scale_y_continuous(label = function(x) {paste(scale_factor * x)}) + 
     labs(y = "CRPS / WIS", x = "Observed value") + 
@@ -152,7 +150,7 @@ plot_fct <- function(scores, scale_factor, nbinom, filter_scale = "natural") {
                TeX(r'(B: $\sigma^2 = \mu$)'))
     ) + 
     scale_fill_discrete(
-      labels=c(TeX(r'(A: $\sigma^2 = \mu + \cdot \mu^2$)'), 
+      labels=c(TeX(r'(A: $\sigma^2 = \mu + \mu^2$)'), 
                TeX(r'(B: $\sigma^2 = \mu$)'))
     )
 }
@@ -180,7 +178,7 @@ ggsave(filename = "output/figures/illustration-effect-log-ranking-crps.png",
 ## FIGURE 3
 ## ========================================================================== ##
 if (file.exists("output/data/simulation-negative-binom.Rda")) {
-  scores <- readRDS(file = "output/data/simulation-negative-binom.Rda")
+  scores_fig_3 <- readRDS(file = "output/data/simulation-negative-binom.Rda")
 } else {
   
   time_points <- 1e5
@@ -201,9 +199,9 @@ if (file.exists("output/data/simulation-negative-binom.Rda")) {
     unnest(cols = c("theta", "model")) |>
     mutate(predictive_sample = rnbinom(n = time_points * n_means * length(model_names), 
                                         size = theta,
-                                        mu = mean)) 
+                                        mu = mean) + 1) 
   
-  scores <- df |>
+  scores_fig_3 <- df |>
     group_by(mean, theta, model) |> 
     summarise(
       crps = mean(abs(predictive_sample[-1] - predictive_sample[-length(predictive_sample)]))/2,
@@ -217,10 +215,10 @@ if (file.exists("output/data/simulation-negative-binom.Rda")) {
                                   sqrt(var / pi),  
                                   sqrt(var / pi) / (mean)))
   
-  saveRDS(scores, file = "output/data/simulation-negative-binom.Rda")
+  saveRDS(scores_fig_3, file = "output/data/simulation-negative-binom.Rda")
 }
 
-p1 <- scores |>
+p1 <- scores_fig_3 |>
   group_by(model, scale) |>
   filter(mean <= 2000) |>
   mutate(crps = crps / mean(crps), 
@@ -251,10 +249,11 @@ p1 / p2 +
 ggsave("output/figures/SIM-mean-state-size.png", width = 7, height = 4.1)
 
 
+## ========================================================================== ##
 ## FIGURE 3 - Appendix version
 ## ========================================================================== ##
 
-scores |>
+scores_fig_3 |>
   ungroup() |>
   mutate(
     model = factor(model, 
@@ -282,6 +281,7 @@ ggsave("output/figures/SIM-score-approximation.png", width = 7, height = 4.1)
 ## FIGURE 4
 ## ========================================================================== ##
 
+# in this plot the CRPS is approximated by the WIS with 99 quantiles
 n_sim <- 1e3
 epsilon <- rnorm(n_sim)
 Y <- exp(epsilon)
@@ -322,7 +322,7 @@ summary <- scores |>
   pivot_longer(cols = c(wis, log_wis, wis_log), values_to = "score", names_to = "type") |>
   mutate(type = factor(type, 
                        levels = c("wis", "wis_log", "log_wis"), 
-                       labels = c("CRPS/WIS", "CRPS/WIS (log scale)", "log(CRPS/WIS)")))
+                       labels = c("CRPS", "CRPS (log scale)", "log(CRPS)")))
 
 
 score_plot <- function(summary) {
@@ -336,11 +336,11 @@ score_plot <- function(summary) {
     theme(panel.spacing = unit(1, "lines"))
 }
 
-score_plot(summary)
-
 summary |>
-  filter(type == "log(CRPS/WIS)", 
-         score == min(score)) 
+  group_by(type) |>
+  filter(score == min(score))
+
+score_plot(summary)
 
 ggsave("output/figures/example-log-first.png", width = 7, height = 2.1)
 
@@ -1148,3 +1148,4 @@ df |>
                       "$\\alpha^*$", 
                       "$\\beta^*$"), escape = FALSE) |>
   kable_styling()
+

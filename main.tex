@@ -49,7 +49,7 @@
 \maketitle
 %\tableofcontents
 \begin{abstract}
-Forecast evaluation plays an essential role in improving forecasting models can help inform future decision making. In epidemiology, forecasts are often scored using the Weighted Interval Score (WIS) or the Continuous Ranked Probability Score (CRPS), which are a measure of absolute distance between forecast and observation. Infectious disease processes are commonly described in terms of the growth rate or the effective reproduction number. Scoring based on the absolute distance between forecast and observation may not reflect the true underlying modelling task well (estimating the growth rate or reproduction number) and makes it difficult to compare forecasts across time, space, and different targets. As a solution we propose transforming the data before scoring the forecasts. Depending on the context, many transformations may be appropriate. We describe the log-transformation as one specific example in detail and discuss its interpretation as a measure of relative error and as score for an implicit forecast of the exponential growth rate. Applying the log-transformation to data from the European COVID-19 Forecast Hub, we found that it changed model rankings, evened scores across time, locations and target types, and emphasised situations in which models missed lower inflection points and consequent rises in numbers, while penalising missed peaks less severely. 
+Forecast evaluation plays an essential role in improving forecasting models can help inform future decision making. In epidemiology, probabilistic forecasts are often scored using the Weighted Interval Score (WIS) or the Continuous Ranked Probability Score (CRPS), which are a measure of absolute distance between forecast and observation. Infectious disease transmission is commonly conceptualised as a non-stationary processes in terms of the growth rate or the effective reproduction number. Scoring based on the absolute distance between forecast and observation may not reflect this underlying modelling task well and may make it difficult to compare forecasts across time, space, and different forecast targets. As a solution, we propose transforming the data before scoring the forecasts to better reflect our understanding of the generative process. Depending on the context, many transformations may be appropriate. We describe the log-transformation as one specific example in detail and discuss its interpretation as a measure of relative error and as a score for an implicit forecast of the exponential growth rate. Applying the log-transformation to data from the European COVID-19 Forecast Hub, we found that it changed model rankings, regardless of stratification by forecast date, location or target types, and emphasised situations in which models missed lower inflection points and consequent rises in numbers, while penalising missed peaks less severely. 
 \end{abstract}
 
 \bigskip
@@ -73,35 +73,46 @@ The CRPS measures the distance of the predictive distribution to the observed da
     \text{CRPS}(F, y) = \int_{-\infty}^\infty \left( F(x) - 1(x \geq y) \right)^2 dx,
 \end{equation*}    
 \end{linenomath*}
-where $y$ is the true observed value and $F$ the cumulative distribution function (CDF) of predictive distribution. Both the WIS and the CRPS can be understood as a generalisation of the absolute error to predictive distributions. The WIS is itself an approximation of the CRPS for predictive distributions represented by a set of predictive quantiles and is currently used to assess forecasts in COVID-19 forecast hubs in the US \citep{cramerCOVID19ForecastHub2020, cramerEvaluationIndividualEnsemble2021}, Europe \citep{sherrattPredictivePerformanceMultimodel2022}, Germany and Poland \citep{bracherShorttermForecastingCOVID192021, bracherNationalSubnationalShortterm2021}, as well as the US Influenza Forecasting Hub \citep{CdcepiFlusightforecastdata2022}. The WIS is commonly defined as 
+where $y$ is the true observed value and $F$ the cumulative distribution function (CDF) of the predictive distribution. The CRPS can be understood as a generalisation of the absolute error to predictive distributions. The WIS is an approximation of the CRPS for predictive distributions represented by a set of predictive quantiles and is currently used to assess forecasts in COVID-19 forecast hubs in the US \citep{cramerCOVID19ForecastHub2020, cramerEvaluationIndividualEnsemble2021}, Europe \citep{sherrattPredictivePerformanceMultimodel2022}, Germany and Poland \citep{bracherShorttermForecastingCOVID192021, bracherNationalSubnationalShortterm2021}, as well as the US Influenza Forecasting Hub \citep{CdcepiFlusightforecastdata2022}. The WIS is defined as 
 \begin{linenomath*}
 \begin{equation*}
-    \text{WIS}(F, y) = \frac{1}{K} \times \sum_{k = 1}^{K} \times 2 \left[ 1(y \leq q_{\tau_k}) - \tau_k \right] \times ( q_{\tau_k} - y), 
+    \text{WIS}(F, y) = \frac{1}{K} \times \sum_{k = 1}^{K} 2 \times \left[ \boldsymbol{1}(y \leq q_{\tau_k}) - \tau_k \right] \times ( q_{\tau_k} - y), 
 \end{equation*}
 \end{linenomath*}
-where $q_{\tau}$ is the $\tau$ quantile of the forecast $F$, $y$ is the observed outcome, and $K$ is the number of predictive quantiles provided. 
+where $q_{\tau}$ is the $\tau$ quantile of the forecast $F$, $y$ is the observed outcome, $K$ is the number of predictive quantiles provided and $\boldsymbol{1}$ is the indicator function. We show an alternative definition based on central prediction intervals in Section \ref{sec:alternative-wis}.
 
-The dynamics of infectious processes are often described by the complementary concepts of the reproduction number R \citep{gosticPracticalConsiderationsMeasuring2020} and growth rate r \citep{wallingaHowGenerationIntervals2007}, where R describes the strength and r the speed of epidemic growth \citep{dushoffSpeedStrengthEpidemic2021}.
+The dynamics of infectious processes are often described by the complementary concepts of the reproduction number $R$ \citep{gosticPracticalConsiderationsMeasuring2020} and growth rate $r$ \citep{wallingaHowGenerationIntervals2007}, where $R$ describes the strength and $r$ the speed of epidemic growth \citep{dushoffSpeedStrengthEpidemic2021}.
 In the absence of changes in immunity, behaviour or other factors that may affect the intensity of transmission, the reproduction number would be expected to remain approximately constant.
 In that case, the number of new infections in the population grows exponentially in time.
 This behaviour was observed, for example, early in the COVID-19 pandemic in many countries~\citep{pellisChallengesControlCOVID192021}.
-If case numbers are growing exponentially and the true modelling task revolves around estimating the reproduction number or the corresponding growth rate, evaluating forecasts based on the absolute distance between forecast and observed value penalises underprediction (of the reproduction number or growth rate) less than overprediction by the same amount, as errors on the observed value grow exponentially with the error on the estimated reproduction number or growth rate.
-If one is to assess the ability of forecasts to assess and forecast the underlying infection dynamics, it may be more appropriate to evaluate errors on the growth rate directly.
+If case numbers are evolving based on an exponential process and the  modelling task revolves around estimating the reproduction number or the corresponding growth rate, evaluating forecasts based on the absolute distance between forecast and observed value penalises underprediction (of the reproduction number or growth rate) less than overprediction by the same amount, as errors on the observed value grow exponentially with the error on the estimated reproduction number or growth rate.
+If one is to measure the ability of forecasts to assess and forecast the underlying infection dynamics, it may thus be more desirable to evaluate errors on the growth rate directly.
 
-Moreover, if forecasts are evaluated based on absolute rather than relative errors, whereas in reality errors scale with the level of observations, scores are strongly influenced by the overall order of magnitude of the quantity to forecast. There exist other scores that do not depend on the scale of the forecast target, such as the log score \citep{goodRationalDecisions1952}, which in addition is also invariant under monotonic transformations of the target, or a scaled version of the CRPS \citep{bolinLocalScaleInvariance2021}. These, however, may not have all of the desired properties of the CRPS and in particular cannot easily be transferred to a setting with predictive quantiles. With the regular CRPS and WIS the dependence on the scale of the forecast target makes it difficult to compare predictive performance across time and in different phases of an epidemic or to compare performance across targets that generally occur at different orders of magnitudes.
-In the example of COVID-19 where case numbers underwent drastic changes over time following the initial emergence, forecast evaluation based on the absolute numbers would be dominated by performance around the peaks. The ability to correctly predict future upswings while case numbers are still low would count little towards overall model scores. Scores based on jointly evaluating the ability to predict numbers of cases, hospitalisation and deaths would be dominated by cases as they occur at largest numbers. 
+Evaluating forecasts using the CRPS or WIS means that scores represent a measure of absolute errors. However, forecast consumers may find errors on a relative scale easier to interpret and more useful in order to track predictive performance across targets of different orders of magnitude. 
+\cite{bolinLocalScaleInvariance2021} have proposed the scaled CRPS (SCRPS) which is locally scale invariant; however, it does not correspond to a relative error measure and lacks a straightforward interpretation as available for the CRPS. % is less commonly used and does not have a straightforward equivalent for a setting with predictive quantiles. 
+A closely related aspect to relative scores (as opposed to absolute scores) is that in the evaluation one may wish to give similar weight to all considered forecast targets. As the CRPS typically scales with the order of magnitude of the quantity to be predicted, this is not the case for the CRPS, which will typically assign higher scores to forecast targets with high expected values (e.g., in large locations or around the peak of an epidemic). \cite{bracherEvaluatingEpidemicForecasts2021} have argued that this is a desirable feature, directing attention to situations of particular public health relevance. An evaluation based on absolute errors, however, will assign little weight to other potentially important aspects, such as the ability to correctly predict future upswings while observed numbers are still low. 
 
-In many fields it is common practice to forecast transformed quantities (see e.g. \cite{taylorEvaluatingVolatilityInterval1999} in finance, \cite{mayrLogLevelVAR2015} in macroeconomics, \cite{loweStochasticRainfallrunoffForecasting2014} in hydrology or \cite{fuglstadDoesNonstationarySpatial2015} in meteorology). The goal of the transformations is usually to improve accuracy of the predictions. In this paper, we discuss how transforming the forecasts and observations prior to applying the WIS (or CRPS) may be an appropriate way to improve the evaluation process by addressing the aforementioned issues. Many different transformations may be appropriate and useful, depending on the exact context, the desired focus of the evaluation, and specific aspects of the forecasts that forecast consumers care most about (see a broader discussion in Section \ref{sec:discussion}). For conceptual clarity and to allow for a more in-depth discussion, we focus most of our attention on the log-transformation as one example of many possible transformations, chosen for its simplicity and usefulness in an epidemiological context. We further focus on the CRPS/WIS as evaluation metric, given its widespread use throughout the COVID-19 pandemic. 
 
-We first outline the motivation for transforming forecasts prior to scoring and specifically the motivation for applying a log-transformation (Section \ref{sec:methods}). We provide a mathematical intuition of the impact of the log-transformation, its interpretation (Section \ref{sec:methods:relative} and \ref{sec:methods:growthrate}) and effects on forecast rankings (section \ref{sec:methods:rankings} and provide some discuss some practical considerations relevant for applying transformations in general and the log-transformation in particular (Section \ref{sec:methods:considerations}). We illustrate the effect of the log-transformation using forecasts submitted to the European COVID-19 Forecast Hub  \citep{europeancovid-19forecasthubEuropeanCovid19Forecast2021, sherrattPredictivePerformanceMultimodel2022} (Section \ref{sec:results}). Finally, we provide scoring recommendations, discuss alternative transformations that may be useful in different contexts, and suggest further research avenues on the use of transformed scores in the evaluation of infectious disease forecasts (Section \ref{sec:discussion}). 
+%that do not depend on the scale of the forecast target, such as the log score \citep{goodRationalDecisions1952}, which in addition is also invariant under monotonic transformations of the target, or a scaled version of the CRPS \citep{bolinLocalScaleInvariance2021}. These, however, may not have all of the desired properties of the CRPS and in particular cannot easily be transferred to a setting with predictive quantiles. 
+
+%In this paper we argue that these three aspects (evaluating the growth rate rather than absolute values, evaluating relative errors, giving more equal weights to all forecast targets) can all be addressed by simply applying the natural logarithm to forecasts (in our case predictive quantiles) and observations prior to computing the CRPS.
+
+In many fields it is common practice to forecast transformed quantities (see e.g. \cite{taylorEvaluatingVolatilityInterval1999} in finance, \cite{mayrLogLevelVAR2015} in macroeconomics, \cite{loweStochasticRainfallrunoffForecasting2014} in hydrology or \cite{fuglstadDoesNonstationarySpatial2015} in meteorology). While the goal of the transformations is usually to improve accuracy of the predictions, they can also be used to enhance and complement the evaluation process. 
+In this paper we argue that the aforementioned issues with evaluating forecasts based on measures of absolute error can be addressed by transforming the forecasts and observations prior to scoring. Transformations can shift the focus of the evaluation in a way that may be more appropriate for epidemiological forecasts, while preserving the propriety of the score. Many different transformations may be appropriate and useful, depending on the exact context, the desired focus of the evaluation, and specific aspects of the forecasts that forecast consumers care most about (see a broader discussion in Section \ref{sec:discussion}). 
+
+For conceptual clarity and to allow for a more in-depth discussion, we focus mostly on the natural logarithm as a particular transformation in the context of epidemic phenomena. Instead of a score representing the magnitude of absolute errors, applying a log-transformation prior to the CRPS yields a score which a) measures relative error (see Section \ref{sec:methods:relative}), b) provides a measure for how well a forecast captures the exponential growth rate of the target quantity (see Section \ref{sec:methods:growthrate}) and c) is less dependent on the expected order of magnitude of the quantity to be predicted (see Section \ref{sec:methods:vst}). %The interpretation of the log-transformed score as a score for a forecast of the exponential growth rate of a given quantity aligns the evaluation with our understanding of how epidemiological processes should be modeled and the kinds of errors models would typically make. 
+We therefore argue that such evaluations on the logarithmic scale should complement the prevailing evaluations on the natural scale. 
+Other transformations may likewise be of interest, and we briefly explore the square root transformation as an alternative transformation. %[and population standardization?]. 
+Our analysis focuses on the CRPS (or WIS) as evaluation metric, given its widespread use throughout the COVID-19 pandemic. 
+
+The remainder of the article is structured as follows. In Sections \ref{sec:methods:relative}--\ref{sec:methods:vst} we provide some mathematical intuition on applying the log transformation prior to evaluating the CRPS, highlighting the connections to relative error measures, the epidmemic growth rate and variance stabilizing transformations.
+%We first provide a mathematical intuition of the impact of the log-transformation and its interpretation as relative error (Section \ref{sec:methods:relative}, measure of the accuracy of a forecast of the growth rate (Section \ref{sec:methods:growthrate}) and it's effect as a variance-stabilising transformation that makes can make scores independent of the mean of the forecast target (Section \ref{sec:methods:vst}. 
+We then discuss the effect of the transformation on forecast rankings (section \ref{sec:methods:rankings} and discuss some practical considerations relevant for applying transformations in general and the log-transformation in particular (Section \ref{sec:methods:considerations}). We illustrate the effect of the log-transformation using forecasts submitted to the European COVID-19 Forecast Hub  \citep{europeancovid-19forecasthubEuropeanCovid19Forecast2021, sherrattPredictivePerformanceMultimodel2022} (Section \ref{sec:results}). Finally, we provide scoring recommendations, discuss alternative transformations that may be useful in different contexts, and suggest further research avenues on the use of transformed scores in the evaluation of infectious disease forecasts (Section \ref{sec:discussion}). 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Transforming forecasts and observations}
 \label{sec:methods}
-
-Our aim in transforming forecasts and observations is to shift the focus of the evaluation in a way that may be more appropriate for epidemiological forecasts, while preserving the propriety of the score. A particularly relevant transformation in the context of epidemic phenomena is the natural logarithm. Instead of a score representing the magnitude of absolute errors this approach makes it possible to obtain a score which a) measures relative error and at the same time b) provides an a measure for how well a forecast captures the exponential growth rate of the target quantity (see Section \ref{sec:methods:growthrate} and is c) independent from the mean of the observed quantity (see Section \ref{sec:methods:vst}). The interpretation of the log-transformed score as a score for a forecast of the exponential growth rate of a given quantity aligns the evaluation with our understanding of how epidemiological processes should be modeled and the kinds of errors models would typically make. 
-
 
 \subsection{Interpretation as a relative error}
 \label{sec:methods:relative}
@@ -131,12 +142,12 @@ and the \textit{symmetric absolute percentage error} (SAPE)
 $$
 \left| \ \frac{\hat{y} - y}{y/2 + \hat{y}/2} \ \right|.
 $$
-As Figure \ref{fig:SAPE} shows, the alignment with the SAPE is in fact the closest and holds quite well even if predicted and observed value differ by a factor of two or three. Moving back to probabilistic forecasts, the CRPS or WIS applied to log-transformed forecasts and outcomes can thus be seen as a probabilistic counterpart to the symmetric absolute percentage error, which offers an appealing intuitive interpretation.
+As Figure \ref{fig:SAPE} shows, the alignment with the SAPE is in fact the closest and holds quite well even if predicted and observed value differ by a factor of two or three. Moving back to probabilistic forecasts, the CRPS applied to log-transformed forecasts and outcomes can thus be seen as a probabilistic counterpart to the symmetric absolute percentage error, which offers an appealing intuitive interpretation.
 
 \begin{figure}[h!]
 \centering
 \includegraphics[width = 1\textwidth]{output/figures/different-relative-errors.png}
-\caption{Numerical comparison of different measures of relative error/ We consider a prediction of $\hat{y} = 1$ and for different observed values show the  absolute percentage error (APE), relative error (RE), symmetric absolute percentage error (SAPE) and the absolute error applied to log-transformed predictions and observations. $\hat{y}$ denotes the predicted value. A: Error measures as a function of the observed value with the x-axis shown on a linear scale. B: Same, but x-axis shown on a logarithmic scale.}
+\caption{Numerical comparison of different measures of relative error: absolute percentage error (APE), relative error (RE), symmetric absolute percentage error (SAPE) and the absolute error applied to log-transformed predictions and observations. We denote the predicted value by $\hat{y}$ and display errors as a function of the ratio of observed and predicted value. A: x-axis shown on a linear scale. B: x-axis shown on a logarithmic scale.}
 \label{fig:SAPE}
 \end{figure}
 
@@ -148,7 +159,7 @@ As Figure \ref{fig:SAPE} shows, the alignment with the SAPE is in fact the close
 \subsection{Interpretation as scoring the exponential growth rate}
 \label{sec:methods:growthrate}
 
-Another interpretation can be based around viewing the process to be forecast as exponential with time-varying growth rate $r(t)$~\citep[see, e.g.,][]{wallingaHowGenerationIntervals2007}, i.e.
+Another interpretation can be based on viewing the process to be forecast as exponential with time-varying growth rate $r(t)$~\citep[see, e.g.,][]{wallingaHowGenerationIntervals2007}, i.e.
 \begin{linenomath*}
 \begin{equation*}
 \frac{d}{dt}y(t) = r(t)y(t)
@@ -174,14 +185,15 @@ If a forecast $\hat{y}(t)$ for the value of the time series at time $t$ is issue
 \end{align*}
 \end{linenomath*}
 %
-We thus evaluate the error in the mean exponential growth rate, scaled by the length of the time period considered. For small $\bar{r}t$, $ y_0 \exp (\bar{r}t)$ is approximately equivalent to $ y_0 (1 + \bar{r}t)$, which is sometimes used as an alternative definition of the growth rate (then called the multiplicative growth rate). 
+We thus evaluate the error in the mean exponential growth rate, scaled by the length of the time period considered. For small $\bar{r}t$, $ y_0 \exp (\bar{r}t)$ is approximately equivalent to $ y_0 (1 + \bar{r}t)$, which is sometimes used as an alternative definition of the growth rate (then called the multiplicative growth rate). This means that by applying the CRPS rather than the absolute error we perform a probabilistic evaluation of forecasts of the epidemic growth rate.
 
 \subsection{Interpretation as a variance-stabilising transformation}
 \label{sec:methods:vst}
 
-In epidemiological contexts, the variance of the variable of interest usually scales with its mean.  A variance-stabilising transformation \citep[VST][]{bartlettSquareRootTransformation1936} is a transformation that serves to make the variance of a variable independent of its mean. 
-
-If the predictive distribution for the quantity $Y$ equals the true data-generating process $F$ (an ideal forecast), the expected CRPS is given by \citep{gneitingStrictlyProperScoring2007}
+When evaluating models across sets of forecasting tasks, it may be considered desirable for each target to have a similar impact on the overall results. In disease forecasting this is not the case when using the CRPS, as the latter typically scales with the order of magnitude of the quantity to be predicted. Average scores are then dominated by the results achieved for targets with high expected outcomes. 
+%Bracher et al. mention this as a desirable feature of the CRPS. 
+% In epidemiological contexts, the variance of the variable of interest usually scales with its mean. 
+Specifically, if the predictive distribution for the quantity $Y$ equals the true data-generating process $F$ (an ideal forecast), the expected CRPS is given by \citep{gneitingStrictlyProperScoring2007}
 $$
 \mathbb{E}[\text{CRPS}(F, y)] = 0.5\times\mathbb{E}|Y - Y'|,
 $$
@@ -189,16 +201,33 @@ where $Y$ and $Y'$ are independent samples from $F$. This corresponds to half th
 $$
 \mathbb{E}_F[\text{CRPS}(F, y)] \approx \frac{\sigma}{\sqrt{\pi}}
 $$
-can be used, meaning that the expected CRPS scales roughly with the standard deviation. Denoting by $F^*$ the predictive distribution for $\log(Y)$, the delta method implies that
+can be used. This means that the expected CRPS scales roughly with the standard deviation, which in turn typically increases with the mean in epidemiological forecasting. In order to make the expected CRPS independent of the expected outcome, a \textit{variance-stabilising transformation} \citep[VST,][]{bartlettSquareRootTransformation1936} can be employed. The choice of this transformation depends on the mean-variance relationship of the underlying process. 
+
+If the mean-variance relationship is quadratic with $\sigma^2 = c \times \mu^2$, the natural logarithm can serve as the VST \citep{guerreroTimeseriesAnalysisSupported1993}. Denoting by $F^*$ the predictive distribution for $\log(Y)$, we can use the delta method to show that
 $$
-\mathbb{E}_F[\text{CRPS}\{F^*, \log(y)\}] \approx \frac{\sigma/\mu}{\sqrt{\pi}}.
+\mathbb{E}_F[\text{CRPS}\{F^*, \log(y)\}] \approx \frac{\sigma/\mu}{\sqrt{\pi}} 
+= \frac{\sqrt{c}}{\sqrt{\pi}}
+.
 $$
-The expected CRPS for the log-transformed outcome thus scales with the coefficient of variation. In instances where the variance scales with the square of the mean, the log-transformation serves as a variance-stabilising transformation \citep{guerreroTimeseriesAnalysisSupported1993}, making the expected CRPS independent of the mean of the forecast quantity. We illustrate this in Figure \ref{fig:SIM-wis-state-size-mean}, where we show CRPS scores for different ideal forecasters. For a negative-binomial distribution with $\sigma^2 = \mu + \mu^2$ and sufficiently large $\mu$ we see that on the log scale scores are independent of the mean of the forecast target. For a Poisson-distribution with 
-$\sigma = \mu$, scores on the log scale decrease as the mean increases. The appropriate variance-stabilising transformation here to make scores independent of the mean would be a square-root-transformation \citep{bartlettSquareRootTransformation1936}. 
+The assumption of a quadratic mean-variance relationship is closely linked to the aspects discussed in Sections \ref{sec:methods:relative} and \ref{sec:methods:growthrate}. It implies that relative errors have constant variance and can thus be meaningfully compared across different targets. Also, it arises naturally if we assume that our capacity to predict the epidemic growth rate does not depend on the expected outcome.
+
+If the variance is linear with $\sigma^2 = c \times \mu$, as with a Poisson-distributed variable, the square root is known to be a VST. Denoting by $\tilde{F}$ the predictive distribution for $\sqrt{Y}$, the delta method can again be used to show that
+$$
+\mathbb{E}_F[\text{CRPS}\{\tilde{F}, \sqrt{y}\}] \approx \frac{\sigma/\sqrt{\mu}}{2\sqrt{\pi}} = \frac{\sqrt{c}}{2\sqrt{\pi}}
+.
+$$
+
+% which one is an empirical question - maybe hint that quadratic may result from RW on growth rate?
+
+To strengthen our intuition on how transforming outcomes prior to applying the CRPS shifts the emphasis between targets with high and low expected outcomes, Figure \ref{fig:SIM-wis-state-size-mean} shows the expected CRPS of ideal forecasters under different mean-variance relationships and transformations. We consider a Poisson distribution where $\sigma^2 = \mu$, a geometric distribution where $\sigma^2 = \mu + \mu^2$, and a negative binomial distribution where the size parameter $\psi(\mu)$ depends on the mean $\mu$ such that $\sigma^2 = \mu + \mu^{2.5}/1000$. We see that when applying the CRPS on the natural scale, the expected CRPS grows in $\mu$ in all cases. When applying it after a log-transformation, the expected CRPS is almost independent of $\mu$ for the geometric distribution and large $\mu$, while smaller targets have higher expected CRPS in the Poisson case. When applying a square-root-transformation before the CRPS, the expected CRPS is independent of the mean for the Poisson-distribution and grows for the two other distributions. 
+%For the negative binomial distribution, targets with very small and very high expectation yield the highest expected CRPS. \textbf{Here it would be nice to also add a sentence on what happens under sqrt transformation.} % scores are independent of the mean of the forecast target. For a Poisson-distribution with 
+% $\sigma = \mu$, scores on the log scale decrease as the mean increases. The appropriate variance-stabilising transformation here to make scores independent of the mean would be a square-root-transformation . 
+
+
 
 \subsection{Effects on model rankings}
 \label{sec:methods:rankings}
-Rankings between different forecasters based on their scores may change through the log-transformation both when looking at aggregate scores as well as when looking at a single forecast. We illustrate this in Figure \ref{fig:illustration-ranking} with two forecasters, A and B, issuing two different distributions with different dispersion. When showing the obtained score as a function of the observed value, it can be seen that the ranking between the two forecasters may change when scoring the forecast on the logarithmic, rather than the natural scale. In particular, on the natural scale, forecaster A, who issues a more uncertain distribution, receives a better score than forecaster B for observed values far away from the centre of the respective predictive distribution. On the log scale, however, forecaster A receives a lower score for large observed values, being more heavily penalised for assigning large probability to small values (which, in relative terms, are far away from the actual observation). 
+Rankings between different forecasters based on the CRPS may change when making use of a transformation both when looking at aggregate scores as well as when looking at a single forecast. We illustrate this in Figure \ref{fig:illustration-ranking} with two forecasters, A and B, issuing two different distributions with different dispersion. When showing the obtained CRPS as a function of the observed value, it can be seen that the ranking between the two forecasters may change when scoring the forecast on the logarithmic, rather than the natural scale. In particular, on the natural scale, forecaster A, who issues a more uncertain distribution, receives a better score than forecaster B for observed values far away from the centre of the respective predictive distribution. On the log scale, however, forecaster A receives a lower score for large observed values, being more heavily penalised for assigning large probability to small values (which, in relative terms, are far away from the actual observation). 
 
 
 \begin{figure}[h!]
@@ -208,7 +237,7 @@ Rankings between different forecasters based on their scores may change through 
 \label{fig:illustration-ranking}
 \end{figure}
 
-Overall model rankings would be expected to differ even more when scores are averaged across multiple forecasts or targets. The change in rankings of aggregate scores is not mainly driven by the kinds of changes in model rankings for single forecasts just discussed. Rather, as observations from exponential processes are likely to be on very different absolute scales, large observations will account for the majority of absolute score but will not dominate relative scores in the same way. Evaluating forecasts based on relative errors may help with comparing performance across different targets. However, log-transforming forecasts and observations may also result in the opposite extreme because small absolute errors (e.g. predicting 9, rather than 3 deaths) may be large in relative terms if the quantity to forecast is very small. This can be exacerbated when forecasts are restricted to discrete values, where relative steps between possible values become greater for values closer to zero. 
+Overall model rankings would be expected to differ even more when scores are averaged across multiple forecasts or targets. The change in rankings of aggregate scores is not mainly driven by the kinds of changes in model rankings for single forecasts just discussed. Rather, average scores will be most influenced by the order of magnitude of scores for different forecast targets across time, location and target type. On the natural scale, large observations will account for the majority of the absolute score but will not dominate relative scores on the log scale in the same way. Depending on the relationship between mean and variance of the forecast target, a log-transformation, however, may also lead to systematically larger scores assigned to small forecast targets, as illustrated in Figure \ref{fig:SIM-wis-state-size-mean}. A different transformation like the square-root may then be appropriate to stabilise the variance effectively and make scores independent of the mean of the target quantity. 
 
 \begin{figure}[h!]
     \centering
@@ -223,26 +252,26 @@ Whether forecasts of small or large targets receive higher scores than those for
 \subsection{Practical considerations}
 \label{sec:methods:considerations}
 
-The log-transformation (among many other transformations) is permissible (in the sense that it preserves propriety of the score), because it is a strictly monotonic transformation. Even though actual rankings between models may change, forecasters will in expectation still minimise their score if they report a predictive distribution that is equal to the data-generating distribution. The order of the operations matters, and applying a transformation after scores have been computed generally does not guarantee propriety. In the specific example, taking the logarithm of the scores, rather than scoring the log-transformed forecasts and data, results in an improper score. This is because taking the logarithm of the WIS / CRPS results in a score that does not penalise outliers enough and therefore incentivises overconfident predictions. We illustrate this point using simulated data in Figure \ref{fig:log-improper}, where it can easily be seen that overconfident models perform best in terms of the log WIS. 
+Transformations that are strictly monotonic are permissible in the sense that they maintain the propriety of the score. This is because even though rankings of models may change forecasts will in expectation still minimise their score if they report a predictive distribution that is equal to the data-generating distribution. This condition holds for both the log and square root transformations, as well as many others. However, the order of the operations matters, and applying a transformation after scores have been computed generally does not guarantee propriety. In the case of log transforms, taking the logarithm of the scores, rather than scoring the log-transformed forecasts and data, results in an improper score. This is because taking the logarithm of the WIS / CRPS results in a score that does not penalise outliers enough and therefore incentivises overconfident predictions. We illustrate this point using simulated data in Figure \ref{fig:log-improper}, where it can easily be seen that overconfident models perform best in terms of the log WIS. 
 
 \begin{figure}[h!]
     \centering
     \includegraphics[width=0.99\textwidth]{output/figures/example-log-first.png}
-    \caption{Illustration of impropriety of log-transformed CRPS. We assume $Y \sim \text{LogNormal}(0, 1)$ and evaluate the expected CRPS for predictive distributions $\text{LogNormal}(0, \sigma)$ with varying values of $\sigma \in [0.1, 2]$. For the regular CRPS (left) and CRPS applied to log-transformed outcomes (middle), the lowest expectation is achieved for the true value $\sigma = 1$. For the log-transformed CRPS, the optimal value is  0.9, i.e. there is an incentive to report a too sharp forecast.}
+    \caption{Illustration of impropriety of log-transformed CRPS. We assume $Y \sim \text{LogNormal}(0, 1)$ and evaluate the expected CRPS for predictive distributions $\text{LogNormal}(0, \sigma)$ with varying values of $\sigma \in [0.1, 2]$. For the regular CRPS (left) and CRPS applied to log-transformed outcomes (middle), the lowest expectation is achieved for the true value $\sigma = 1$. For the log-transformed CRPS, the optimal value is  0.9, i.e. there is an incentive to report a forecast that is too sharp.}
     \label{fig:log-improper}
 \end{figure}
 
-In practice, one issue with the log-transformation is that it cannot readily be applied to negative numbers or zero values. In addition, it may be difficult to reliably evaluate relative errors when dealing with small discrete values. In an epidemiological setting that involves count data, negative values should likely be omitted entirely. One solution to deal with zeroes and small values is to also exclude those from ongoing analysis. An alternative is to add a small quantity, such as 1, to all observations and predictions before taking the logarithm as is common practice when log-transforming counts. This represents a strictly monotonic transformation and therefore preserves propriety of the resulting score. The choice of the number to add influences scores and rankings, as measures of relative errors shrink when adding a constant to the forecast and the observation. Adding something to the forecasts and observations changes scores for forecasts of small quantities most, as relative errors shrink more the smaller the original value before adding a constant. In principle, it would also be possible to exploit the difference in how scores are affected in order to equalise scores for forecasts of quantities across different scales by adding a larger number (e.g. 100 or 10,000) if average scores are dominated too strongly by forecasts for small quantities. 
+In practice, one issue with transformations, such as the log transform, is that they may not be readily applicable to negative numbers or zero values. When using a log-transformation, it may also be difficult to reliably evaluate relative errors when dealing with small discrete values. In an epidemiological setting that involves count data, negative values should likely be omitted entirely. One potential solution to deal with zeroes and small values is to also exclude these from the ongoing analysis. An alternative is to add a small quantity, such as 1, to all observations and predictions before taking the logarithm as is common practice when log-transforming counts. This represents a strictly monotonic transformation and therefore still preserves the propriety of the resulting score. The choice of the number to add influences scores and rankings, as measures of relative errors shrink when adding a constant to the forecast and the observation. Adding a number to the forecasts and observations changes scores for forecasts of small quantities most, as relative errors shrink more the smaller the original value before adding a constant. In principle, it would also be possible to exploit the difference in how scores are affected in order to equalise scores for forecasts of quantities across different scales by adding a larger number (e.g. 100 or 10,000) if average scores are dominated too strongly by forecasts for small quantities. 
 
 
 
 \section{Empirical example: the European Forecast Hub}
 \label{sec:results}
 
-As an empirical example for evaluating forecasts on the natural and on the log scale we use forecasts from the European Forecast Hub \citep{europeancovid-19forecasthubEuropeanCovid19Forecast2021, sherrattPredictivePerformanceMultimodel2022}. 
-The European COVID-19 Forecast Hub is one of several COVID-19 Forecast hubs (together with a Hub in the US \citep{cramerEvaluationIndividualEnsemble2021} and one in Germany and Poland \citep{bracherShorttermForecastingCOVID192021}) which have been systematically collecting, aggregating and evaluating forecasts of several COVID-19 targets created by different teams every week. Forecasts are made one to four weeks ahead into the future and follow a quantile-based format with a set of 22 quantiles plus the median ($0.01, 0.025, 0.05, ..., 0.5, ... 0.95, 0.975, 0.99$). 
+As an empirical comparison of evaluating forecasts on the natural and on the log scale, we use forecasts from the European Forecast Hub \citep{europeancovid-19forecasthubEuropeanCovid19Forecast2021, sherrattPredictivePerformanceMultimodel2022}. 
+The European COVID-19 Forecast Hub is one of several COVID-19 Forecast hubs\citep{cramerEvaluationIndividualEnsemble2021, bracherShorttermForecastingCOVID192021} which have been systematically collecting, aggregating and evaluating forecasts of several COVID-19 targets created by different teams every week. Forecasts are made one to four weeks ahead into the future and follow a quantile-based format with a set of 22 quantiles plus the median ($0.01, 0.025, 0.05, ..., 0.5, ... 0.95, 0.975, 0.99$). 
 
-The forecasts used for the purpose of this illustration are forecasts submitted between March 8 2021 and October 18 2021 for reported cases and deaths from COVID-19. We filtered all forecasts submitted to the Hub to only include models which have submitted forecasts for both deaths and cases for 4 horizons in 32 locations on at least 16 forecast dates (see Figure \ref{fig:HUB-num-avail-models}). We removed all observations marked as data anomalies by the European Forecast Hub as well as all remaining negative observed values. All predictive quantiles were truncated at 0. We applied the log-transformation after adding 1 to all predictions and observed values. Where not otherwise stated, we report results for a two-week-ahead forecast horizon. 
+The forecasts used for the purpose of this illustration are forecasts submitted between March 8 2021 and October 18 2021 CHECK AGAIN for reported cases and deaths from COVID-19. We filtered all forecasts submitted to the Hub to only include models which have submitted forecasts for both deaths and cases for 4 horizons in 32 locations on at least 16 CHECK AGAIN forecast dates (see Figure \ref{fig:HUB-num-avail-models}). We removed all observations marked as data anomalies by the European Forecast Hub as well as all remaining negative observed values. In addition, we filtered out erroneous forecasts characterised by a median forecast of 0 and an actual observed value of larger than 150. All predictive quantiles were truncated at 0. We applied the log-transformation after adding 1 to all predictions and observed values. Where not otherwise stated, we report results for a two-week-ahead forecast horizon. 
 
 In addition to the WIS we use pairwise comparisons \citep{cramerEvaluationIndividualEnsemble2021} to evaluate the relative performance of models across countries in the presence of missingness. In a first step, score ratios are computed for all pairs of models by taking the set of overlapping forecasts between the two models and dividing the score of one model over the score achieved by the other model. The relative skill for a given model compared to others is then obtained by taking the geometric mean of all score ratios which involve that model. Low values are better, and the average model receives a relative skill score of 1. 
 
@@ -263,8 +292,8 @@ Across the dataset, the average number of observed cases and deaths varied consi
     \label{fig:HUB-cors}
 \end{figure}
 
-As expected on the natural scale, scores correlate strongly with the average number of observed cases and deaths (Spearman rank correlation: 0.96 and 0.97) in a given country (see Figure\ref{fig:HUB-mean-locations}A, B). We report the Spearman rank correlation here, rather than the Pearson correlation, so that correlations remain the same regardless of whether we look at observed values on the log or natural scale. 
-On the log scale, the correlation is much weaker and slightly negative, at least in terms of rank correlation (Spearman correlation: CHECK AGAIN -0.33 and -0.36), implying a tendency towards larger scores in countries with lower mean incidences. 
+As expected on the natural scale, scores correlate strongly with the magnitude of the median forecast (Spearman rank correlation: 0.9 and 0.92) (see Figure\ref{fig:HUB-mean-locations}A, B). We report the Spearman rank correlation here, rather than the Pearson correlation, as it tends to be more robust and is invariant to transformations. 
+For scores on the log scale, the correlation is weaker and slightly negative (Spearman correlation: -0.35 and -0.55), implying a tendency towards larger scores for forecasts of smaller quantities. 
 
 In order to test the relationship between scores and the order of magnitude of the forecast, we ran the following regression on scores on the natural scale
 
@@ -274,10 +303,15 @@ In order to test the relationship between scores and the order of magnitude of t
 where $F$ is the predictive distribution and $y$ the observed value. In addition, we ran the following regression on scores on the log scale
 
 \begin{equation*}
-    \text{CRPS}(\log F, \log y) = \alpha^* + \beta^* \cdot \log{(\text{median}(F))}. 
-\end{equation*}
+    \text{CRPS}(\log F, \log y) = \alpha^* + \beta^* \cdot \log{(\text{median}(F))}
+\end{equation*} 
+and the following regression on scores obtained after applying a square-root-transformation
 
-We found that on the natural scale, the order of magnitude of the forecast (represented by the median, rather than the mean, as forecasts were stored as quantiles and the mean was not available) strongly influenced scores, with estimated $\beta$-values close to one. On the natural, this influence was small, with estimated $\beta^*$-values close to zero. Both on the natural and on the log scale we found scores to increase over time (estimated $\alpha$- and $\alpha^*$-values increased over horizons). Estimates are summarised in Table \ref{tab:HUB-regression}. 
+\begin{equation*}
+    \text{CRPS}(\sqrt{F}, \sqrt{y}) = \alpha^{**} + \beta^{**} \cdot \sqrt{(\text{median}(F))}
+\end{equation*} 
+
+We found that on the natural scale, the order of magnitude of the forecast (represented by the median, rather than the mean, as forecasts were stored as quantiles and the mean was not available) strongly influenced scores, with estimated $\beta$-values close to one. On the log scale, this influence was small, with estimated $\beta^*$-values close to zero. Both on the natural and on the log scale we found scores to increase over time (estimated $\alpha$- and $\alpha^*$-values increased over horizons). Estimates are summarised in Table \ref{tab:HUB-regression}. 
 
 \begin{figure}[h!]
     \centering
@@ -307,45 +341,68 @@ The rank order of different forecasting models (see Figure \ref{fig:HUB-rank-ord
 \section{Discussion}
 \label{sec:discussion}
 
-In this paper we proposed a log-transformation of forecasts and observed values prior to evaluation with the WIS (or CRPS) in order to address issues that arise when evaluating epidemiological forecasts based on a measure of absolute error. We gave a mathematical intuition for the transformation and showed that scores on the log scale can be interpreted as a) a measure of relative prediction errors, as well as b) a score for a forecast of the exponential growth rate of the target quantity. 
-When applying this approach to forecasts from the European COVID-19 Forecast Hub, we found overall scores on the log scale to be more equal across, time, location and target type (cases, deaths) than scores on the natural scale. Scores on the log scale were much less influenced by the overall incidence level in a country, and showed a slight tendency to be higher in locations with very low incidences. We found that model rankings changed noticeably, favouring models like epiforecasts-EpiNow2 which explicitly has an exponential error structure, and disfavouring models like MUNI-ARIMA which is a purely statistical model with a linear error structure. On the natural scale, missing the peak and overshooting was more severely penalised than missing the nadir and a following upswing in numbers. Both failure modes tended to be more equally penalised on the log scale (with undershooting receiving slightly higher penalties in our example). 
+In this paper we proposed the use of transformations, with a particular focus on the log transformation, in order to address issues that arise when evaluating epidemiological forecasts based on measures of absolute error and their probabilistic generalisations (i.e CRPS and WIS). We gave a mathematical intuition for the log transformation and showed that scores on the log scale can be interpreted as a) a measure of relative prediction errors, as well as b) a score for a forecast of the exponential growth rate of the target quantity and c) as variance stabilising transformation in some settings.
+When applying this approach to forecasts from the European COVID-19 Forecast Hub, we found overall scores on the log scale to be more equal across, time, location and target type (cases, deaths) than scores on the natural scale. Scores on the log scale were much less influenced by the overall incidence level in a country, and showed a slight tendency to be higher in locations with very low incidences. We found that model rankings changed noticeably, favouring models like epiforecasts-EpiNow2 which uses a log scale generative process and a negative binomial observation model, and disfavouring models like MUNI-ARIMA which uses a square root transform to stabilise variance. On the natural scale, missing the peak and overshooting was more severely penalised than missing the nadir and the following upswing in numbers. Both failure modes tended to be more equally penalised on the log scale (with undershooting receiving slightly higher penalties in our example). 
 
 Applying a log-transformation prior to the WIS means that forecasts are evaluated in terms of relative errors and errors on the exponential growth rate, rather than absolute errors. The most important strength of this approach is that the evaluation better accommodates the exponential nature of epidemiological process and the types of errors forecasters who accurately model those processes are expected to make. The log-transformation also helps avoid issues with scores being strongly influenced by the order of magnitude of the forecast quantity, which can be an issue when evaluating forecasts on the natural scale. 
 A potential downside is that forecast evaluation is unreliable in situations where observed values are zero or very small. Including very small values in prediction intervals (see e.g. Figure \ref{fig:HUB-model-comparison-baseline}) can lead to excessive dispersion values on the log scale. 
 Similarly, locations with lower incidences may get disproportionate weight (i.e. high scores) when evaluating forecasts on the log scale. \cite{bracherEvaluatingEpidemicForecasts2021} argue that the large weight given to forecasts for locations with high incidences is a desirable property, as it reflects performance on the targets we should care about most. On the other hand, scoring forecasts on the log scale may be less influenced by outliers and better reflect consistent performance across time, space, and forecast targets. It also gives higher weight to another type of situation one may care about, namely one in which numbers start to rise from a previously low level. 
 If one is interested in scoring a forecast of the multiplicative, rather than the exponential  growth rate, it may be better to use a different transformation, e.g. dividing every forecast and corresponding observed value by the previously last observed value when the forecast was made. 
 
-The log-transformation is only one of many transformation that may be useful and appropriate in an epidemiological context. One easy transformation is to divide all forecasts by the population in a location, in order to obtain forecasts of standardised incidences per e.g. 100,000 inhabitants. A second transformation was mentioned above, namely converting forecasts into forecasts for the multiplicative growth rate by dividing numbers by the last observed value. One could also think about applying a Box-Cox or a square-root transformation in order to stabilise the variance of the forecasts. Another promising transformation would be to divide each forecast by the forecast of the previous week (and observations by the observation of the previous week), in order to obtain forecasts for week-to-week multiplicative growth rates, or alternatively, to ask forecasters to provide estimates of the weekly relative change applied to the latest data and subsequent forecast points directly. This would be akin to evaluating the shape of the predicted trajectory against the shape of the observed trajectory \citep[for a different approach to evaluation the shape of a forecast, see][]{srivastavaShapebasedEvaluationEpidemic2022}. This, unfortunately is not well defined in the context of forecasts stored as predictive quantiles, as the growth rate of the $\alpha$-quantile may be different from the $\alpha$-quantile of the growth-rate, but may be an interesting approach if predictive samples are available. What makes this approach of transforming forecasts before scoring particularly interesting is the possibility to construct composite scores as a weighted sum of scores based on different transformations. This would allow forecast consumers to assign explicit weights to different qualities of the forecasts they might care about. 
+The log-transformation is only one of many transformation that may be useful and appropriate in an epidemiological context. One easy transformation is to divide all forecasts by the population in a location, in order to obtain forecasts of standardised incidences per e.g. 100,000 inhabitants. A second transformation was mentioned above, namely converting forecasts into forecasts for the multiplicative growth rate by dividing numbers by the last observed value. One could also think about applying a Box-Cox or a square-root transformation in order to stabilise the variance of the forecasts. Another promising transformation would be to divide each forecast by the forecast of the previous week (and observations by the observation of the previous week), in order to obtain forecasts for week-to-week multiplicative growth rates, or alternatively, to ask forecasters to provide estimates of the weekly relative change applied to the latest data and subsequent forecast points directly. This would be akin to evaluating the shape of the predicted trajectory against the shape of the observed trajectory \citep[for a different approach to evaluate the shape of a forecast, see][]{srivastavaShapebasedEvaluationEpidemic2022}. This, unfortunately is not feasible in the context of forecasts stored as predictive quantiles, as the growth rate of the $\alpha$-quantile may be different from the $\alpha$-quantile of the growth-rate, but may be an interesting approach if predictive samples are available. What makes this approach of transforming forecasts before scoring particularly interesting is the possibility to construct composite scores as a weighted sum of scores based on different transformations. This would allow forecast consumers to assign explicit weights to different qualities of the forecasts they might care about.
 
-Exploring these different transformations is a promising avenue for future work that could help bridge the gap between modellers and policy makers by providing scoring rules that better reflect what forecast consumers actually care about. We have showed that the log-transformation can lead to significant changes in the relative rankings of models against each other, with potentially important implications for decision makers who rely on the knowledge of past performance to make a decision about which forecasts should inform future decisions. While it is commonly accepted that multiple proper scoring rules should usually be considered when comparing forecasts, we think this should be supplemented by considering different transformations of the data to obtain a richer picture of model performance. While we have produced this work as an initial case study, more work needs to be done to better understand the effects of applying a logarithmic or other transformations more comprehensively and in different contexts, and how it might affect decision making. 
+Exploring transformations is a promising avenue for future work that could help bridge the gap between modellers and policy makers by providing scoring rules that better reflect what forecast consumers care about. Potentially the variance stabilising time-series forecasting literature may be a useful source of transformations for various forecast settings. We have showed that the log-transformation can lead to significant changes in the relative rankings of models against each other, with potentially important implications for decision-makers who rely on the knowledge of past performance to make a decision about which forecasts should inform future decisions. While it is commonly accepted that multiple proper scoring rules should usually be considered when comparing forecasts, we think this should be supplemented by considering different transformations of the data to obtain a richer picture of model performance. More work needs to be done to better understand the effects of applying transformations more comprehensively and in different contexts, and how it might affect decision-making. 
 
 \newpage
 
 \appendix
 \section{Supplementary information}
 
+\subsection{Alternative Formulation of the WIS}
+\label{sec:alternative-wis}
+
+Instead of defining the WIS as an average of scores for individual quantiles, we can define it using an average of scores for symmetric predictive intervals. For a single prediction interval, the interval scoren (IS) is computed as the sum of three penalty components, dispersion (width of the prediction interval), underprediction and overprediction,  
+%
+\begin{linenomath*}
+\begin{align*}
+ IS_\alpha(F,y) &= (u-l) + \frac{2}{\alpha} \cdot (l-y) \cdot 1(y \leq l) + \frac{2}{\alpha} \cdot (y-u) \cdot 1(y \geq u) \\
+ &= \text{dispersion} + \text{underprediction} + \text{overprediction},    
+\end{align*}
+\end{linenomath*}
+%
+where $1()$ is the indicator function, $y$ is the observed value, and $l$ and $u$ are the $\frac{\alpha}{2}$ and $1 - \frac{\alpha}{2}$ quantiles of the predictive distribution, i.e. the lower and upper bound of a single central prediction interval. For a set of $K^*$ prediction intervals and the median $m$, the WIS is computed as a weighted sum, 
+\begin{linenomath*}
+\begin{equation*}
+\text{WIS} = \frac{1}{K^* + 0.5} \cdot \left(w_0 \cdot |y - m| + \sum_{k = 1}^{K^*} w_k \cdot IS_{\alpha_{k}}(F, y)\right),    
+\end{equation*} 
+\end{linenomath*}
+where $w_k$ is a weight for every interval. Usually, $w_k = \frac{\alpha_k}{2}$ and $w_0 = 0.5$. 
+
+
+
 \begin{table}[h!]
     \centering
-    
+
+
 \begin{tabular}{lllcc}
 \toprule
-Target & Quantity & Measure & natural & log\\
+target\_type & quantity & measure & natural & log\\
 \midrule
-Cases & Observations & mean & 20013 & 8.33\\
-Cases & Observations & sd & 43256 & 2.07\\
-Cases & Observations & var & 1871039511 & 4.30\\
+Cases & Observations & mean & 62004 & 9.19\\
+Cases & Observations & sd & 171723 & 2.10\\
+Cases & Observations & var & 29488651564 & 4.42\\
 \addlinespace
-Deaths & Observations & mean & 244 & 4.01\\
-Deaths & Observations & sd & 498 & 1.81\\
-Deaths & Observations & var & 248306 & 3.28\\
+Deaths & Observations & mean & 223 & 3.90\\
+Deaths & Observations & sd & 441 & 1.96\\
+Deaths & Observations & var & 194221 & 3.85\\
 \addlinespace
 \hline
 \addlinespace
-Cases & WIS & mean & 4220 & 0.26\\
-Cases & WIS & sd & 13978 & 0.35\\
+Cases & WIS & mean & 15840 & 0.27\\
+Cases & WIS & sd & 53117 & 0.28\\
 \addlinespace
-Deaths & WIS & mean & 30 & 0.21\\
-Deaths & WIS & sd & 70 & 0.19\\
+Deaths & WIS & mean & 31 & 0.23\\
+Deaths & WIS & sd & 65 & 0.28\\
 \bottomrule
 \end{tabular}
     \caption{Summary statistics for observations and scores for forecasts from the ECDC data set.}
@@ -385,62 +442,42 @@ Deaths & WIS & sd & 70 & 0.19\\
     \centering
     \includegraphics[width=0.99\textwidth]{output/figures/SIM-score-approximation.png}
     \caption{
-    Forecasts and scores for two-week-ahead predictions from the epiforecasts-EpiNow2 model made in Germany. A, E: 50\% and 90\% prediction intervals and observed values for cases and deaths on the natural scale. B, F: Corresponding scores. C, G: Forecasts and observations on the log scale. D, H: Corresponding scores. 
+    Visualisation of expected CRPS values against approximated scores using the approximation detailed in Section \ref{sec:methods:rankings} (see also Figure \ref{fig:SIM-wis-state-size-mean}). Expected CRPS scores are shown for three different distributions once on the natural scale (top row) and once scored on the log scale (bottom row).  
     }
     \label{fig:HUB-model-comparison-epinow}
 \end{figure}
 
 
-\subsection{Alternative Formulation of the WIS}
-
-Instead of defining the WIS as an average of scores for individual quantiles, we can define it using an average of scores for symmetric predictive intervals. For a single prediction interval, the interval scoren (IS) is computed as the sum of three penalty components, dispersion (width of the prediction interval), underprediction and overprediction,  
-%
-\begin{linenomath*}
-\begin{align*}
- IS_\alpha(F,y) &= (u-l) + \frac{2}{\alpha} \cdot (l-y) \cdot 1(y \leq l) + \frac{2}{\alpha} \cdot (y-u) \cdot 1(y \geq u) \\
- &= \text{dispersion} + \text{underprediction} + \text{overprediction},    
-\end{align*}
-\end{linenomath*}
-%
-where $1()$ is the indicator function, $y$ is the observed value, and $l$ and $u$ are the $\frac{\alpha}{2}$ and $1 - \frac{\alpha}{2}$ quantiles of the predictive distribution, i.e. the lower and upper bound of a single central prediction interval. For a set of $K^*$ prediction intervals and the median $m$, the WIS is computed as a weighted sum, 
-\begin{linenomath*}
-\begin{equation*}
-\text{WIS} = \frac{1}{K^* + 0.5} \cdot \left(w_0 \cdot |y - m| + \sum_{k = 1}^{K^*} w_k \cdot IS_{\alpha_{k}}(F, y)\right),    
-\end{equation*} 
-\end{linenomath*}
-where $w_k$ is a weight for every interval. Usually, $w_k = \frac{\alpha_k}{2}$ and $w_0 = 0.5$. 
-
-
 \begin{table}
 \centering
-\begin{tabular}{ccrrrr}
+\begin{tabular}{ccrrrrrr}
 \toprule
-Horizon & Target & $\alpha$ & $\beta$ & $\alpha^*$ & $\beta^*$\\
+Horizon & Target & $\alpha$ & $\beta$ & $\alpha^*$ & $\beta^*$ & $\alpha^{**}$ & $\beta^{**}$\\
 \midrule
-all & all & -0.556 & 0.877 & 0.579 & -0.028\\
+all & all & -1.093 & 0.963 & 0.390 & 0.001 & -0.995 & 0.209\\
 \addlinespace
-all & Cases & 1.112 & 0.710 & 1.280 & -0.101\\
-all & Deaths & -0.433 & 0.762 & 0.523 & -0.044\\
+all & Cases & 0.036 & 0.858 & 0.751 & -0.033 & 0.047 & 0.201\\
+all & Deaths & -0.885 & 0.868 & 0.430 & -0.021 & -7.564 & 0.826\\
 \addlinespace
-1 & all & -0.999 & 0.855 & 0.419 & -0.031\\
-2 & all & -0.756 & 0.890 & 0.517 & -0.028\\
-3 & all & -0.430 & 0.895 & 0.628 & -0.026\\
-4 & all & -0.047 & 0.881 & 0.747 & -0.024\\
+1 & all & -1.402 & 0.923 & 0.318 & -0.014 & 0.318 & 0.088\\
+2 & all & -1.221 & 0.967 & 0.364 & -0.003 & 0.111 & 0.164\\
+3 & all & -1.001 & 0.984 & 0.408 & 0.008 & -1.283 & 0.255\\
+4 & all & -0.757 & 0.986 & 0.467 & 0.016 & -1.041 & 0.312\\
 \addlinespace
-1 & Cases & -0.065 & 0.764 & 0.768 & -0.067\\
-2 & Cases & 0.676 & 0.748 & 1.104 & -0.089\\
-3 & Cases & 1.414 & 0.710 & 1.432 & -0.109\\
-4 & Cases & 2.173 & 0.658 & 1.712 & -0.124\\
+1 & Cases & -0.861 & 0.876 & 0.433 & -0.024 & 0.785 & 0.087\\
+2 & Cases & -0.243 & 0.877 & 0.660 & -0.031 & 0.959 & 0.162\\
+3 & Cases & 0.372 & 0.855 & 0.882 & -0.037 & 1.115 & 0.238\\
+4 & Cases & 0.816 & 0.837 & 1.009 & -0.036 & 1.665 & 0.296\\
 \addlinespace
-1 & Deaths & -0.726 & 0.735 & 0.429 & -0.048\\
-2 & Deaths & -0.553 & 0.766 & 0.490 & -0.045\\
-3 & Deaths & -0.352 & 0.782 & 0.552 & -0.041\\
-4 & Deaths & -0.113 & 0.781 & 0.618 & -0.036\\
+1 & Deaths & -1.145 & 0.831 & 0.376 & -0.035 & 0.458 & 0.048\\
+2 & Deaths & -0.980 & 0.866 & 0.415 & -0.027 & 0.445 & 0.084\\
+3 & Deaths & -0.809 & 0.885 & 0.441 & -0.016 & -8.262 & 0.903\\
+4 & Deaths & -0.603 & 0.891 & 0.488 & -0.007 & -7.834 & 0.898\\
 \bottomrule
 \end{tabular}
-\caption{Coefficients of two regressions for the effect of the magnitude of the median forecast on expected scores. The first regression was 
+\caption{Coefficients of three regressions for the effect of the magnitude of the median forecast on expected scores. The first regression was 
 $\text{CRPS}(F, y) = \exp(\alpha) \cdot \text{median}(F)^{\beta},$ where $F$ is the predictive distribution and $y$ the observed value. The second one was 
-$\text{CRPS}(\log F, \log y) = \alpha^* + \beta^* \cdot \log{(\text{median}(F))}.$
+$\text{CRPS}(\log F, \log y) = \alpha^* + \beta^* \cdot \log{(\text{median}(F))}.$ The third one was $\text{CRPS}(\sqrt{F}, \sqrt{y}) = \alpha^{**} + \beta^{**} \cdot \sqrt{(\text{median}(F))}.$
 }
 \label{tab:HUB-regression}
 \end{table}

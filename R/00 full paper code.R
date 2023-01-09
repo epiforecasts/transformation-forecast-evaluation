@@ -174,13 +174,13 @@ plot_fct <- function(scores, scale_factor, nbinom, filter_scale = "natural") {
 }
 
 p1 <- scores |>
-  plot_fct(scale_factor = 240, nbinom = nbinom, filter_scale = "natural")
+  plot_fct(scale_factor = 240, nbinom = nbinom_natural, filter_scale = "natural")
 
 p2 <- scores |>
-  plot_fct(scale_factor = 13, nbinom = nbinom, filter_scale = "log") 
+  plot_fct(scale_factor = 13, nbinom = nbinom_natural, filter_scale = "log") 
 
 p3 <- scores |>
-  plot_fct(scale_factor = 23, nbinom = nbinom, filter_scale = "sqrt") 
+  plot_fct(scale_factor = 23, nbinom = nbinom_natural, filter_scale = "sqrt") 
 
 p1 + p2 +
   plot_layout(guides = "collect") &
@@ -838,17 +838,20 @@ ranking_figure <- function(target = "Cases") {
     facet_wrap(~scale, scales = "free_x")
   
   plot_ranking_change <- summarised_pairwise |>
+    filter(scale %in% c("natural", "log")) |>
     select(model, scale, relative_skill) |>
     group_by(scale) |>
+    # mutate(scale = factor(scale, levels = c("log", "natural"))) |>
     mutate(rank = rank(-relative_skill), 
            x = ifelse(scale == "natural", 0.4, 2.8), 
            x_arrow = ifelse(scale == "natural", 1.7, 2.7)
     ) |>
     group_by(model) |>
-    mutate(color = ifelse(diff(relative_skill) > 0, "deteriorated", "not deteriorated")) |>
-    ggplot(aes(y = rank, x = x, group = model, label = model)) +
+    mutate(custom_color = ifelse(diff(relative_skill) < 0, "deteriorated", "not deteriorated")) |>
+    arrange(desc(scale)) |>
+    ggplot(aes(y = rank, group = model, label = model, color = custom_color)) +
     geom_path(
-      aes(x=x_arrow, color = color), 
+      aes(x=x_arrow), 
       arrow = arrow(length = unit(0.09,"npc")), 
       lineend = "round", linejoin = "mitre",
       size=1, show.legend = FALSE) +

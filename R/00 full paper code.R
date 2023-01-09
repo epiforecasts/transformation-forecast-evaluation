@@ -410,6 +410,8 @@ hub_data$location |>
 ## ========================================================================== ##
 
 label_fn <- function(x) {
+  x <- ifelse(x%%1 == 0, 
+              as.integer(x), x)
   ifelse(x < 1000, 
          paste(x), 
          ifelse(x < 1e6, 
@@ -776,6 +778,12 @@ scores |>
 ## Figure 8 - Look at pairwise comparisons and changes in rankings (plus Appendix figures)
 ## ========================================================================== ##
 
+simple_labels <- function(x) {
+  ifelse(x%%1 == 0, 
+    paste(as.integer(x)),
+    paste(x))
+}
+
 ranking_figure <- function(target = "Cases") {
   summarised_pairwise <- scores |>
     select(-median_prediction) |>
@@ -795,7 +803,8 @@ ranking_figure <- function(target = "Cases") {
     geom_bar(stat = "identity") +
     theme_scoringutils() +
     facet_wrap(~scale) +
-    labs(y = "Model", x = "Relative skill")
+    labs(y = "Model", x = "Relative skill") +
+    scale_x_continuous(labels = simple_labels, breaks = c(0, 0.5, 1))
   
   plot_rel_skill_log <- summarised_pairwise |>
     filter(scale == "log") |>
@@ -804,7 +813,8 @@ ranking_figure <- function(target = "Cases") {
     theme_scoringutils() +
     facet_wrap(~scale) +
     labs(y = "", x = "Relative skill") +
-    theme(axis.title.y = element_blank())
+    theme(axis.title.y = element_blank()) +
+    scale_x_continuous(labels = simple_labels)
   
   diffs <- summarised_pairwise |>
     select(model, relative_skill, scale) |>
@@ -822,11 +832,14 @@ ranking_figure <- function(target = "Cases") {
           axis.text.y = element_blank(), 
           axis.ticks.y = element_blank(), 
           axis.line.y = element_blank()) +
-    facet_wrap(~title)
+    facet_wrap(~title) +
+    scale_x_continuous(labels = simple_labels)
   
   plot_rel_wis <- scores |>
     filter(horizon == 2, 
-           target_type == "Cases") |>
+           target_type == target, 
+           scale %in% c("log", "natural")) |>
+    mutate(scale = factor(scale, levels = c("natural", "log"))) |>
     mutate(model = factor(model, levels = ranking_log)) |>
     summarise_scores(by = c("model", "scale")) |>
     plot_wis(relative_contributions = TRUE) +
@@ -866,8 +879,6 @@ ranking_figure <- function(target = "Cases") {
           panel.grid = element_blank(), 
           legend.position="none")
   
-  plot_rel_skill_natural + plot_ranking_change
-  
   return(
     list(
       plot_ranking_change, plot_rel_skill_natural, plot_rel_skill_log, plot_diffs, plot_rel_wis
@@ -889,10 +900,10 @@ ranking_cases[[2]] + ranking_cases[[1]] +
   plot_annotation(tag_levels = "A") +
   plot_layout(design = layout, 
               guides = "collect", 
-              widths = c(1, 1, 1, 1, 2.5)) &
+              widths = c(0.9, 0.9, 0.9, 1.4, 2.5)) &
   theme(legend.position = "bottom")
 
-ggsave("output/figures/HUB-pairwise-comparisons.png", width = 10.5, height = 6)
+ggsave("output/figures/HUB-pairwise-comparisons.png", width = 11.5, height = 6)
 
 
 

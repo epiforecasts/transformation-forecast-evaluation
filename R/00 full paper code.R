@@ -20,7 +20,8 @@ library(covidHubUtils) # remotes::install_github("https://github.com/reichlab/co
 set.seed(1234)
 
 ## ========================================================================== ##
-## FIGURE 1 + Figure XX
+## FIGURE 1 Numerical comparison of different measures of relative error
+##  + Figure XX
 ## ========================================================================== ##
 
 y_hat <- 1
@@ -91,8 +92,132 @@ p4 <- p3 +
 
 ggsave("output/figures/different-relative-errors-sqrt.png", width = 7, height = 3)
 
+
+
+
 ## ========================================================================== ##
-## FIGURE 2
+## FIGURE 3
+## ========================================================================== ##
+if (file.exists("output/data/simulation-figure-2.Rda")) {
+  scores_fig_2 <- readRDS(file = "output/data/simulation-figure-2.Rda")
+} else {
+  
+  time_points <- 1e5
+  n_means <- 60
+  means = (10^seq(1, 3.3, length.out = n_means))
+  model_names <- c("theta_1", "theta_1e9")
+  
+  df <- data.table(
+    state = 1:length(mean),
+    mean = means
+  ) |>
+    mutate(date = list(1:time_points)) |>
+    unnest(cols = date) |>
+    rowwise() |>
+    mutate(theta = list(c(1, 1e9)), 
+           model = list(model_names)) |>
+    ungroup() |>
+    unnest(cols = c("theta", "model")) |>
+    mutate(predictive_sample = rnbinom(n = time_points * n_means * length(model_names), 
+                                        size = theta,
+                                        mu = mean) + 1) 
+  
+  # add normal
+  df_normal <- filter(df, theta == 1) |>
+    mutate(model = "normal", 
+           theta = 0, 
+           predictive_sample = rnorm(n = time_points * n_means, 
+                                     mean = mean, 
+                                     sd = 1))
+  
+  df <- rbind(df, df_normal)
+  
+  scores_fig_2 <- df |>
+    group_by(mean, theta, model) |> 
+    summarise(
+      crps = mean(abs(predictive_sample[-1] - predictive_sample[-length(predictive_sample)]))/2,
+      crps_log = mean(abs(log(predictive_sample[-1]) - log(predictive_sample[-length(predictive_sample)])))/2,
+      crps_sqrt = mean(abs(sqrt(predictive_sample[-1]) - sqrt(predictive_sample[-length(predictive_sample)])))/2
+    ) |>
+    pivot_longer(cols = c(crps, crps_log, crps_sqrt), values_to = "crps", names_to = "scale") |>
+    mutate(scale = ifelse(scale == "crps", "natural", 
+                          ifelse(scale == "crps_log", "log", "sqrt")), 
+           scale = factor(scale, levels = c("natural", "log", "sqrt"))) |> 
+    mutate(var = ifelse(theta == 0, # normal distribution
+                        1, 
+                        mean + mean^2 / theta), # negative binomial distribution 
+           approximation = ifelse(scale == "natural", 
+                                  sqrt(var / pi),  
+                                  ifelse(scale == "sqrt", 
+                                         sqrt(var / (2^2 * mean * pi)),
+                                         sqrt(var / pi) / (mean))))
+  
+  saveRDS(scores_fig_2, file = "output/data/simulation-figure-2.Rda")
+}
+
+p1 <- scores_fig_2 |>
+  group_by(model, scale) |>
+  filter(mean <= 2000) |>
+  mutate(crps = crps / mean(crps), 
+         approximation = approximation / mean(approximation)) |>
+  ggplot(aes(y = crps, x = mean, colour = model)) +
+  geom_line(aes(y = approximation)) +
+  geom_point(size = 0.4) +  
+  theme_scoringutils() + 
+  theme(axis.title.y = element_text(size=7.1)) +
+  labs(x = TeX("\\mu")) +
+  scale_colour_discrete(
+    labels=c(
+      TeX(r'($\sigma^2 = const$)'), 
+      TeX(r'($\sigma^2 = \mu + \mu^2$)'), 
+      #TeX(r'($\sigma^2 = \mu + \frac{\mu^{2.5}}{1000}$)'), 
+      TeX(r'($\sigma^2 = \mu$)'))
+  ) +
+  facet_wrap(~ scale, scales = "free_y") 
+
+p2 <- p1 + 
+  scale_x_continuous(trans = "log10") + 
+  scale_y_continuous(trans = "log10")
+
+p1 / p2 +
+  plot_annotation(tag_levels = "A") +   
+  plot_layout(guides = "collect") & 
+  theme(legend.position = "bottom") &
+  labs(y = TeX("Mean CRPS (normalised)"))
+
+ggsave("output/figures/SIM-mean-state-size.png", width = 7, height = 4.1)
+
+
+## ========================================================================== ##
+## FIGURE 3 - Appendix version - Figure XX
+## ========================================================================== ##
+
+scores_fig_2 |>
+  ungroup() |>
+  mutate(
+    model = factor(model, 
+                   labels = c(TeX(r'($\sigma^2 = \mu + \mu^2$)'), 
+                              TeX(r'($\sigma^2 = \mu + \mu^{2.5}/1000$)'), 
+                              TeX(r'($\sigma^2 = \mu$)')))
+  ) |>
+  ggplot(aes(y = crps, x = mean, color = model)) +
+  geom_line(aes(y = approximation)) +
+  geom_point(aes(color = model), alpha = 0.3) + 
+  facet_wrap(scale ~ model, scales = "free", labeller = label_parsed) + 
+  theme_scoringutils() + 
+  scale_colour_discrete(
+    labels=c(TeX(r'($\sigma^2 = \mu + 0.1 \cdot \mu^2$)'), 
+             TeX(r'($\sigma^2 = \mu + \frac{\mu^{2.5}}{1000}$)'), 
+             TeX(r'($\sigma^2 = \mu$)'))
+  ) + 
+  scale_x_continuous(trans = "log10") 
+
+ggsave("output/figures/SIM-score-approximation.png", width = 7, height = 4.1)
+
+
+## ========================================================================== ##
+## FIGURE 4: Illustration of the effect of the log-transformation of 
+##           the ranking for a single forecast
 ## ========================================================================== ##
 
 quantile <- seq(0.005, 0.995, 0.005)
@@ -192,114 +317,6 @@ ggsave(filename = "output/figures/illustration-effect-log-ranking-crps.png",
 
 
 
-
-## ========================================================================== ##
-## FIGURE 3
-## ========================================================================== ##
-if (file.exists("output/data/simulation-negative-binom.Rda")) {
-  scores_fig_3 <- readRDS(file = "output/data/simulation-negative-binom.Rda")
-} else {
-  
-  time_points <- 1e5
-  n_means <- 60
-  means = (10^seq(1, 3.31, length.out = n_means))
-  model_names <- c("theta_1000_sqrt_mu", "theta_1", "theta_1e9")
-  
-  df <- data.table(
-    state = 1:length(mean),
-    mean = means
-  ) |>
-    mutate(date = list(1:time_points)) |>
-    unnest(cols = date) |>
-    rowwise() |>
-    mutate(theta = list(c(1000/sqrt(mean), 10, 1e9)), 
-           model = list(model_names)) |>
-    ungroup() |>
-    unnest(cols = c("theta", "model")) |>
-    mutate(predictive_sample = rnbinom(n = time_points * n_means * length(model_names), 
-                                        size = theta,
-                                        mu = mean) + 1) 
-  
-  scores_fig_3 <- df |>
-    group_by(mean, theta, model) |> 
-    summarise(
-      crps = mean(abs(predictive_sample[-1] - predictive_sample[-length(predictive_sample)]))/2,
-      crps_log = mean(abs(log(predictive_sample[-1]) - log(predictive_sample[-length(predictive_sample)])))/2,
-      crps_sqrt = mean(abs(sqrt(predictive_sample[-1]) - sqrt(predictive_sample[-length(predictive_sample)])))/2
-    ) |>
-    pivot_longer(cols = c(crps, crps_log, crps_sqrt), values_to = "crps", names_to = "scale") |>
-    mutate(scale = ifelse(scale == "crps", "natural", 
-                          ifelse(scale == "crps_log", "log", "sqrt")), 
-           scale = factor(scale, levels = c("natural", "log", "sqrt"))) |> 
-    mutate(var = mean + mean^2 / theta, 
-           approximation = ifelse(scale == "natural", 
-                                  sqrt(var / pi),  
-                                  ifelse(scale == "sqrt", 
-                                         sqrt(var / (2^2 * mean * pi)),
-                                         sqrt(var / pi) / (mean))))
-  
-  saveRDS(scores_fig_3, file = "output/data/simulation-negative-binom.Rda")
-}
-
-p1 <- scores_fig_3 |>
-  group_by(model, scale) |>
-  filter(mean <= 2000) |>
-  mutate(crps = crps / mean(crps), 
-         approximation = approximation / mean(approximation)) |>
-  ggplot(aes(y = crps, x = mean, colour = model)) +
-  geom_line(aes(y = approximation)) +
-  geom_point(size = 0.4) +  
-  theme_scoringutils() + 
-  theme(axis.title.y = element_text(size=7.1)) +
-  labs(x = TeX("\\mu")) +
-  scale_colour_discrete(
-    labels=c(TeX(r'($\sigma^2 = \mu + \mu^2$)'), 
-             TeX(r'($\sigma^2 = \mu + \frac{\mu^{2.5}}{1000}$)'), 
-             TeX(r'($\sigma^2 = \mu$)'))
-  ) +
-  facet_wrap(~ scale, scales = "free_y") 
-
-p2 <- p1 + 
-  scale_x_continuous(trans = "log10") + 
-  scale_y_continuous(trans = "log10")
-
-p1 / p2 +
-  plot_annotation(tag_levels = "A") +   
-  plot_layout(guides = "collect") & 
-  theme(legend.position = "bottom") &
-  labs(y = TeX("Mean CRPS (normalised)"))
-
-ggsave("output/figures/SIM-mean-state-size.png", width = 7, height = 4.1)
-
-
-## ========================================================================== ##
-## FIGURE 3 - Appendix version - Figure XX
-## ========================================================================== ##
-
-scores_fig_3 |>
-  ungroup() |>
-  mutate(
-    model = factor(model, 
-                   labels = c(TeX(r'($\sigma^2 = \mu + \mu^2$)'), 
-                              TeX(r'($\sigma^2 = \mu + \mu^{2.5}/1000$)'), 
-                              TeX(r'($\sigma^2 = \mu$)')))
-  ) |>
-  ggplot(aes(y = crps, x = mean, color = model)) +
-  geom_line(aes(y = approximation)) +
-  geom_point(aes(color = model), alpha = 0.3) + 
-  facet_wrap(scale ~ model, scales = "free", labeller = label_parsed) + 
-  theme_scoringutils() + 
-  scale_colour_discrete(
-    labels=c(TeX(r'($\sigma^2 = \mu + 0.1 \cdot \mu^2$)'), 
-             TeX(r'($\sigma^2 = \mu + \frac{\mu^{2.5}}{1000}$)'), 
-             TeX(r'($\sigma^2 = \mu$)'))
-  ) + 
-  scale_x_continuous(trans = "log10") 
-
-ggsave("output/figures/SIM-score-approximation.png", width = 7, height = 4.1)
-
-
-
 ## ========================================================================== ##
 ## FIGURE 4
 ## ========================================================================== ##
@@ -378,7 +395,7 @@ ggsave("output/figures/example-log-first.png", width = 7, height = 2.1)
 
 analysis_date <- "2022-12-12"
 start_date <- "2021-03-08"
-end_date <- "2021-10-18"
+end_date <- "2022-05-12"
 
 hub_data <- rbindlist(list(
   fread(here("data", "full-data-european-forecast-hub-1.csv")), 

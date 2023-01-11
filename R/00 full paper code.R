@@ -217,110 +217,9 @@ scores_fig_2 |>
 ggsave("output/figures/SIM-score-approximation.png", width = 7, height = 8)
 
 
-## ========================================================================== ##
-## FIGURE 4: Illustration of the effect of the log-transformation of 
-##           the ranking for a single forecast
-## ========================================================================== ##
-
-quantile <- seq(0.005, 0.995, 0.005)
-mu <- 10
-theta_1 <- 1
-theta_2 <- 1e9
-
-data <- data.table(
-  quantile = quantile,
-  model_A = qnbinom(p = quantile, size = theta_1, mu = mu), 
-  model_B = qnbinom(p = quantile, size = theta_2, mu = mu)
-) |>
-  pivot_longer(cols = c(model_A, model_B), names_to = "model", values_to = "prediction") |>
-  mutate(true_value = list(1:50), 
-         id = list(1:50)) |>
-  unnest(cols = c(true_value, id))
-
-scores_natural <- data |>
-  score(metrics = "interval_score") |>
-  summarise_scores(by = c("model", "id")) |>
-  mutate(scale = "natural")
-
-scores_log <- data |>
-  mutate(true_value = log(true_value), 
-         prediction = log(prediction)) |>
-  score(metrics = "interval_score") |>
-  summarise_scores(by = c("model", "id"), na.rm = TRUE) |>
-  mutate(scale = "log")
-
-scores_sqrt <- data |>
-  mutate(true_value = sqrt(true_value), 
-         prediction = sqrt(prediction)) |>
-  score(metrics = "interval_score") |>
-  summarise_scores(by = c("model", "id"), na.rm = TRUE) |>
-  mutate(scale = "sqrt")
-
-scores <- rbind(scores_natural, scores_log, scores_sqrt) |>
-  mutate(scale = factor(scale, levels = c("natural", "log", "sqrt")), 
-         Forecaster = ifelse(model == "model_A", "A", "B"))
-
-nbinom_natural <- data.table(
-  A = rnbinom(100000, mu = 10, size = theta_1), 
-  B = rnbinom(100000, mu = 10, size = theta_2)
-) |>
-  pivot_longer(cols = c(A, B), names_to = "Forecaster") 
-
-plot_fct <- function(scores, scale_factor, nbinom, filter_scale = "natural") {
-  
-  scores <- filter(scores, scale == filter_scale)
-  
-  scores |>
-    ggplot(aes(x = id, y = interval_score / scale_factor, color = Forecaster)) + 
-    geom_histogram(data = filter(nbinom, Forecaster == "A"), inherit.aes = FALSE,
-                   aes(y = after_stat(density),
-                       x = value, color = NULL,
-                       fill = Forecaster),
-                   alpha = 0.2,
-                   binwidth = 1) +
-    geom_histogram(data = filter(nbinom, Forecaster == "B"), inherit.aes = FALSE,
-                   aes(y = after_stat(density),
-                       x = value, color = NULL,
-                       fill = Forecaster),
-                   alpha = 0.2,
-                   binwidth = 1) +
-    geom_line() +
-    theme_scoringutils() + 
-    scale_y_continuous(label = function(x) {paste(scale_factor * x)}) + 
-    labs(y = "CRPS", x = "Observed value") + 
-    coord_cartesian(xlim = c(0, 30)) +
-    scale_colour_discrete(
-      labels=c(TeX(r'(A: $\sigma^2 = \mu + \mu^2$)'), 
-               TeX(r'(B: $\sigma^2 = \mu$)'))
-    ) + 
-    scale_fill_discrete(
-      labels=c(TeX(r'(A: $\sigma^2 = \mu + \mu^2$)'), 
-               TeX(r'(B: $\sigma^2 = \mu$)'))
-    ) + 
-    facet_wrap(~ scale)
-}
-
-p1 <- scores |>
-  plot_fct(scale_factor = 240, nbinom = nbinom_natural, filter_scale = "natural")
-
-p2 <- scores |>
-  plot_fct(scale_factor = 13, nbinom = nbinom_natural, filter_scale = "log") 
-
-p3 <- scores |>
-  plot_fct(scale_factor = 23, nbinom = nbinom_natural, filter_scale = "sqrt") 
-
-p1 + p2 +
-  plot_layout(guides = "collect") &
-  theme(legend.position = "bottom") 
-
-ggsave(filename = "output/figures/illustration-effect-log-ranking-crps.png", 
-       width = 7, height = 3)
-
-
-
 
 ## ========================================================================== ##
-## FIGURE 4
+## FIGURE 3
 ## ========================================================================== ##
 
 # in this plot the CRPS is approximated by the WIS with 99 quantiles
@@ -389,6 +288,108 @@ ggsave("output/figures/example-log-first.png", width = 7, height = 2.1)
 
 
 
+## ========================================================================== ##
+## FIGURE 4: Illustration of the effect of the log-transformation of 
+##           the ranking for a single forecast
+## ========================================================================== ##
+
+# CRPS values were approximated by a WIS with 200 quantiles
+quantile <- seq(0.005, 0.995, 0.005)
+mu <- 10
+theta_1 <- 1
+theta_2 <- 1e9
+
+data <- data.table(
+  quantile = quantile,
+  model_A = qnbinom(p = quantile, size = theta_1, mu = mu), 
+  model_B = qnbinom(p = quantile, size = theta_2, mu = mu)
+) |>
+  pivot_longer(cols = c(model_A, model_B), names_to = "model", values_to = "prediction") |>
+  mutate(true_value = list(1:50), 
+         id = list(1:50)) |>
+  unnest(cols = c(true_value, id))
+
+scores_natural <- data |>
+  score(metrics = "interval_score") |>
+  summarise_scores(by = c("model", "id")) |>
+  mutate(scale = "natural")
+
+scores_log <- data |>
+  mutate(true_value = log(true_value + 1), 
+         prediction = log(prediction + 1)) |>
+  score(metrics = "interval_score") |>
+  summarise_scores(by = c("model", "id")) |>
+  mutate(scale = "log")
+
+scores_sqrt <- data |>
+  mutate(true_value = sqrt(true_value), 
+         prediction = sqrt(prediction)) |>
+  score(metrics = "interval_score") |>
+  summarise_scores(by = c("model", "id"), na.rm = TRUE) |>
+  mutate(scale = "sqrt")
+
+scores <- rbind(scores_natural, scores_log, scores_sqrt) |>
+  mutate(scale = factor(scale, levels = c("natural", "log", "sqrt")), 
+         Forecaster = ifelse(model == "model_A", "A", "B"))
+
+nbinom_natural <- data.table(
+  A = rnbinom(100000, mu = 10, size = theta_1), 
+  B = rnbinom(100000, mu = 10, size = theta_2)
+) |>
+  pivot_longer(cols = c(A, B), names_to = "Forecaster") 
+
+plot_fct <- function(scores, scale_factor, nbinom, filter_scale = "natural") {
+  
+  scores <- filter(scores, scale == filter_scale)
+  
+  scores |>
+    ggplot(aes(x = id, y = interval_score / scale_factor, color = Forecaster)) + 
+    geom_histogram(data = filter(nbinom, Forecaster == "A"), inherit.aes = FALSE,
+                   aes(y = after_stat(density),
+                       x = value, color = NULL,
+                       fill = Forecaster),
+                   alpha = 0.2,
+                   binwidth = 1) +
+    geom_histogram(data = filter(nbinom, Forecaster == "B"), inherit.aes = FALSE,
+                   aes(y = after_stat(density),
+                       x = value, color = NULL,
+                       fill = Forecaster),
+                   alpha = 0.2,
+                   binwidth = 1) +
+    geom_line() +
+    theme_scoringutils() + 
+    scale_y_continuous(label = function(x) {paste(scale_factor * x)}) + 
+    labs(y = "CRPS", x = "Observed value") + 
+    coord_cartesian(xlim = c(0, 30)) +
+    scale_colour_discrete(
+      labels=c(TeX(r'(A: $\sigma^2 = \mu + \mu^2$)'), 
+               TeX(r'(B: $\sigma^2 = \mu$)'))
+    ) + 
+    scale_fill_discrete(
+      labels=c(TeX(r'(A: $\sigma^2 = \mu + \mu^2$)'), 
+               TeX(r'(B: $\sigma^2 = \mu$)'))
+    ) + 
+    facet_wrap(~ scale)
+}
+
+p1 <- scores |>
+  plot_fct(scale_factor = 253, nbinom = nbinom_natural, filter_scale = "natural")
+
+p2 <- scores |>
+  plot_fct(scale_factor = 10, nbinom = nbinom_natural, filter_scale = "log") 
+
+p3 <- scores |>
+  plot_fct(scale_factor = 23, nbinom = nbinom_natural, filter_scale = "sqrt") 
+
+p1 + p2 +
+  plot_layout(guides = "collect") &
+  theme(legend.position = "bottom") 
+
+ggsave(filename = "output/figures/illustration-effect-log-ranking-crps.png", 
+       width = 7, height = 3)
+
+
+
 
 
 ## ========================================================================== ##
@@ -405,9 +406,15 @@ hub_data <- rbindlist(list(
   fread(here("data", "full-data-european-forecast-hub-3.csv")), 
   fread(here("data", "full-data-european-forecast-hub-4.csv"))
 )) |>
-  unique()
+  unique() |>
+  filter(location != "")
 
-scores <- fread(here("output", "data", "all-scores-european-hub.csv"))
+scores <- fread(here("output", "data", "all-scores-european-hub.csv")) |>
+  mutate(scale = factor(scale, levels = c("natural", "log", "sqrt"))) |>
+  mutate(type_and_scale = factor(type_and_scale, 
+                                 levels = c("Cases - natural", "Deaths - natural", 
+                                            "Cases - log", "Deaths - log"))) |>
+  filter(horizon <= 4)
 
 
 # dates and number of locations
@@ -425,7 +432,8 @@ hub_data$location |>
 
 
 ## ========================================================================== ##
-## Figure 5
+## Figure 5: Observations and scores across locations and forecast 
+##           horizons for the European COVID-19 Forecast Hub data
 ## ========================================================================== ##
 
 label_fn <- function(x) {
@@ -483,7 +491,8 @@ box_plot_obs <- hub_data |>
 
 plot_df <- scores |> 
   filter(model == "EuroCOVIDhub-ensemble", 
-         horizon == 2) |>
+         horizon == 2, 
+         scale %in% c("log", "natural")) |>
   group_by(target_type, location, scale, type_and_scale) |>
   summarise(interval_score = mean(interval_score), 
             .groups = "drop_last") |> 
@@ -499,14 +508,15 @@ plot_mean_scores <- plot_df |>
   theme(legend.position = "none") + 
   scale_y_continuous(labels = label_fn) + 
   scale_x_discrete(guide = guide_axis(n.dodge=2), labels = label_fn_within) +
-  labs(y = "Mean interval score", x = "Loaction") 
+  labs(y = "Mean weighted interval score", x = "Loaction") 
 
 
 
 
 box_plot_scores <- scores |> 
   filter(model == "EuroCOVIDhub-ensemble", 
-         horizon == 2) |>
+         horizon == 2, 
+         scale %in% c("log","natural")) |>
   ggplot(aes(y = interval_score, x = target_type)) + 
   geom_violin(aes(fill = target_type), alpha = 0.2, color = NA) + 
   geom_boxplot(alpha = 0.5) + 
@@ -515,7 +525,7 @@ box_plot_scores <- scores |>
   theme_scoringutils() + 
   theme(legend.position = "none") + 
   scale_y_continuous(labels = label_fn, trans = "log10") + 
-  labs(y = "Interval score", x = "Target type")
+  labs(y = "Weighted interval score", x = "Target type")
 
 
 fct = function(x, x2) {
@@ -528,7 +538,8 @@ fct = function(x, x2) {
 
 box_plot_horizon <- scores |> 
   filter(model == "EuroCOVIDhub-ensemble", 
-         horizon <= 4) |>
+         horizon <= 4, 
+         scale %in% c("log", "natural")) |>
   group_by(forecast_date, model, location, target_type, scale, type_and_scale) |>
   mutate(
     interval_score = fct(interval_score, interval_score[horizon ==1])
@@ -543,7 +554,9 @@ box_plot_horizon <- scores |>
   theme_scoringutils() + 
   theme(legend.position = "none") + 
   scale_y_continuous(labels = label_fn, trans = "log10") +
-  labs(y = "Rel. change in WIS", x = "Forecast horizon (weeks)")
+  labs(y = "Rel. change in WIS", x = "Forecast horizon (weeks)") 
+# + 
+#   coord_flip()
 
 layout <- "
 AB
@@ -559,33 +572,120 @@ plot_means_obs  + box_plot_obs + plot_mean_scores + box_plot_scores + box_plot_h
 
 ggsave("output/figures/HUB-mean-obs-location.png", width = 10, height = 10)
 
-# 
-# scores |>
-#   filter(scale == "log", 
-#          location == "FI",
-#          horizon == 2,
-#          model == "EuroCOVIDhub-ensemble") |>
-#   filter(interval_score == max(interval_score))
+
 
 ## ========================================================================== ##
-## Figure 6
+## Figure 6: Correlations for median forecasts, 
+##           scores, and rankings on the natural and logarithmic scale
 ## ========================================================================== ##
 
+# run regressions
+regression <- function(scores, s = "natural", h = 1:4, t) {
+  
+  data <- scores |>
+    filter(scale == s, horizon %in% h, target_type %in% t) |>
+    mutate(log_wis = log(interval_score))
+  
+  
+  if (s == "natural") {
+    out <- data |>
+      filter(is.finite(log_wis)) %>%
+      lm(log_wis ~ 1 + log(median_prediction + 1), data = .)
+  } else if (s == "log"){
+    out <- lm(interval_score ~ 1 + log(median_prediction + 1), data = data)
+  } else if (s == "sqrt") {
+    out <- lm(interval_score ~ 1 + sqrt(median_prediction), data = data)
+  }
+  return(out$coefficients)
+}
+
+regression_df <- function(scores, s = "natural", horizons = "all", targets = "all") {
+  if (horizons == "all") {
+    h <- 1:4
+  } else {
+    h <- horizons
+  }
+  if (targets == "all") {
+    t <- c("Cases", "Deaths")
+  } else {
+    t <- targets
+  }
+  df <- regression(scores, s, h, t) |> 
+    t() |>
+    as.data.frame()
+  
+  names(df) <- c("alpha", "beta")
+  
+  df <- mutate(
+    df, 
+    horizon = horizons, target_type = targets, scale = s
+  )
+  
+  return(df)
+}
+
+regs_coef <- rbind(
+  regression_df(scores, s = "natural", horizons = "2", targets = "Cases"),  
+  regression_df(scores, s = "natural", horizons = "2", targets = "Deaths"), 
+  regression_df(scores, s = "log", horizons = "2", targets = "Cases"), 
+  regression_df(scores, s = "log", horizons = "2", targets = "Deaths")
+) |>
+  mutate(type_and_scale = paste(target_type, scale, sep = " - ")) |>
+  mutate(type_and_scale = factor(type_and_scale, 
+                                 levels = c("Cases - natural", "Deaths - natural", 
+                                            "Cases - log", "Deaths - log")))
+
+regs_coef <- regs_coef |> 
+  mutate(alpha = signif(alpha, 2), 
+         beta = signif(beta, 2)) |>
+  mutate(label = ifelse(
+    scale == "log",
+    paste0("\\hat{crps} = e^", alpha, " \\cdot x^", beta), 
+    paste0("\\hat{crps} = ", alpha, " + ", beta, "\\cdot x")
+    ))
+
+
+# mutate(label = case_when(
+#   scale == "natural" ~ TeX(paste0("\\hat{crps} = e^", alpha, " \\cdot x ^ ", beta)), 
+#   scale == "log" ~ TeX(paste0("\\hat{crps} = \\mathrm{e}^", alpha, " \\cdot x ^ ", beta))
+# ))
+
+regs <- regs_coef |> 
+  group_by(type_and_scale) |>
+  mutate(median_prediction = 
+           ifelse(target_type == "Deaths", 
+                  list(1:51467), 
+                  list(seq(1, max(scores$median_prediction), 100)))) |>
+  unnest(cols = median_prediction) |>
+  mutate(yreg = ifelse(
+    scale == "natural", 
+    exp(alpha) * median_prediction ^ beta, # regression for natural scale
+    alpha + beta * log(median_prediction + 1) # regression for log scale
+    ))
 
 scatter_wis_pred <- scores |> 
   filter(model == "EuroCOVIDhub-ensemble", 
-         horizon == 2) |>
+         horizon == 2, 
+         scale %in% c("log", "natural")) |>
   ggplot(aes(y = interval_score, x = median_prediction)) +
   geom_point(size = 0.1, color = "grey20") + 
+  geom_line(data = regs, aes(y = yreg), color = "red") + 
+  ggpp::geom_label_npc(
+    data = regs_coef, 
+    size = 2.5,
+    label.padding = unit(0.17, "lines"),
+    label.r = unit(0, "lines"),
+    aes(npcx = "left", npcy = "top", 
+        label = TeX(label, output = "character")), 
+    parse = TRUE) +
   facet_wrap(~ type_and_scale, scale = "free") + 
   theme_scoringutils() + 
   theme(legend.position = "none") + 
   scale_x_continuous(trans = "log10", labels = label_fn) +
   scale_y_continuous(trans = "log10", labels = label_fn) +
   labs(y = "WIS", x = "Median predicted value") +
-  ggpubr::stat_cor(method = "spearman", p.accuracy = 0.001, 
-                   cor.coef.name = "rho", size = 3)
-
+  plot_annotation()
+  
 df <- scores |>
   select(c(model, target_type, horizon, interval_score,
            forecast_date, target_end_date, scale, location)) |>
@@ -1007,49 +1107,7 @@ ggsave(filename = "output/figures/number-avail-forecasts.png", height = 4, width
 ## Table 2: Regression for the relationship of mean and var
 ## ========================================================================== ##
 
-regression <- function(scores, s = "natural", h = 1:4, t) {
-  
-  data <- scores |>
-    filter(scale == s, horizon %in% h, target_type %in% t) |>
-    mutate(log_wis = log(interval_score))
-  
-  
-  if (s == "natural") {
-    out <- data |>
-      filter(is.finite(log_wis)) %>%
-      lm(log_wis ~ 1 + log(median_prediction + 1), data = .)
-  } else if (s == "log"){
-    out <- lm(interval_score ~ 1 + log(median_prediction + 1), data = data)
-  } else if (s == "sqrt") {
-    out <- lm(interval_score ~ 1 + sqrt(median_prediction), data = data)
-  }
-  return(out$coefficients)
-}
-
-regression_df <- function(scores, s = "natural", horizons = "all", targets = "all") {
-  if (horizons == "all") {
-    h <- 1:4
-  } else {
-    h <- horizons
-  }
-  if (targets == "all") {
-    t <- c("Cases", "Deaths")
-  } else {
-    t <- targets
-  }
-  df <- regression(scores, s, h, t) |> 
-    t() |>
-    as.data.frame()
-  
-  names(df) <- c("alpha", "beta")
-  
-  df <- mutate(
-    df, 
-    horizon = horizons, target_type = targets, scale = s
-  )
-  
-  return(df)
-}
+# regression functions defined above for Figure 6
 
 natural_reg <- regression_df(scores, s = "natural", horizons = "all")
 log_reg <- regression_df(scores, s = "log", horizons = "all")

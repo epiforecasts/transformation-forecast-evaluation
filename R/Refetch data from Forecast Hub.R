@@ -5,6 +5,8 @@ library(dplyr)
 library(data.table)
 library(purrr)
 library(scoringutils)
+library(here)
+library(stringr)
 
 analysis_date <- "2022-12-12"
   
@@ -185,6 +187,7 @@ hub_data <- filter(hub_data, target_type != "")
 remove <- hub_data |> 
   filter(quantile == 0.5) |>
   filter((true_value > 10) & (prediction > 20*true_value) |
+         (true_value > 0) & (prediction > 100*true_value) |
          (true_value > 50) & (prediction < 1/50 * true_value) |
          (true_value == 0) & (prediction > 100)) |>
   select(-quantile)

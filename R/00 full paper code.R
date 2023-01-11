@@ -96,7 +96,7 @@ ggsave("output/figures/different-relative-errors-sqrt.png", width = 7, height = 
 
 
 ## ========================================================================== ##
-## FIGURE 3
+## FIGURE 2
 ## ========================================================================== ##
 if (file.exists("output/data/simulation-figure-2.Rda")) {
   scores_fig_2 <- readRDS(file = "output/data/simulation-figure-2.Rda")
@@ -105,7 +105,7 @@ if (file.exists("output/data/simulation-figure-2.Rda")) {
   time_points <- 1e5
   n_means <- 60
   means = (10^seq(1, 3.3, length.out = n_means))
-  model_names <- c("theta_1", "theta_1e9")
+  model_names <- c("theta_10", "theta_1e9")
   
   df <- data.table(
     state = 1:length(mean),
@@ -114,16 +114,16 @@ if (file.exists("output/data/simulation-figure-2.Rda")) {
     mutate(date = list(1:time_points)) |>
     unnest(cols = date) |>
     rowwise() |>
-    mutate(theta = list(c(1, 1e9)), 
+    mutate(theta = list(c(10, 1e9)), 
            model = list(model_names)) |>
     ungroup() |>
     unnest(cols = c("theta", "model")) |>
     mutate(predictive_sample = rnbinom(n = time_points * n_means * length(model_names), 
                                         size = theta,
-                                        mu = mean) + 1) 
+                                        mu = mean)) 
   
   # add normal
-  df_normal <- filter(df, theta == 1) |>
+  df_normal <- filter(df, theta == 10) |>
     mutate(model = "normal", 
            theta = 0, 
            predictive_sample = rnorm(n = time_points * n_means, 
@@ -136,10 +136,11 @@ if (file.exists("output/data/simulation-figure-2.Rda")) {
     group_by(mean, theta, model) |> 
     summarise(
       crps = mean(abs(predictive_sample[-1] - predictive_sample[-length(predictive_sample)]))/2,
-      crps_log = mean(abs(log(predictive_sample[-1]) - log(predictive_sample[-length(predictive_sample)])))/2,
+      crps_log = mean(abs(log(predictive_sample[-1] + 1) - log(predictive_sample[-length(predictive_sample)] + 1)))/2,
       crps_sqrt = mean(abs(sqrt(predictive_sample[-1]) - sqrt(predictive_sample[-length(predictive_sample)])))/2
     ) |>
     pivot_longer(cols = c(crps, crps_log, crps_sqrt), values_to = "crps", names_to = "scale") |>
+    # rename scale
     mutate(scale = ifelse(scale == "crps", "natural", 
                           ifelse(scale == "crps_log", "log", "sqrt")), 
            scale = factor(scale, levels = c("natural", "log", "sqrt"))) |> 
@@ -147,10 +148,10 @@ if (file.exists("output/data/simulation-figure-2.Rda")) {
                         1, 
                         mean + mean^2 / theta), # negative binomial distribution 
            approximation = ifelse(scale == "natural", 
-                                  sqrt(var / pi),  
+                                  sqrt(var / pi), # approx for normal 
                                   ifelse(scale == "sqrt", 
-                                         sqrt(var / (2^2 * mean * pi)),
-                                         sqrt(var / pi) / (mean))))
+                                         sqrt(var / (2^2 * mean * pi)), # approx for sqrt
+                                         sqrt(var / pi) / (mean)))) # approx for log
   
   saveRDS(scores_fig_2, file = "output/data/simulation-figure-2.Rda")
 }
@@ -169,7 +170,7 @@ p1 <- scores_fig_2 |>
   scale_colour_discrete(
     labels=c(
       TeX(r'($\sigma^2 = const$)'), 
-      TeX(r'($\sigma^2 = \mu + \mu^2$)'), 
+      TeX(r'($\sigma^2 = \mu + 0.1 \mu^2$)'), 
       #TeX(r'($\sigma^2 = \mu + \frac{\mu^{2.5}}{1000}$)'), 
       TeX(r'($\sigma^2 = \mu$)'))
   ) +
@@ -189,30 +190,31 @@ ggsave("output/figures/SIM-mean-state-size.png", width = 7, height = 4.1)
 
 
 ## ========================================================================== ##
-## FIGURE 3 - Appendix version - Figure XX
+## FIGURE 2 - Appendix version - Figure XX
 ## ========================================================================== ##
 
 scores_fig_2 |>
   ungroup() |>
   mutate(
-    model = factor(model, 
-                   labels = c(TeX(r'($\sigma^2 = \mu + \mu^2$)'), 
-                              TeX(r'($\sigma^2 = \mu + \mu^{2.5}/1000$)'), 
-                              TeX(r'($\sigma^2 = \mu$)')))
+    model = factor(
+      model, 
+      labels=c(
+        TeX(r'($\sigma^2 = const$)'), 
+        TeX(r'($\sigma^2 = \mu + 0.1 \mu^2$)'), 
+        #TeX(r'($\sigma^2 = \mu + \frac{\mu^{2.5}}{1000}$)'), 
+        TeX(r'($\sigma^2 = \mu$)')))
   ) |>
-  ggplot(aes(y = crps, x = mean, color = model)) +
-  geom_line(aes(y = approximation)) +
-  geom_point(aes(color = model), alpha = 0.3) + 
+  ggplot(aes(y = crps, x = mean)) +
+  geom_line(aes(y = approximation, color = "Approximated score")) +
+  geom_point(aes(color = "Score of a simulated ideal forecaster"), alpha = 0.2) + 
   facet_wrap(scale ~ model, scales = "free", labeller = label_parsed) + 
-  theme_scoringutils() + 
-  scale_colour_discrete(
-    labels=c(TeX(r'($\sigma^2 = \mu + 0.1 \cdot \mu^2$)'), 
-             TeX(r'($\sigma^2 = \mu + \frac{\mu^{2.5}}{1000}$)'), 
-             TeX(r'($\sigma^2 = \mu$)'))
-  ) + 
-  scale_x_continuous(trans = "log10") 
+  theme_scoringutils() +
+  scale_colour_manual(values = c("black", "red")) +
+  scale_x_continuous(trans = "log10") + 
+  labs(y = "Mean CRPS", colour = "Score") +
+  expand_limits(y = 0)
 
-ggsave("output/figures/SIM-score-approximation.png", width = 7, height = 4.1)
+ggsave("output/figures/SIM-score-approximation.png", width = 7, height = 8)
 
 
 ## ========================================================================== ##

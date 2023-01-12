@@ -1,4 +1,6 @@
-# Code to refetch data from the Forecast Hub
+## ========================================================================== ##
+##               Code to refetch data from the Forecast Hub.                  ##
+## ========================================================================== ##
 
 library(covidHubUtils)
 library(dplyr)
@@ -9,12 +11,15 @@ library(here)
 library(stringr)
 
 analysis_date <- "2022-12-12"
-  
-# download folder using SVN
+
+## -------------------------------------------------------------------------- ##  
+##                  Download and process Forecast Hub data                    ##
+## -------------------------------------------------------------------------- ##
+
+# -------------------- Download Forecast Hub folder using SVN ---------------- #
 # svn checkout https://github.com/epiforecasts/covid19-forecast-hub-europe/trunk/data-processed
 
-# load truth data using the covidHubutils package ------------------------------
-
+# ---------------load truth data using the covidHubutils package ------------- #
 if (file.exists("data/weekly-truth-Europe.csv")) {
   truth <- fread("data/weekly-truth-Europe.csv")
 } else {
@@ -29,8 +34,9 @@ if (file.exists("data/weekly-truth-Europe.csv")) {
   fwrite(truth, "data/weekly-truth-Europe.csv")
 }
 
+# ----------------------- Load and handle forecast data ---------------------- #
 
-# get the correct file paths to all forecasts ----------------------------------
+# get the correct file paths to all forecasts 
 folders <- here("data-processed", list.files("data-processed"))
 folders <- folders[
   !(grepl("\\.R", folders) | grepl(".sh", folders) | grepl(".csv", folders))
@@ -44,8 +50,7 @@ file_paths <- purrr::map(folders,
   unlist()
 file_paths <- file_paths[grepl(".csv", file_paths)]
 
-# load all past forecasts ------------------------------------------------------
-# ceate a helper function to get model name from a file path
+# ceate a helper function to obtain the model name from a given file path
 get_model_name <- function(file_path) {
   split <- str_split(file_path, pattern = "/")[[1]]
   model <- split[length(split) - 1]
@@ -85,33 +90,10 @@ hub_data <- merge_pred_and_obs(prediction_data, truth,
 hub_data <- mutate(hub_data, 
                    forecast_date = calc_submission_due_date(forecast_date))
 
-# function that performs some basic filtering to clean the data
-# filter_hub_data <- function(hub_data) {
-#   
-#   # define the unit of a single forecast
-#   unit_observation <- c("location", "forecast_date", "horizon", "model", "target_type")
-#   
-#   h <- hub_data |>
-#     # filter out unnecessary horizons and dates
-#     filter(horizon <= 4, 
-#            forecast_date >= "2021-03-08") |>
-#     # filter out all models that don't have all quantiles
-#     group_by_at(unit_observation) |>
-#     mutate(n = n()) |>
-#     ungroup() |>
-#     filter(n == max(n)) |>
-#     # filter out models that don't have all horizons
-#     group_by_at(unit_observation) |>
-#     ungroup(horizon) |>
-#     mutate(n = length(unique(horizon))) |>
-#     ungroup() |>
-#     filter(n == max(n)) 
-#   
-#   return(h)
-# }
-# hub_data <- filter_hub_data(hub_data)
 
+# --------------------------- Filter forecast data --------------------------- #
 
+# filter out forecast anomalies based on the Forecast Hub anomalies file
 filter_out_anomalies <- function(hub_data) {
   anomalies_file <- here::here("data", "anomalies.csv")
   if (file.exists(anomalies_file)) {
@@ -135,7 +117,7 @@ filter_out_anomalies <- function(hub_data) {
     data.table::fwrite(x = anomalies, file = anomalies_file)
   }
   
-  ## prepare for mergeing into hub_data
+  ## prepare anomalies for mergeing into hub_data
   anomalies <- anomalies[, list(
     target_end_date,
     location,
@@ -148,8 +130,10 @@ filter_out_anomalies <- function(hub_data) {
   hub_data <- hub_data[true_value >= 0][]
   return(hub_data)
 }
+
 hub_data <- filter_out_anomalies(hub_data)
 
+# remove all models that do not satisfy at least some criteria
 filter_models <- function(hub_data) {
   check <- hub_data |> 
     check_forecasts()
@@ -179,11 +163,8 @@ filter_models <- function(hub_data) {
 }
 hub_data <- filter_models(hub_data)
 
-hub_data <- filter(hub_data, target_type != "")
 
-
-# Remove spurious forecasts. We define these as forecasts with a median of 0
-# but with an actual observed value of larger than 150
+# Remove spurious forecasts
 remove <- hub_data |> 
   filter(quantile == 0.5) |>
   filter((true_value > 10) & (prediction > 20*true_value) |
@@ -195,6 +176,15 @@ remove[, forecast_date := as.Date(forecast_date)]
 setDT(hub_data)
 hub_data[, forecast_date := as.Date(forecast_date)]
 hub_data <- hub_data[!remove, on = .(target_end_date, true_value, forecast_date, location, target_type, model, horizon)]
+
+# some additional filtering
+hub_data <- filter(hub_data, 
+                   target_type != "", 
+                   horizon <= 4, 
+                   forecast_date >= "2021-03-08")
+
+
+# --------------------------- Save forecast data ----------------------------- #
 
 split_data <- function(data, n_splits) {
   n <- floor(nrow(data) / n_splits)
@@ -212,7 +202,6 @@ split_data <- function(data, n_splits) {
   return(indices)
 }
 
-
 indices <- split_data(hub_data, 4)
 
 for (i in 1:length(indices)) {
@@ -222,7 +211,13 @@ for (i in 1:length(indices)) {
 
 
 
-## Score forecasts
+
+
+## -------------------------------------------------------------------------- ##  
+##                               Score forecasts                              ##
+## -------------------------------------------------------------------------- ##
+
+## Score forecasts, adding versions for the log and sqrt transformations
 scores <- hub_data |>
   mutate(scale = "natural") |>
   rbind(hub_data |>
@@ -242,16 +237,8 @@ scores <- hub_data |>
                    na.rm = TRUE)
 
 scores[, type_and_scale := paste0(target_type, " - ", scale)]
-scores[, type_and_scale := factor(type_and_scale, 
-                                  levels = c("Cases - natural", "Deaths - natural",
-                                             "Cases - log", "Deaths - log", 
-                                             "Cases - sqrt", "Deaths - sqrt"))]
 
-scores <- scores[, type_and_scale := factor(type_and_scale, 
-                                            levels = c("Cases - natural", "Cases - log", 
-                                                       "Deaths - natural", "Deaths - log"))]
-scores <- scores[, scale := factor(scale, levels = c("natural", "log", "sqrt"))]
-
+# add median forecast to scores, needed for some downstream analysis
 add_median_forecast <- function(scores, hub_data) {
   medians <- hub_data |>
     filter(quantile == 0.5) |> 
@@ -266,4 +253,11 @@ add_median_forecast <- function(scores, hub_data) {
 scores <- add_median_forecast(scores, hub_data)
 
 fwrite(scores, here("output", "data", "all-scores-european-hub.csv"))
+
+
+
+
+
+
+
 

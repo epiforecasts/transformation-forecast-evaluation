@@ -184,7 +184,7 @@ p1 / p2 +
   plot_annotation(tag_levels = "A") +   
   plot_layout(guides = "collect") & 
   theme(legend.position = "bottom") &
-  labs(y = TeX("Mean CRPS (normalised)"))
+  labs(y = TeX("CRPS (normalised)"))
 
 ggsave("output/figures/SIM-mean-state-size.png", width = 7, height = 4.1)
 
@@ -707,7 +707,7 @@ p_natural / p_log / p_sqrt +
   plot_annotation(tag_levels = "A") &
   theme(legend.position = "bottom")
 
-ggsave("output/figures/HUB-transformation-regression.png", width = 7, height = 7)
+ggsave("output/figures/HUB-transformation-regression.png", width = 7, height = 6.3)
 
 
 
@@ -765,7 +765,7 @@ p_cor_scores + p_cor_skill +
   plot_annotation(tag_levels = "A") &
   theme(legend.position = "bottom")
 
-ggsave("output/figures/HUB-correlations.png", width = 7, height = 3)
+ggsave("output/figures/HUB-correlations.png", width = 7, height = 2.6)
 
 
 ## ========================================================================== ##
@@ -932,6 +932,7 @@ simple_labels <- function(x) {
 
 ranking_figure <- function(target = "Cases") {
   summarised_pairwise <- scores |>
+    filter(scale %in% c("log", "natural")) |>
     select(-median_prediction) |>
     filter(target_type == target, 
            horizon == 2) |>
@@ -996,18 +997,23 @@ ranking_figure <- function(target = "Cases") {
     scale_x_continuous(labels = label_fn) +
     facet_wrap(~scale, scales = "free_x")
   
-  plot_ranking_change <- summarised_pairwise |>
+  
+  df_ranking_change <- summarised_pairwise |>
     filter(scale %in% c("natural", "log")) |>
     select(model, scale, relative_skill) |>
     group_by(scale) |>
-    # mutate(scale = factor(scale, levels = c("log", "natural"))) |>
+    mutate(scale = factor(scale, levels = c("natural", "log"))) |>
     mutate(rank = rank(-relative_skill), 
            x = ifelse(scale == "natural", 0.4, 2.8), 
            x_arrow = ifelse(scale == "natural", 1.7, 2.7)
     ) |>
     group_by(model) |>
-    mutate(custom_color = ifelse(diff(relative_skill) < 0, "deteriorated", "not deteriorated")) |>
-    arrange(desc(scale)) |>
+    mutate(custom_color = ifelse(diff(relative_skill) > 0, "deteriorated", "not deteriorated")) |>
+    arrange(scale) 
+
+  print(df_ranking_change)  
+  
+  plot_ranking_change <- df_ranking_change |>
     ggplot(aes(y = rank, group = model, label = model, color = custom_color)) +
     geom_path(
       aes(x=x_arrow), 
@@ -1265,3 +1271,16 @@ df |>
                       "$\\beta^{**}$"), escape = FALSE) |>
   kable_styling()
 
+
+## ========================================================================== ##
+## Table XX: Erroneous forecasts
+## ========================================================================== ##
+
+data.table(
+  "True value" = c(">0", ">10", ">50", "=0"), 
+  "Median prediction" = c(">100x true value", ">20x true value", "<1/50x true value", ">100")
+) |>
+  kable(format = "latex", 
+        align = c("cc"),
+        booktabs = TRUE) |>
+  kable_styling()

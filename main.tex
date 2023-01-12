@@ -271,6 +271,7 @@ Overall model rankings would be expected to differ even more when scores are ave
 \label{sec:results}
 
 \subsection{Setting}
+\label{sec:HUB-setting}
 
 As an empirical comparison of evaluating forecasts on the natural and on the log scale, we use forecasts from the European Forecast Hub \citep{europeancovid-19forecasthubEuropeanCovid19Forecast2021, sherrattPredictivePerformanceMultimodel2022}. 
 The European COVID-19 Forecast Hub is one of several COVID-19 Forecast Hubs \citep{cramerEvaluationIndividualEnsemble2021, bracherShorttermForecastingCOVID192021} which have been systematically collecting, aggregating and evaluating forecasts of several COVID-19 targets created by different teams every week. Forecasts are made one to four weeks ahead into the future and follow a quantile-based format with a set of 23 quantiles ($0.01, 0.025, 0.05, ..., 0.5, ... 0.95, 0.975, 0.99$). 
@@ -289,7 +290,7 @@ Show and discuss Fig 7 here? CHECK AGAIN
     \centering
     \includegraphics[width=0.99\textwidth]{output/figures/HUB-mean-obs-location.png}
     \caption{Observations and scores across locations and forecast horizons for the European COVID-19 Forecast Hub data. Locations are sorted according to the mean observed value in that location. 
-    A: Average (across all time points) of observed cases and deaths for different locations. B: Corresponding boxplot (y-axis on log-scale) of all cases and deaths. C: Scores for two-week-ahead forecasts from the EuroCOVIDhub-ensemble (averaged across all forecast dates) for different locations, evaluated on the natural as well as the logarithmic scale. D: Corresponding boxplots of all individual scores for two-week-ahead predictions. E: Boxplots for the relative change of scores for the EuroCOVIDhub-ensemble across forecast horizons. For any given forecast date and location, forecasts were made for four different forecast horizons, resulting in four scores. All scores were divided by the score for forecast horizon one.}
+    A: Average (across all time points) of observed cases and deaths for different locations. B: Corresponding boxplot (y-axis on log-scale) of all cases and deaths. C: Scores for two-week-ahead forecasts from the EuroCOVIDhub-ensemble (averaged across all forecast dates) for different locations, evaluated on the natural as well as the logarithmic scale. D: Corresponding boxplots of all individual scores for two-week-ahead predictions. E: Boxplots for the relative change of scores for the EuroCOVIDhub-ensemble across forecast horizons. For any given forecast date and location, forecasts were made for four different forecast horizons, resulting in four scores. All scores were divided by the score for forecast horizon one. To enhance interpretability, the range of visible relative changes was restricted to [0.1, 10].}
     \label{fig:HUB-mean-locations}
 \end{figure}
 
@@ -303,6 +304,40 @@ Across the dataset, the average number of observed cases and deaths varied consi
 \end{figure}
 
 \subsection{Regression analysis to determine the variance-stabilizing transformation}
+
+\begin{table}
+\centering
+\begin{tabular}{ccrrrrrr}
+\toprule
+Horizon & Target & $\alpha$ & $\beta$ & $\alpha_{\log}$ & $\beta_{\log}$ & $\alpha_{\sqrt{\ }}$ & $\beta_{\sqrt{\ }}$\\
+\midrule
+all & all & -1.093 & 0.963 & 0.390 & 0.001 & -0.995 & 0.209\\
+\addlinespace
+all & Cases & 0.036 & 0.858 & 0.751 & -0.033 & 0.047 & 0.201\\
+all & Deaths & -0.885 & 0.868 & 0.430 & -0.021 & -7.564 & 0.826\\
+\addlinespace
+1 & all & -1.402 & 0.923 & 0.318 & -0.014 & 0.318 & 0.088\\
+2 & all & -1.221 & 0.967 & 0.364 & -0.003 & 0.111 & 0.164\\
+3 & all & -1.001 & 0.984 & 0.408 & 0.008 & -1.283 & 0.255\\
+4 & all & -0.757 & 0.986 & 0.467 & 0.016 & -1.041 & 0.312\\
+\addlinespace
+1 & Cases & -0.861 & 0.876 & 0.433 & -0.024 & 0.785 & 0.087\\
+2 & Cases & -0.243 & 0.877 & 0.660 & -0.031 & 0.959 & 0.162\\
+3 & Cases & 0.372 & 0.855 & 0.882 & -0.037 & 1.115 & 0.238\\
+4 & Cases & 0.816 & 0.837 & 1.009 & -0.036 & 1.665 & 0.296\\
+\addlinespace
+1 & Deaths & -1.145 & 0.831 & 0.376 & -0.035 & 0.458 & 0.048\\
+2 & Deaths & -0.980 & 0.866 & 0.415 & -0.027 & 0.445 & 0.084\\
+3 & Deaths & -0.809 & 0.885 & 0.441 & -0.016 & -8.262 & 0.903\\
+4 & Deaths & -0.603 & 0.891 & 0.488 & -0.007 & -7.834 & 0.898\\
+\bottomrule
+\end{tabular}
+\caption{Coefficients of three regressions for the effect of the magnitude of the median forecast on expected scores. The first regression was 
+$\log[\text{CRPS}(F, y)] = \alpha + \beta \times \log[\text{median}(F)], $ where $F$ is the predictive distribution and $y$ the observed value. The second one was 
+$\text{CRPS}(F_{\log}, \log y) = \alpha_{\log} + \beta_{\log} \cdot \log{(\text{median}(F))},$ where $F_{\log}$ is the predictive distribution for $\log y$. The third one was $\text{CRPS}(F_{\sqrt{\ }}, \sqrt{y}) = \alpha_{sqrt{\ }} + \beta_{sqrt{\ }} \cdot \sqrt{(\text{median}(F))},$ where $F_{\sqrt{\ }}$ is the predictive distribution for $\sqrt{y}$.
+}
+\label{tab:HUB-regression}
+\end{table}
 
 As argued in Section \ref{sec:methods:vst}, the mean-variance, or mean-CRPS, relationship determines which transformation can serve as a VST. To assess this empirically, we ran the regression
 
@@ -323,15 +358,14 @@ where $F_{\log}$ is the predictive distribution for $\log(y)$, and
 \begin{equation*}
     \text{CRPS}(F_{\sqrt{\ }}, \sqrt{y}) = \alpha_{\sqrt{\ }} + \beta_{\sqrt{\ }} \cdot \sqrt{\text{median}(F)},
 \end{equation*} 
-where $F_{\sqrt{\ }}$ is the predictive distribution on the square-root scale. As can be seen from Table \ref{tab:HUB-regression}, the results indeed indicate small targets lead to larger average CRPS when using the log transform ($\beta_{\log} < 0$), while the opposite is true for the square-root transform ($\beta_{\sqrt{\ }} > 0$). The results of the three regressions are also displayed in Figure \ref{fig:HUB-cors}. It appears that the log transformation is most suitable to stabilise the CRPS values in this empirical example. 
-
-% We found that on the natural scale, the order of magnitude of the forecast (represented by the median, rather than the mean, as forecasts were stored as quantiles and the mean was not available) strongly influenced scores, with estimated $\beta$-values close to one. On the log scale, this influence was small, with estimated $\beta^*$-values close to zero. Both on the natural and on the log scale we found scores to increase over time (estimated $\alpha$- and $\alpha^*$-values increased over horizons). Estimates are summarised in Table \ref{tab:HUB-regression}. 
+where $F_{\sqrt{\ }}$ is the predictive distribution on the square-root scale. As can be seen from Table \ref{tab:HUB-regression}, the results indeed indicate small targets lead to larger average CRPS when using the log transform ($\beta_{\log} < 0$), while the opposite is true for the square-root transform ($\beta_{\sqrt{\ }} > 0$). The results of the three regressions are also displayed in Figure \ref{fig:HUB-cors}. It appears that the log transformation is most suitable to stabilise the WIS values in this empirical example. 
 
 \begin{figure}[h!]
     \centering
     \includegraphics[width=0.99\textwidth]{output/figures/HUB-model-comparison-ensemble.png}
     \caption{
-    Forecasts and scores for two-week-ahead predictions from the EuroCOVIDhub-ensemble made in Germany. A, E: 50\% and 90\% prediction intervals and observed values for cases and deaths on the natural scale. B, F: Corresponding scores. C, G: Forecasts and observations on the log scale. D, H: Corresponding scores. 
+    Forecasts and scores for two-week-ahead predictions from the EuroCOVIDhub-ensemble made in Germany. Missing values are due to data anomalies that were removed (see section \ref{sec:HUB-setting}. 
+    A, E: 50\% and 90\% prediction intervals and observed values for cases and deaths on the natural scale. B, F: Corresponding scores. C, G: Forecasts and observations on the log scale. D, H: Corresponding scores. 
     }
     \label{fig:HUB-model-comparison-ensemble}
 \end{figure}
@@ -346,7 +380,7 @@ Conversely, failure to predict an upswing while numbers are still low, is less s
 \begin{figure}[h!]
     \centering
     \includegraphics[width=0.99\textwidth]{output/figures/HUB-pairwise-comparisons.png}
-    \caption{Changes in model ratings as measured by relative skill for two-week-ahead predictions for cases (top row) and deaths (bottom row). A: Relative skill scores for case forecasts from different models submitted to the European COVID-19 Forecast Hub computed on the natural scale. B: Change in rankings as determined by relative skill scores when moving from an evaluation on the natural scale to one on the logarithmic scale. C: Relative skill scores based on scores on the log scale. D: Difference in relative skill scores computed on the natural and on the logarithmic scale. E: Relative contributions of the different WIS components (overprediction, underprediction, and dispersion) to overall model scores on the natural and the logarithmic scale. F, G, H, I, J, K: Analogously for deaths.}
+    \caption{Changes in model ratings as measured by relative skill for two-week-ahead predictions for cases (top row) and deaths (bottom row). A: Relative skill scores for case forecasts from different models submitted to the European COVID-19 Forecast Hub computed on the natural scale. B: Change in rankings as determined by relative skill scores when moving from an evaluation on the natural scale to one on the logarithmic scale. C: Relative skill scores based on scores on the log scale. D: Difference in relative skill scores computed on the natural and on the logarithmic scale, ordered as in C. E: Relative contributions of the different WIS components (overprediction, underprediction, and dispersion) to overall model scores on the natural and the logarithmic scale. F, G, H, I, J, K: Analogously for deaths.}
     \label{fig:HUB-rank-order}
 \end{figure}
 
@@ -468,41 +502,6 @@ Deaths & WIS & sd & 65 & 0.28\\
     }
     \label{fig:HUB-model-comparison-epinow}
 \end{figure}
-
-
-\begin{table}
-\centering
-\begin{tabular}{ccrrrrrr}
-\toprule
-Horizon & Target & $\alpha$ & $\beta$ & $\alpha_{\log}$ & $\beta_{\log}$ & $\alpha_{\sqrt{\ }}$ & $\beta_{\sqrt{\ }}$\\
-\midrule
-all & all & -1.093 & 0.963 & 0.390 & 0.001 & -0.995 & 0.209\\
-\addlinespace
-all & Cases & 0.036 & 0.858 & 0.751 & -0.033 & 0.047 & 0.201\\
-all & Deaths & -0.885 & 0.868 & 0.430 & -0.021 & -7.564 & 0.826\\
-\addlinespace
-1 & all & -1.402 & 0.923 & 0.318 & -0.014 & 0.318 & 0.088\\
-2 & all & -1.221 & 0.967 & 0.364 & -0.003 & 0.111 & 0.164\\
-3 & all & -1.001 & 0.984 & 0.408 & 0.008 & -1.283 & 0.255\\
-4 & all & -0.757 & 0.986 & 0.467 & 0.016 & -1.041 & 0.312\\
-\addlinespace
-1 & Cases & -0.861 & 0.876 & 0.433 & -0.024 & 0.785 & 0.087\\
-2 & Cases & -0.243 & 0.877 & 0.660 & -0.031 & 0.959 & 0.162\\
-3 & Cases & 0.372 & 0.855 & 0.882 & -0.037 & 1.115 & 0.238\\
-4 & Cases & 0.816 & 0.837 & 1.009 & -0.036 & 1.665 & 0.296\\
-\addlinespace
-1 & Deaths & -1.145 & 0.831 & 0.376 & -0.035 & 0.458 & 0.048\\
-2 & Deaths & -0.980 & 0.866 & 0.415 & -0.027 & 0.445 & 0.084\\
-3 & Deaths & -0.809 & 0.885 & 0.441 & -0.016 & -8.262 & 0.903\\
-4 & Deaths & -0.603 & 0.891 & 0.488 & -0.007 & -7.834 & 0.898\\
-\bottomrule
-\end{tabular}
-\caption{Coefficients of three regressions for the effect of the magnitude of the median forecast on expected scores. The first regression was 
-$\log[\text{CRPS}(F, y)] = \alpha + \beta \times \log[\text{median}(F)], $ where $F$ is the predictive distribution and $y$ the observed value. The second one was 
-$\text{CRPS}(F_{\log}, \log y) = \alpha_{\log} + \beta_{\log} \cdot \log{(\text{median}(F))},$ where $F_{\log}$ is the predictive distribution for $\log y$. The third one was $\text{CRPS}(F_{\sqrt{\ }}, \sqrt{y}) = \alpha_{sqrt{\ }} + \beta_{sqrt{\ }} \cdot \sqrt{(\text{median}(F))},$ where $F_{\sqrt{\ }}$ is the predictive distribution for $\sqrt{y}$.
-}
-\label{tab:HUB-regression}
-\end{table}
 
 
 

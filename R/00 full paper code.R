@@ -741,6 +741,8 @@ p_cor_scores <- df |>
 
 # Correlation between pairwise comparisons
 correlation_rel_skill <- scores |>
+  filter(scale %in% c("log", "natural")) |>
+  select(model, location, forecast_date, horizon, target_type, scale, interval_score) |>
   summarise_scores(
     by = c("model", "scale", "horizon", "target_type"), 
     relative_skill = TRUE) |>
@@ -933,7 +935,7 @@ simple_labels <- function(x) {
 ranking_figure <- function(target = "Cases") {
   summarised_pairwise <- scores |>
     filter(scale %in% c("log", "natural")) |>
-    select(-median_prediction) |>
+    select(model, location, forecast_date, horizon, target_type, scale, interval_score) |>
     filter(target_type == target, 
            horizon == 2) |>
     summarise_scores(by = c("model", "scale"), relative_skill = TRUE)

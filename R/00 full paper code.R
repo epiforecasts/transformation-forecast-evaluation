@@ -644,11 +644,11 @@ regs_coef <- regs_coef |>
          beta = signif(beta, 2)) |>
   mutate(label = ifelse(
     scale == "natural",
-    paste0("\\hat{WIS} = e^", alpha, " \\cdot x^", beta), # regression for natural
+    paste0("\\hat{WIS} = e^", alpha, " \\cdot median^", beta), # regression for natural
     
     ifelse(scale == "log", 
-           paste0("\\hat{WIS} = ", alpha, " + ", beta, "\\cdot \\log (x)"), # regression for log
-           paste0("\\hat{WIS} = ", alpha, " + ", beta, "\\cdot \\sqrt{x}")) # regression for sqrt
+           paste0("\\hat{WIS} = ", alpha, " - ", -beta, "\\cdot \\log (median)"), # regression for log
+           paste0("\\hat{WIS} = ", alpha, " + ", beta, "\\cdot \\sqrt{median}")) # regression for sqrt
     ))
 
 regs <- regs_coef |> 

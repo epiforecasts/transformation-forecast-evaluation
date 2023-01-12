@@ -217,18 +217,16 @@ $$
 .
 $$
 
-% which one is an empirical question - maybe hint that quadratic may result from RW on growth rate?
-
-To strengthen our intuition on how transforming outcomes prior to applying the CRPS shifts the emphasis between targets with high and low expected outcomes, Figure \ref{fig:SIM-wis-state-size-mean} shows the expected CRPS of ideal forecasters under different mean-variance relationships and transformations. We consider a Poisson distribution where $\sigma^2 = \mu$, a geometric distribution where $\sigma^2 = \mu + \mu^2$, and a negative binomial distribution where the size parameter $\psi(\mu)$ depends on the mean $\mu$ such that $\sigma^2 = \mu + \mu^{2.5}/1000$. We see that when applying the CRPS on the natural scale, the expected CRPS grows in $\mu$ in all cases. When applying it after a log-transformation, the expected CRPS is almost independent of $\mu$ for the geometric distribution and large $\mu$, while smaller targets have higher expected CRPS in the Poisson case. When applying a square-root-transformation before the CRPS, the expected CRPS is independent of the mean for the Poisson-distribution and grows for the two other distributions. 
-%For the negative binomial distribution, targets with very small and very high expectation yield the highest expected CRPS. \textbf{Here it would be nice to also add a sentence on what happens under sqrt transformation.} % scores are independent of the mean of the forecast target. For a Poisson-distribution with 
-% $\sigma = \mu$, scores on the log scale decrease as the mean increases. The appropriate variance-stabilising transformation here to make scores independent of the mean would be a square-root-transformation . 
+To strengthen our intuition on how transforming outcomes prior to applying the CRPS shifts the emphasis between targets with high and low expected outcomes, Figure \ref{fig:SIM-wis-state-size-mean} shows the expected CRPS of ideal forecasters under different mean-variance relationships and transformations. We consider a Poisson distribution where $\sigma^2 = \mu$, a negative binomial distribution with $\theta = 10$ and $\sigma^2 = \mu + 0.1\mu^2$, and a normal distribution with constant variance. We see that when applying the CRPS on the natural scale, the expected CRPS grows with the variance of the predictive distribution (which is equal to the data-generating distribution for the ideal forecaster). The expected CRPS is constant only for the distribution with constant variance, and grows in $\mu$ for the other two. When applying a log-transformation first, the expected CRPS is almost independent of $\mu$ for the negative binomial distribution and large $\mu$, while smaller targets have higher expected CRPS in case of the Poisson distribution and the normal distribution with constant variance. When applying a square-root-transformation before the CRPS, the expected CRPS is independent of the mean for the Poisson-distribution, but not for the other two. As can be seen in Figures \ref{fig:SIM-wis-state-size-mean} and \ref{fig:score-approx}, the approximations presented above work quite well for our simulated example. 
 
 \begin{figure}[h!]
     \centering
     \includegraphics[width=0.99\textwidth]{output/figures/SIM-mean-state-size.png}
-    \caption{Expected CRPS scores as a function of the mean and variance of the forecast quantity. We generated 10,000 samples for three distributions with differing relationships between mean and variance. We then computed expected CRPS values assuming an ideal forecaster with predictive distribution equal to the data-generating distribution. The first distribution (red) is a truncated normal distribution with constant variance (we chose a $\sigma = 1$ in order to only obtain positive samples). The second (green) is a geometric distribution (a negative binomial distribution with variance $\sigma^2 = \mu + \mu^2$. The third (blue) is a
-    Poisson distribution with $\sigma^2 = \mu + \mu$. To make the scores for the different distributions comparable, scores were normalised to one, meaning that the mean score for every distribution (red, green, blue) is one. 
-    A: Normalised expected CRPS for ideal forecasts with increasing means for three distribution with different relationships between mean and variance. B: A but with x axis on the log scale.}
+    \caption{Expected CRPS scores as a function of the mean and variance of the forecast quantity. We computed expected CRPS values  for three different distributions, assuming an ideal forecaster with predictive distribution equal to the data-generating distribution. 
+    These expected CRPS values where computed for different predictive means based on 10,000 samples each and are represented by dots. Solid lines show the corresponding approximation of the expected CRPS based on an assumed normal distribution as discussed in section \ref{sec:methods:vst}. Figure \ref{fig:XXX} shows the quality of the approximation in more detail. 
+    The first distribution (red) is a truncated normal distribution with constant variance (we chose $\sigma = 1$ in order to only obtain positive samples). The second (green) is a negative binomial distribution with variance $\theta = 10$ and variance $\sigma^2 = \mu + 0.1\mu^2$. The third (blue) is a
+    Poisson distribution with $\sigma^2 = \mu$. To make the scores for the different distributions comparable, scores were normalised to one, meaning that the mean score for every distribution (red, green, blue) is one. 
+    A: Normalised expected CRPS for ideal forecasts with increasing means for three distribution with different relationships between mean and variance. Expected CRPS was computed on the natural scale (middle), after adding one and applying a log-transformation to the data (middle) and after applying a square-root transformation (left). B: A but with x axis on the log scale.}
     \label{fig:SIM-wis-state-size-mean}
 \end{figure}
 
@@ -276,7 +274,7 @@ Overall model rankings would be expected to differ even more when scores are ave
 As an empirical comparison of evaluating forecasts on the natural and on the log scale, we use forecasts from the European Forecast Hub \citep{europeancovid-19forecasthubEuropeanCovid19Forecast2021, sherrattPredictivePerformanceMultimodel2022}. 
 The European COVID-19 Forecast Hub is one of several COVID-19 Forecast Hubs \citep{cramerEvaluationIndividualEnsemble2021, bracherShorttermForecastingCOVID192021} which have been systematically collecting, aggregating and evaluating forecasts of several COVID-19 targets created by different teams every week. Forecasts are made one to four weeks ahead into the future and follow a quantile-based format with a set of 23 quantiles ($0.01, 0.025, 0.05, ..., 0.5, ... 0.95, 0.975, 0.99$). 
 
-The forecasts used for the purpose of this illustration are forecasts submitted between the 8th of March 2021 and the 12th of May 2022 for reported cases and deaths from COVID-19. We filtered all forecasts submitted to the Hub to only include models which have submitted forecasts for both deaths and cases for 4 horizons in 32 locations on at least 46 forecast dates (see Figure \ref{fig:HUB-num-avail-models}). We removed all observations marked as data anomalies by the European Forecast Hub \citep{sherrattPredictivePerformanceMultimodel2022} as well as all remaining negative observed values. In addition, we filtered out erroneous forecasts characterised by a median forecast of 0 and an actual observed value of larger than 150. All predictive quantiles were truncated at 0. We applied the log-transformation after adding 1 to all predictions and observed values. Where not otherwise stated, we report results for a two-week-ahead forecast horizon. 
+The forecasts used for the purpose of this illustration are forecasts submitted between the 8th of March 2021 and the 12th of May 2022 for reported cases and deaths from COVID-19. See \cite{sherrattPredictivePerformanceMultimodel2022} for a more thorough description of the data. We filtered all forecasts submitted to the Hub to only include models which have submitted forecasts for both deaths and cases for 4 horizons in 32 locations on at least 46 forecast dates (see Figure \ref{fig:HUB-num-avail-models}). We removed all observations marked as data anomalies by the European Forecast Hub \citep{sherrattPredictivePerformanceMultimodel2022} as well as all remaining negative observed values. In addition, we filtered out erroneous forecasts defined by any of the conditions listed in Table \ref{tab:erroneous}. Those forecasts were removed in order to be better able to illustrate the effects of the log-transformation on scores and eliminating distortions caused by outlier forecasters. All predictive quantiles were truncated at 0. We applied the log-transformation after adding 1 to all predictions and observed values. Where not otherwise stated, we report results for a two-week-ahead forecast horizon. 
 
 In addition to the WIS we use pairwise comparisons \citep{cramerEvaluationIndividualEnsemble2021} to evaluate the relative performance of models across countries in the presence of missing forecasts. In the first step, score ratios are computed for all pairs of models by taking the set of overlapping forecasts between the two models and dividing the score of one model by the score achieved by the other model. The relative skill for a given model compared to others is then obtained by taking the geometric mean of all score ratios which involve that model. Low values are better, and the average model receives a relative skill score of 1. 
 
@@ -321,26 +319,25 @@ Across the dataset, the average number of observed cases and deaths varied consi
 \toprule
 Horizon & Target & $\alpha$ & $\beta$ & $\alpha_{\log}$ & $\beta_{\log}$ & $\alpha_{\sqrt{\ }}$ & $\beta_{\sqrt{\ }}$\\
 \midrule
-all & all & -1.093 & 0.963 & 0.390 & 0.001 & -0.995 & 0.209\\
+all & all & -1.093 & 0.963 & 0.391 & 0.001 & -0.352 & 0.201\\
 \addlinespace
-all & Cases & 0.036 & 0.858 & 0.751 & -0.033 & 0.047 & 0.201\\
-all & Deaths & -0.885 & 0.868 & 0.430 & -0.021 & -7.564 & 0.826\\
+all & Cases & 0.036 & 0.858 & 0.751 & -0.033 & 0.043 & 0.201\\
+all & Deaths & -0.884 & 0.868 & 0.436 & -0.023 & 0.273 & 0.121\\
 \addlinespace
-1 & all & -1.402 & 0.923 & 0.318 & -0.014 & 0.318 & 0.088\\
-2 & all & -1.221 & 0.967 & 0.364 & -0.003 & 0.111 & 0.164\\
-3 & all & -1.001 & 0.984 & 0.408 & 0.008 & -1.283 & 0.255\\
-4 & all & -0.757 & 0.986 & 0.467 & 0.016 & -1.041 & 0.312\\
+1 & all & -1.402 & 0.923 & 0.318 & -0.014 & 0.320 & 0.088\\
+2 & all & -1.221 & 0.967 & 0.364 & -0.003 & 0.112 & 0.164\\
+3 & all & -1.001 & 0.984 & 0.410 & 0.008 & -0.094 & 0.241\\
+4 & all & -0.757 & 0.986 & 0.469 & 0.015 & 0.000 & 0.299\\
 \addlinespace
-1 & Cases & -0.861 & 0.876 & 0.433 & -0.024 & 0.785 & 0.087\\
+1 & Cases & -0.862 & 0.876 & 0.433 & -0.024 & 0.790 & 0.087\\
 2 & Cases & -0.243 & 0.877 & 0.660 & -0.031 & 0.959 & 0.162\\
-3 & Cases & 0.372 & 0.855 & 0.882 & -0.037 & 1.115 & 0.238\\
-4 & Cases & 0.816 & 0.837 & 1.009 & -0.036 & 1.665 & 0.296\\
+3 & Cases & 0.372 & 0.855 & 0.882 & -0.037 & 1.109 & 0.238\\
+4 & Cases & 0.816 & 0.837 & 1.009 & -0.036 & 1.645 & 0.296\\
 \addlinespace
-1 & Deaths & -1.145 & 0.831 & 0.376 & -0.035 & 0.458 & 0.048\\
-2 & Deaths & -0.980 & 0.866 & 0.415 & -0.027 & 0.445 & 0.084\\
-3 & Deaths & -0.809 & 0.885 & 0.441 & -0.016 & -8.262 & 0.903\\
-4 & Deaths & -0.603 & 0.891 & 0.488 & -0.007 & -7.834 & 0.898\\
-\bottomrule
+1 & Deaths & -1.146 & 0.832 & 0.376 & -0.035 & 0.457 & 0.048\\
+2 & Deaths & -0.981 & 0.867 & 0.416 & -0.028 & 0.443 & 0.084\\
+3 & Deaths & -0.807 & 0.885 & 0.453 & -0.019 & 0.349 & 0.131\\
+4 & Deaths & -0.602 & 0.891 & 0.501 & -0.011 & 0.125 & 0.194\\
 \bottomrule
 \end{tabular}
 \caption{Coefficients of three regressions for the effect of the magnitude of the median forecast on expected scores. The first regression was 
@@ -416,7 +413,7 @@ If one is interested in scoring a forecast of the multiplicative, rather than th
 
 The log-transformation is only one of many transformations that may be useful and appropriate in an epidemiological context. One obvious option is to apply a population standardization to obtain incidence forecasts e.g., per 100,000 population If one is interested in multiplicative, rather than exponential growth rates, one could convert forecasts into forecasts for the multiplicative growth rate by dividing numbers by the last observed value. We suggested using the natural logarithm as a variance-stabilising transformation (VST) or alternatively the square-root transformation in the case of a Poisson distributed variable. Other VST like the Box-Cox \citep{boxAnalysisTransformations1964} are conceivable as well. Another promising transformation would be to take differences between forecasts on the log scale, or alternatively to divide each forecast by the forecast of the previous week (and analogously for observations), in order to obtain forecasts for week-to-week growth rates. One could then also ask forecasters to provide estimates of the weekly relative change applied to the latest data and subsequent forecast points directly. This would be akin to evaluating the shape of the predicted trajectory against the shape of the observed trajectory \citep[for a different approach to evaluating the shape of a forecast, see][]{srivastavaShapebasedEvaluationEpidemic2022}. This, unfortunately, is not feasible for forecasts stored as predictive quantiles, as the growth rate of the $\alpha$-quantile may be different from the $\alpha$-quantile of the growth-rate, but may be an interesting approach if predictive samples are available. It is possible to go beyond choosing a single transformation by constructing composite scores as a weighted sum of scores based on different transformations. This would make it possible to create custom scores and allow forecast consumers to assign explicit weights to different qualities of the forecasts they might care about.
 
-In this work, we focused on the CRPS and WIS, which are widely used in the evaluation of epidemic forecasts. We note that for the logarithmic score, which has also been used e.g., in some editions of the FluSight challenge \cite{reichCollaborativeMultiyearMultimodel2019}, the question of the right scale to evaluate forecasts does not arise. It is known that log score differences between different forecasters are invariant to monotonic transformations of the outcome variable (see e.g., \citealt{Diks2011}). This is clearly an advantage of the logarithmic score over the CRPS; however, the logarithmic score is known to have other severe downsides, e.g., its low robustness to sporadically misguided forecasts; see \cite{bracherEvaluatingEpidemicForecasts2021} for a more detailed discussion.
+In this work, we focused on the CRPS and WIS, which are widely used in the evaluation of epidemic forecasts. We note that for the logarithmic score, which has also been used e.g., in some editions of the FluSight challenge \cite{reichCollaborativeMultiyearMultimodel2019}, the question of the right scale to evaluate forecasts does not arise. It is known that log score differences between different forecasters are invariant to monotonic transformations of the outcome variable (see e.g., \citealt{diksLikelihoodbasedScoringRules2011}). This is clearly an advantage of the logarithmic score over the CRPS; however, the logarithmic score is known to have other severe downsides, e.g., its low robustness to sporadically misguided forecasts; see \cite{bracherEvaluatingEpidemicForecasts2021} for a more detailed discussion.
 
 Exploring transformations is a promising avenue for future work that could help bridge the gap between modellers and policymakers by providing scoring rules that better reflect what forecast consumers care about. Potentially, the variance stabilising time-series forecasting literature may be a useful source of transformations for various forecast settings. We have shown that the natural logarithm transformation can lead to significant changes in the relative rankings of models against each other, with potentially important implications for decision-makers who rely on the knowledge of past performance to make a judgement about which forecasts should inform future decisions. While it is commonly accepted that multiple proper scoring rules should usually be considered when comparing forecasts, we think this should be supplemented by considering different transformations of the data to obtain a richer picture of model performance. More work needs to be done to better understand the effects of applying transformations in different contexts, and how they may impact decision-making. 
 
@@ -452,6 +449,14 @@ where $w_k$ is a weight for every interval. Usually, $w_k = \frac{\alpha_k}{2}$ 
 \caption{Numerical comparison of different measures of relative error: absolute percentage error (APE), relative error (RE), symmetric absolute percentage error (SAPE) and the absolute error applied to \textit{sqrt}-transformed predictions and observations. We denote the predicted value by $\hat{y}$ and display errors as a function of the ratio of observed and predicted value. A: x-axis shown on a linear scale. B: x-axis shown on a logarithmic scale.}
 \label{fig:SAPE-sqrt}
 \end{figure}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width = 1\textwidth]{output/figures/SIM-score-approximation.png}
+\caption{Comparison of expected CRPS values of an ideal forecaster and approximated values. Expected scores for three distributions as described in Section \ref{sec:methods:vst} and Figure \ref{fig:SIM-wis-state-size-mean} and approximated as described in \ref{sec:methods:vst}}
+\label{fig:score-approx}
+\end{figure}
+
 
 
 
@@ -491,6 +496,23 @@ Deaths & WIS & sd & 65 & 0.28\\
     }
     \label{fig:HUB-num-avail-models}
 \end{figure}
+
+\begin{table}
+\centering
+\begin{tabular}{ccc}
+\toprule
+True value & \& & Median prediction\\
+\midrule
+$>0$ & \ & $>100\times$ true value\\
+$>10$ & \  & $>20\times$ true value\\
+$>50$ & \  & $<1/50\times$ true value\\
+$= 0$ & \  & $>100$\\
+\bottomrule
+\end{tabular}
+\caption{Criteria for removing forecasts. Any forecast that met one of the listed criteria (represented by a row in the table), was removed. Those forecasts were removed in order to be better able to illustrate the effects of the log-transformation on scores and eliminating distortions caused by outlier forecasters. When evaluating models against each other (rather than illustrating the effect of a transformation), one would prefer not to condition on the outcome when deciding whether a forecast should be taken into account. }
+\label{tab:erroneous}
+\end{table}
+
 
 \begin{figure}[h!]
     \centering

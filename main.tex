@@ -274,15 +274,27 @@ Overall model rankings would be expected to differ even more when scores are ave
 As an empirical comparison of evaluating forecasts on the natural and on the log scale, we use forecasts from the European Forecast Hub \citep{europeancovid-19forecasthubEuropeanCovid19Forecast2021, sherrattPredictivePerformanceMultimodel2022}. 
 The European COVID-19 Forecast Hub is one of several COVID-19 Forecast Hubs \citep{cramerEvaluationIndividualEnsemble2021, bracherShorttermForecastingCOVID192021} which have been systematically collecting, aggregating and evaluating forecasts of several COVID-19 targets created by different teams every week. Forecasts are made one to four weeks ahead into the future and follow a quantile-based format with a set of 23 quantiles ($0.01, 0.025, 0.05, ..., 0.5, ... 0.95, 0.975, 0.99$). 
 
-The forecasts used for the purpose of this illustration are forecasts submitted between the 8th of March 2021 and the 12th of May 2022 for reported cases and deaths from COVID-19. See \cite{sherrattPredictivePerformanceMultimodel2022} for a more thorough description of the data. We filtered all forecasts submitted to the Hub to only include models which have submitted forecasts for both deaths and cases for 4 horizons in 32 locations on at least 46 forecast dates (see Figure \ref{fig:HUB-num-avail-models}). We removed all observations marked as data anomalies by the European Forecast Hub \citep{sherrattPredictivePerformanceMultimodel2022} as well as all remaining negative observed values. In addition, we filtered out erroneous forecasts defined by any of the conditions listed in Table \ref{tab:erroneous}. Those forecasts were removed in order to be better able to illustrate the effects of the log-transformation on scores and eliminating distortions caused by outlier forecasters. All predictive quantiles were truncated at 0. We applied the log-transformation after adding 1 to all predictions and observed values. Where not otherwise stated, we report results for a two-week-ahead forecast horizon. 
+The forecasts used for the purpose of this illustration are forecasts submitted between the 8th of March 2021 and the 5th of December 2022 for reported cases and deaths from COVID-19. See \cite{sherrattPredictivePerformanceMultimodel2022} for a more thorough description of the data. We filtered all forecasts submitted to the Hub to only include models which have submitted forecasts for both deaths and cases for 4 horizons in 32 locations on at least 46 forecast dates (see Figure \ref{fig:HUB-num-avail-models}). We removed all observations marked as data anomalies by the European Forecast Hub \citep{sherrattPredictivePerformanceMultimodel2022} as well as all remaining negative observed values. In addition, we filtered out erroneous forecasts defined by any of the conditions listed in Table \ref{tab:erroneous}. Those forecasts were removed in order to be better able to illustrate the effects of the log-transformation on scores and eliminating distortions caused by outlier forecasters. All predictive quantiles were truncated at 0. We applied the log-transformation after adding 1 to all predictions and observed values. Where not otherwise stated, we report results for a two-week-ahead forecast horizon. 
 
 In addition to the WIS we use pairwise comparisons \citep{cramerEvaluationIndividualEnsemble2021} to evaluate the relative performance of models across countries in the presence of missing forecasts. In the first step, score ratios are computed for all pairs of models by taking the set of overlapping forecasts between the two models and dividing the score of one model by the score achieved by the other model. The relative skill for a given model compared to others is then obtained by taking the geometric mean of all score ratios which involve that model. Low values are better, and the average model receives a relative skill score of 1. 
 
+
+
+
+
 \subsection{Illustration and qualitative observations}
 
-Show and discuss Fig 7 here? CHECK AGAIN
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.99\textwidth]{output/figures/HUB-model-comparison-ensemble.png}
+    \caption{
+    Forecasts and scores for two-week-ahead predictions from the EuroCOVIDhub-ensemble made in Germany. Missing values are due to data anomalies that were removed (see section \ref{sec:HUB-setting}. 
+    A, E: 50\% and 90\% prediction intervals and observed values for cases and deaths on the natural scale. B, F: Corresponding scores. C, G: Forecasts and observations on the log scale. D, H: Corresponding scores. 
+    }
+    \label{fig:HUB-model-comparison-ensemble}
+\end{figure}
 
-\subsection{Descriptive analysis of observed values and scores obtained on the natural and logarithmic scales CHECK AGAIN} 
+When comparing examples of forecasts on the natural scale with those on the log scale (see Figures \ref{fig:HUB-model-comparison-ensemble}, \ref{fig:HUB-model-comparison-baseline}, \ref{fig:HUB-model-comparison-epinow}) a few interesting patterns emerge. Missing the peak, i.e. predicting increasing numbers while actual observations are already falling, tends to contribute a lot to overall scores on the natural scale (see forecasts in May in Figure \ref{fig:HUB-model-comparison-ensemble}A, B). On the log scale, these have less of an influence, as errors are smaller in relative terms (see \ref{fig:HUB-model-comparison-ensemble}C, D). Conversely, failure to predict an upswing while numbers are still low, is less severely punished on the natural scale (see forecasts in July in Figure \ref{fig:HUB-model-comparison-ensemble} A, B), as overall absolute errors are low. On the log scale, missing lower inflection points tends to lead to more severe penalties (see Figure \ref{fig:HUB-model-comparison-ensemble}C, D)). One can also observe that on the natural scale, scores tend to track the overall level of the target quantity (compare for example forecasts for March-July with forecasts for September-October in Figure \ref{fig:HUB-model-comparison-ensemble}E, F). On the log scale, scores do not exhibit this behaviour and rather increase whenever forecasts are far away from the truth in relative terms, regardless of the overall level of observations. 
 
 \begin{figure}[h!]
     \centering
@@ -294,24 +306,30 @@ Show and discuss Fig 7 here? CHECK AGAIN
 
 Across the dataset, the average number of observed cases and deaths varied considerably by location and target type (see Figure \ref{fig:HUB-mean-locations}A and B). On the natural scale, scores also varied considerably across targets (see Figure\ref{fig:HUB-mean-locations}D) and locations (see Figure\ref{fig:HUB-mean-locations}C). On the log scale, scores were more evenly distributed between targets (see Figure\ref{fig:HUB-mean-locations}D) and locations (see Figure\ref{fig:HUB-mean-locations}C). Both on the natural scale as well to a slightly lesser extent on the log scale, scores increased considerably with increasing forecast horizon (see Figure \ref{fig:HUB-mean-locations}E). This reflects the increasing difficulty of forecasts further into the future and, for the log scale, corresponds with our expectations from Section \ref{sec:methods:growthrate}. 
 
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.99\textwidth]{output/figures/HUB-transformation-regression.png}
-    \caption{Relationship between median forecasts and scores. Black dots represent WIS values for two-week ahead predictions of the EuroCOVIDhub-ensemble. Shown in red are the regression lines discussed in \ref{sec:regression} and \ref{tab:HUB-regression}. A: WIS for two-week-ahead predictions of the EuroCOVIDhub-ensemble against median predicted values. B: Same as A, with scores obtained after applying a log-transformation to the data. C: Same as A, with scores obtained after applying a square-root-transformation to the data.} 
-    \label{fig:HUB-regression}
-\end{figure}
-
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.99\textwidth]{output/figures/HUB-correlations.png}
-    \caption{Correlations of rankings on the natural and logarithmic scale. A: Average Spearman rank correlation of scores for individual forecasts from all models. For every individual target (defined by a combination of forecast date, target type, horizon, location), one score was obtained per model. Then, the rank correlation was computed between the scores for all models on the natural scale vs. on the log scale. All rank correlations were averaged across locations, and target types and stratified by horizon and target type. B: Correlation between relative skill scores. For every forecast horizon and target type, a separate rel. skill score was computed per model using pairwise comparisons. The plot shows the correlation between the rel. skill scores on the natural vs. on the log scale.}
-    \label{fig:HUB-cors}
-\end{figure}
 
 
 
 
 \subsection{Regression analysis to determine the variance-stabilizing transformation}
+\label{sec:HUB-regression}
+
+As argued in Section \ref{sec:methods:vst}, the mean-variance, or mean-CRPS, relationship determines which transformation can serve as a VST. To assess this empirically, we ran the regression
+
+\begin{equation*}
+    \log[\text{CRPS}(F, y)] = \alpha + \beta \times \log[\text{median}(F)], 
+\end{equation*}
+where the predictive distribution $F$ and the observation $y$ are on the natural scale. This is equivalent to
+\begin{equation*}
+    \text{CRPS}(F, y) = \exp(\alpha) \times \text{median}(F)^\beta, 
+\end{equation*}
+meaning that we estimate a polynomial relationship between the predictive median and achieved CRPS. Note that we are using predictive medians rather than means as only the former are available in the European COVID-19 Forecast Hub. We applied the regression to case and death forecasts, pooled across horizons and stratified for one through four-week-ahead forecasts. Results are provided in Table \ref{tab:HUB-regression}. It can be seen that the estimates of $\beta$ always take a value below 1.  As the CRPS scales with the standard deviation (see Section \ref{sec:methods:vst}), this can be interpreted as a slightly sub-quadratic mean-variance relationship. The logarithmic transformation should thus approximately stabilize the variance (and CRPS), possibly leading to somewhat higher scores for smaller forecast targets. The square-root transformation, on the other hand, can be expected to still lead to higher CRPS values for targets of higher orders of magnitude.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.99\textwidth]{output/figures/HUB-transformation-regression.png}
+    \caption{Relationship between median forecasts and scores. Black dots represent WIS values for two-week ahead predictions of the EuroCOVIDhub-ensemble. Shown in red are the regression lines discussed in Section \ref{sec:HUB-regression} shown in Table \ref{tab:HUB-regression}. A: WIS for two-week-ahead predictions of the EuroCOVIDhub-ensemble against median predicted values. B: Same as A, with scores obtained after applying a log-transformation to the data. C: Same as A, with scores obtained after applying a square-root-transformation to the data.} 
+    \label{fig:HUB-regression}
+\end{figure}
 
 \begin{table}
 \centering
@@ -347,17 +365,6 @@ $\text{CRPS}(F_{\log}, \log y) = \alpha_{\log} + \beta_{\log} \cdot \log{(\text{
 \label{tab:HUB-regression}
 \end{table}
 
-As argued in Section \ref{sec:methods:vst}, the mean-variance, or mean-CRPS, relationship determines which transformation can serve as a VST. To assess this empirically, we ran the regression
-
-\begin{equation*}
-    \log[\text{CRPS}(F, y)] = \alpha + \beta \times \log[\text{median}(F)], 
-\end{equation*}
-where the predictive distribution $F$ and the observation $y$ are on the natural scale. This is equivalent to
-\begin{equation*}
-    \text{CRPS}(F, y) = \exp(\alpha) \times \text{median}(F)^\beta, 
-\end{equation*}
-meaning that we estimate a polynomial relationship between the predictive median and achieved CRPS. Note that we are using predictive medians rather than means as only the former are available in the European COVID-19 Forecast Hub. We applied the regression to case and death forecasts, pooled across horizons and stratified for one through four-week-ahead forecasts. Results are provided in Table \ref{tab:HUB-regression}. It can be seen that the estimates of $\beta$ always take a value below 1.  As the CRPS scales with the standard deviation (see Section \ref{sec:methods:vst}), this can be interpreted as a slightly sub-quadratic mean-variance relationship. The logarithmic transformation should thus approximately stabilize the variance (and CRPS), possibly leading to somewhat higher scores for smaller forecast targets. The square-root transformation, on the other hand, can be expected to still lead to higher CRPS values for targets of higher orders of magnitude.
-
 To check this, we ran the regressions
 \begin{equation*}
     \text{CRPS}(F_{\log}, \log y) = \alpha_{\log} + \beta_{\log} \cdot \log{(\text{median}(F))},
@@ -366,24 +373,18 @@ where $F_{\log}$ is the predictive distribution for $\log(y)$, and
 \begin{equation*}
     \text{CRPS}(F_{\sqrt{\ }}, \sqrt{y}) = \alpha_{\sqrt{\ }} + \beta_{\sqrt{\ }} \cdot \sqrt{\text{median}(F)},
 \end{equation*} 
-where $F_{\sqrt{\ }}$ is the predictive distribution on the square-root scale. As can be seen from Table \ref{tab:HUB-regression}, the results indeed indicate small targets lead to larger average CRPS when using the log transform ($\beta_{\log} < 0$), while the opposite is true for the square-root transform ($\beta_{\sqrt{\ }} > 0$). The results of the three regressions are also displayed in Figure \ref{fig:HUB-regression}. It appears that the log transformation is most suitable to stabilise the WIS values in this empirical example. 
-
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.99\textwidth]{output/figures/HUB-model-comparison-ensemble.png}
-    \caption{
-    Forecasts and scores for two-week-ahead predictions from the EuroCOVIDhub-ensemble made in Germany. Missing values are due to data anomalies that were removed (see section \ref{sec:HUB-setting}. 
-    A, E: 50\% and 90\% prediction intervals and observed values for cases and deaths on the natural scale. B, F: Corresponding scores. C, G: Forecasts and observations on the log scale. D, H: Corresponding scores. 
-    }
-    \label{fig:HUB-model-comparison-ensemble}
-\end{figure}
+where $F_{\sqrt{\ }}$ is the predictive distribution on the square-root scale. As can be seen from Table \ref{tab:HUB-regression}, the results indeed indicate small targets lead to larger average CRPS when using the log transform ($\beta_{\log} < 0$), while the opposite is true for the square-root transform ($\beta_{\sqrt{\ }} > 0$). The results of the three regressions are also displayed in Figure \ref{fig:HUB-regression}. In this empirical example, the log transformation helps (albeit not perfectly), to stabilise WIS values and achieves this better suited than the square-root transformation. 
 
 \subsection{Impact of logarithmic transformation on model rankings}
 
-For \textit{individual} forecasts, rankings between models for single forecasts are mostly preserved, with differences increasing across forecast horizons (see Figure \ref{fig:HUB-cors}A). When evaluating performance \textit{averaged across} different forecasts and forecast targets, relative skill scores of the models change considerably. The change is stronger for cases than for deaths (Figure \ref{fig:HUB-cors}B) and possibly tends to increase with increasing forecast horizon. 
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.99\textwidth]{output/figures/HUB-correlations.png}
+    \caption{Correlations of rankings on the natural and logarithmic scale. A: Average Spearman rank correlation of scores for individual forecasts from all models. For every individual target (defined by a combination of forecast date, target type, horizon, location), one score was obtained per model. Then, the rank correlation was computed between the scores for all models on the natural scale vs. on the log scale. All rank correlations were averaged across locations, and target types and stratified by horizon and target type. B: Correlation between relative skill scores. For every forecast horizon and target type, a separate rel. skill score was computed per model using pairwise comparisons. The plot shows the correlation between the rel. skill scores on the natural vs. on the log scale.}
+    \label{fig:HUB-cors}
+\end{figure}
 
-When comparing examples of forecasts on the natural scale with those on the log scale (see Figures \ref{fig:HUB-model-comparison-ensemble}, \ref{fig:HUB-model-comparison-baseline}, \ref{fig:HUB-model-comparison-epinow}) a few interesting patterns emerge. Missing the peak, i.e. predicting increasing numbers while actual observations are already falling, tends to contribute a lot to overall scores on the natural scale (see forecasts in May in Figure \ref{fig:HUB-model-comparison-ensemble}A, B). On the log scale, these have less of an influence, as errors are smaller in relative terms (see \ref{fig:HUB-model-comparison-ensemble}C, D). We hypothesise that the lower correlation between skill scores for cases (compared to the correlation of scores for deaths) as displayed in Figure \ref{fig:HUB-cors}B is related to the fact that outlier forecasts missing the peak are more common for cases than for deaths, and therefore relative skill scores are more strongly affected for cases. 
-Conversely, failure to predict an upswing while numbers are still low, is less severely punished on the natural scale (see forecasts in July in Figure \ref{fig:HUB-model-comparison-ensemble} A, B), as overall absolute errors are low. On the log scale, missing lower inflection points tends to lead to more severe penalties (see Figure \ref{fig:HUB-model-comparison-ensemble}C, D)). One can also observe that on the natural scale, scores tend to track the overall level of the target quantity (compare for example forecasts for March-July with forecasts for September-October in Figure \ref{fig:HUB-model-comparison-ensemble}E, F). On the log scale, scores do not exhibit this behaviour and rather increase whenever forecasts are far away from the truth in relative terms, regardless of the overall level of observations. 
+For \textit{individual} forecasts, rankings between models for single forecasts are mostly preserved, with differences increasing across forecast horizons (see Figure \ref{fig:HUB-cors}A). When evaluating performance \textit{averaged across} different forecasts and forecast targets, relative skill scores of the models change considerably. The change is stronger for cases than for deaths (Figure \ref{fig:HUB-cors}B) and increases noticeably with increasing forecast horizon. 
 
 \begin{figure}[h!]
     \centering
@@ -397,6 +398,12 @@ The rank order of different forecasting models changes noticeably (see Figure \r
 % I removed this part as it doesn't seem accurate anymore / we don't even have all the models in there anymore. 
 %indicates that models that do not make use of a exponential error model and thus would be biased towards under-prediction during periods of exponential growth, such as the MUNI-ARMA model, were ranked lower when using a log-transform. The epiforecasts-EpiNow2 forecast model, on the other hand~(created by co-authors of this study), which makes forecasts based on the behaviour of the reproduction number and thus implicitly uses an exponential error model, was the most impacted by the change to log-scale scoring moving from last place for reported cases to 4th place. Other models that are based on modelling the growth rate, such as the LANL-GrowthRate forecaster, do less well after a log-transform, indicating that this potential association between model structure and score under different approximations does not hold strictly.
 Encouragingly for the European Forecast Hub, the Hub ensemble, which is the forecast the organisers suggest forecast consumers make use of, remains one of the top forecasts across scoring schemes and indeed ranks higher for reported cases when a log-transform is used.
+
+
+
+We hypothesise that the lower correlation between skill scores for cases (compared to the correlation of scores for deaths) as displayed in Figure \ref{fig:HUB-cors}B is related to the fact that outlier forecasts missing the peak are more common for cases than for deaths, and therefore relative skill scores are more strongly affected for cases. 
+
+
 
 \section{Discussion}
 \label{sec:discussion}

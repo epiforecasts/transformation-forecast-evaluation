@@ -409,12 +409,14 @@ hub_data <- rbindlist(list(
   unique() |>
   filter(location != "")
 
-scores <- fread(here("output", "data", "all-scores-european-hub.csv")) |>
+scores <- fread(here("output", "data", "all-scores-european-hub.csv")) 
+
+scores <- scores |>
   mutate(scale = factor(scale, levels = c("natural", "log", "sqrt"))) |>
   mutate(type_and_scale = factor(type_and_scale, 
                                  levels = c("Cases - natural", "Deaths - natural", 
-                                            "Cases - log", "Deaths - log"))) |>
-  filter(horizon <= 4)
+                                            "Cases - log", "Deaths - log", 
+                                            "Cases - sqrt", "Deaths - sqrt")))
 
 
 # dates and number of locations
@@ -554,9 +556,8 @@ box_plot_horizon <- scores |>
   theme_scoringutils() + 
   theme(legend.position = "none") + 
   scale_y_continuous(labels = label_fn, trans = "log10") +
-  labs(y = "Rel. change in WIS", x = "Forecast horizon (weeks)") 
-# + 
-#   coord_flip()
+  labs(y = "Rel. change in WIS", x = "Forecast horizon (weeks)") + 
+  coord_cartesian(ylim = c(0.1, 10))
 
 layout <- "
 AB
@@ -628,27 +629,27 @@ regs_coef <- rbind(
   regression_df(scores, s = "natural", horizons = "2", targets = "Cases"),  
   regression_df(scores, s = "natural", horizons = "2", targets = "Deaths"), 
   regression_df(scores, s = "log", horizons = "2", targets = "Cases"), 
-  regression_df(scores, s = "log", horizons = "2", targets = "Deaths")
+  regression_df(scores, s = "log", horizons = "2", targets = "Deaths"),
+  regression_df(scores, s = "sqrt", horizons = "2", targets = "Cases"), 
+  regression_df(scores, s = "sqrt", horizons = "2", targets = "Deaths")
 ) |>
   mutate(type_and_scale = paste(target_type, scale, sep = " - ")) |>
   mutate(type_and_scale = factor(type_and_scale, 
                                  levels = c("Cases - natural", "Deaths - natural", 
-                                            "Cases - log", "Deaths - log")))
+                                            "Cases - log", "Deaths - log", 
+                                            "Cases - sqrt", "Deaths - sqrt")))
 
 regs_coef <- regs_coef |> 
   mutate(alpha = signif(alpha, 2), 
          beta = signif(beta, 2)) |>
   mutate(label = ifelse(
-    scale == "log",
-    paste0("\\hat{crps} = e^", alpha, " \\cdot x^", beta), 
-    paste0("\\hat{crps} = ", alpha, " + ", beta, "\\cdot x")
+    scale == "natural",
+    paste0("\\hat{WIS} = e^", alpha, " \\cdot x^", beta), # regression for natural
+    
+    ifelse(scale == "log", 
+           paste0("\\hat{WIS} = ", alpha, " + ", beta, "\\cdot \\log (x)"), # regression for log
+           paste0("\\hat{WIS} = ", alpha, " + ", beta, "\\cdot \\sqrt{x}")) # regression for sqrt
     ))
-
-
-# mutate(label = case_when(
-#   scale == "natural" ~ TeX(paste0("\\hat{crps} = e^", alpha, " \\cdot x ^ ", beta)), 
-#   scale == "log" ~ TeX(paste0("\\hat{crps} = \\mathrm{e}^", alpha, " \\cdot x ^ ", beta))
-# ))
 
 regs <- regs_coef |> 
   group_by(type_and_scale) |>
@@ -660,32 +661,61 @@ regs <- regs_coef |>
   mutate(yreg = ifelse(
     scale == "natural", 
     exp(alpha) * median_prediction ^ beta, # regression for natural scale
-    alpha + beta * log(median_prediction + 1) # regression for log scale
+    ifelse(scale == "log", 
+           alpha + beta * log(median_prediction + 1), # regression for log scale
+           alpha + beta * sqrt(median_prediction) # regression for sqrt scale
+           )
+    
     ))
 
-scatter_wis_pred <- scores |> 
-  filter(model == "EuroCOVIDhub-ensemble", 
-         horizon == 2, 
-         scale %in% c("log", "natural")) |>
-  ggplot(aes(y = interval_score, x = median_prediction)) +
-  geom_point(size = 0.1, color = "grey20") + 
-  geom_line(data = regs, aes(y = yreg), color = "red") + 
-  ggpp::geom_label_npc(
-    data = regs_coef, 
-    size = 2.5,
-    label.padding = unit(0.17, "lines"),
-    label.r = unit(0, "lines"),
-    aes(npcx = "left", npcy = "top", 
-        label = TeX(label, output = "character")), 
-    parse = TRUE) +
-  facet_wrap(~ type_and_scale, scale = "free") + 
-  theme_scoringutils() + 
-  theme(legend.position = "none") + 
-  scale_x_continuous(trans = "log10", labels = label_fn) +
-  scale_y_continuous(trans = "log10", labels = label_fn) +
-  labs(y = "WIS", x = "Median predicted value") +
-  plot_annotation()
+scatter_wis_pred <- function(scores, filterscale) {
+
+  scores |>
+    filter(model == "EuroCOVIDhub-ensemble", 
+           horizon == 2, 
+           scale == filterscale) |>
+    ggplot(aes(y = interval_score, x = median_prediction)) +
+    geom_point(size = 0.1, color = "grey20") + 
+    geom_line(
+      data = filter(regs, scale == filterscale), 
+      aes(y = yreg), 
+      color = "red") + 
+    ggpp::geom_label_npc(
+      data = filter(regs_coef, scale == filterscale), 
+      size = 2.5,
+      label.padding = unit(0.17, "lines"),
+      label.r = unit(0, "lines"),
+      aes(npcx = "left", npcy = "top", 
+          label = TeX(label, output = "character")), 
+      parse = TRUE) +
+    facet_wrap(~ type_and_scale, scale = "free", ncol = 2) + 
+    theme_scoringutils() + 
+    theme(legend.position = "none") + 
+    scale_x_continuous(trans = "log10", labels = label_fn) +
+    scale_y_continuous(trans = "log10", labels = label_fn) +
+    labs(y = "WIS", x = "Median predicted value") +
+    plot_annotation()
+}
+
+p_natural <- scatter_wis_pred(scores, filterscale = "natural")
+p_log <- scatter_wis_pred(scores, filterscale = "log")
+p_sqrt <- scatter_wis_pred(scores, filterscale = "sqrt")
   
+
+p_natural / p_log / p_sqrt +
+  plot_layout(guides = "collect") +
+  plot_annotation(tag_levels = "A") &
+  theme(legend.position = "bottom")
+
+ggsave("output/figures/HUB-transformation-regression.png", width = 7, height = 7)
+
+
+
+
+## ========================================================================== ##
+## Figure 7 - Name tbd
+## ========================================================================== ##
+
 df <- scores |>
   select(c(model, target_type, horizon, interval_score,
            forecast_date, target_end_date, scale, location)) |>
@@ -730,15 +760,12 @@ p_cor_skill <- correlation_rel_skill |>
   coord_cartesian(ylim = c(0, 1)) +
   labs(y = "Cor(rel. skill)", x = "Forecast horizon")
 
-
-(scatter_wis_pred) / (p_cor_scores + p_cor_skill) +
+p_cor_scores + p_cor_skill +
   plot_layout(guides = "collect") +
-  plot_annotation(tag_levels = "A") +
-  plot_layout(widths = c(1, 1), heights = c(3, 1)) &
+  plot_annotation(tag_levels = "A") &
   theme(legend.position = "bottom")
 
-ggsave("output/figures/HUB-correlations.png", width = 7, height = 7)
-
+ggsave("output/figures/HUB-correlations.png", width = 7, height = 3)
 
 
 ## ========================================================================== ##

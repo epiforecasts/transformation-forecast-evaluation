@@ -223,7 +223,7 @@ To strengthen our intuition on how transforming outcomes prior to applying the C
     \centering
     \includegraphics[width=0.99\textwidth]{output/figures/SIM-mean-state-size.png}
     \caption{Expected CRPS scores as a function of the mean and variance of the forecast quantity. We computed expected CRPS values  for three different distributions, assuming an ideal forecaster with predictive distribution equal to the data-generating distribution. 
-    These expected CRPS values where computed for different predictive means based on 10,000 samples each and are represented by dots. Solid lines show the corresponding approximation of the expected CRPS based on an assumed normal distribution as discussed in section \ref{sec:methods:vst}. Figure \ref{fig:XXX} shows the quality of the approximation in more detail. 
+    These expected CRPS values where computed for different predictive means based on 10,000 samples each and are represented by dots. Solid lines show the corresponding approximation of the expected CRPS based on an assumed normal distribution as discussed in section \ref{sec:methods:vst}. Figure \ref{fig:score-approx} shows the quality of the approximation in more detail. 
     The first distribution (red) is a truncated normal distribution with constant variance (we chose $\sigma = 1$ in order to only obtain positive samples). The second (green) is a negative binomial distribution with variance $\theta = 10$ and variance $\sigma^2 = \mu + 0.1\mu^2$. The third (blue) is a
     Poisson distribution with $\sigma^2 = \mu$. To make the scores for the different distributions comparable, scores were normalised to one, meaning that the mean score for every distribution (red, green, blue) is one. 
     A: Normalised expected CRPS for ideal forecasts with increasing means for three distribution with different relationships between mean and variance. Expected CRPS was computed on the natural scale (middle), after adding one and applying a log-transformation to the data (middle) and after applying a square-root transformation (left). B: A but with x axis on the log scale.}
@@ -384,7 +384,7 @@ where $F_{\sqrt{\ }}$ is the predictive distribution on the square-root scale. A
     \label{fig:HUB-cors}
 \end{figure}
 
-For \textit{individual} forecasts, rankings between models for single forecasts are mostly preserved, with differences increasing across forecast horizons (see Figure \ref{fig:HUB-cors}A). When evaluating performance \textit{averaged across} different forecasts and forecast targets, relative skill scores of the models change considerably. The change is stronger for cases than for deaths (Figure \ref{fig:HUB-cors}B) and increases noticeably with increasing forecast horizon. 
+For \textit{individual} forecasts, rankings between models for single forecasts are mostly preserved, with differences increasing across forecast horizons (see Figure \ref{fig:HUB-cors}A). When evaluating performance \textit{averaged across} different forecasts and forecast targets, relative skill scores of the models change considerably (Figure \ref{fig:HUB-cors}B). The correlation between relative skill scores also decreases noticeably with increasing forecast horizon. 
 
 \begin{figure}[h!]
     \centering
@@ -393,15 +393,14 @@ For \textit{individual} forecasts, rankings between models for single forecasts 
     \label{fig:HUB-rank-order}
 \end{figure}
 
+Figure Figure \ref{fig:HUB-rank-order} shows the changes in the ranking between different forecasting models. Encouragingly for the European Forecast Hub, the Hub ensemble, which is the forecast the organisers suggest forecast consumers make use of, remains the top forecasts across scoring schemes. For cases, the ILM-EKF model and the Forecast Hub baseline model exhibit the largest change in relative skill scores. For the ILM-EKF model the relative proportion of the score that is due to overprediction is reduced when applying a log-transformation before scoring (see Figure \ref{fig:HUB-rank-order}E. Instances where the model has overshot are penalised less heavily on the log scale, leading to an overall better score. For the Forecast Hub baseline model, the fact that it often puts relevant probability mass on zero (see Figure \ref{fig:HUB-model-comparison-baseline}), leads to worse scores after applying log-transformation due to large dispersion penalties. For deaths, the baseline model seems to get similarly penalised for its in relative terms highly forecasts. The performance of other models changes as well, but patterns are less discernible on this aggregate level. 
 
-The rank order of different forecasting models changes noticeably (see Figure \ref{fig:HUB-rank-order}. 
+
 % I removed this part as it doesn't seem accurate anymore / we don't even have all the models in there anymore. 
 %indicates that models that do not make use of a exponential error model and thus would be biased towards under-prediction during periods of exponential growth, such as the MUNI-ARMA model, were ranked lower when using a log-transform. The epiforecasts-EpiNow2 forecast model, on the other hand~(created by co-authors of this study), which makes forecasts based on the behaviour of the reproduction number and thus implicitly uses an exponential error model, was the most impacted by the change to log-scale scoring moving from last place for reported cases to 4th place. Other models that are based on modelling the growth rate, such as the LANL-GrowthRate forecaster, do less well after a log-transform, indicating that this potential association between model structure and score under different approximations does not hold strictly.
-Encouragingly for the European Forecast Hub, the Hub ensemble, which is the forecast the organisers suggest forecast consumers make use of, remains one of the top forecasts across scoring schemes and indeed ranks higher for reported cases when a log-transform is used.
 
-
-
-We hypothesise that the lower correlation between skill scores for cases (compared to the correlation of scores for deaths) as displayed in Figure \ref{fig:HUB-cors}B is related to the fact that outlier forecasts missing the peak are more common for cases than for deaths, and therefore relative skill scores are more strongly affected for cases. 
+% THIS DOESN'T SEEM TRUE ANYMORE
+%We hypothesise that the lower correlation between skill scores for cases (compared to the correlation of scores for deaths) as displayed in Figure \ref{fig:HUB-cors}B is related to the fact that outlier forecasts missing the peak are more common for cases than for deaths, and therefore relative skill scores are more strongly affected for cases. 
 
 
 
@@ -428,6 +427,10 @@ Exploring transformations is a promising avenue for future work that could help 
 
 \appendix
 \section{Supplementary information}
+
+\renewcommand{\thefigure}{SI.\arabic{figure}}
+\setcounter{figure}{0}
+\renewcommand{\thetable}{SI.\arabic{table}} \setcounter{table}{0}
 
 \subsection{Alternative Formulation of the WIS}
 \label{sec:alternative-wis}
@@ -460,7 +463,9 @@ where $w_k$ is a weight for every interval. Usually, $w_k = \frac{\alpha_k}{2}$ 
 \begin{figure}[h!]
 \centering
 \includegraphics[width = 1\textwidth]{output/figures/SIM-score-approximation.png}
-\caption{Comparison of expected CRPS values of an ideal forecaster and approximated values. Expected scores for three distributions as described in Section \ref{sec:methods:vst} and Figure \ref{fig:SIM-wis-state-size-mean} and approximated as described in \ref{sec:methods:vst}}
+\caption{
+Visualisation of expected CRPS values against approximated scores using the approximation detailed in Section \ref{sec:methods:rankings} (see also Figure \ref{fig:SIM-wis-state-size-mean}). Expected CRPS scores are shown for three different distributions once on the natural scale (top row) and once scored on the log scale (bottom row).  
+}
 \label{fig:score-approx}
 \end{figure}
 
@@ -538,17 +543,6 @@ $= 0$ & \  & $>100$\\
     }
     \label{fig:HUB-model-comparison-epinow}
 \end{figure}
-
-
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.99\textwidth]{output/figures/SIM-score-approximation.png}
-    \caption{
-    Visualisation of expected CRPS values against approximated scores using the approximation detailed in Section \ref{sec:methods:rankings} (see also Figure \ref{fig:SIM-wis-state-size-mean}). Expected CRPS scores are shown for three different distributions once on the natural scale (top row) and once scored on the log scale (bottom row).  
-    }
-    \label{fig:HUB-model-comparison-epinow}
-\end{figure}
-
 
 
 

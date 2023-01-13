@@ -441,9 +441,23 @@ hub_data$location |>
 
 
 ## ========================================================================== ##
-## Figure 7: Scores for two-week-ahead predictions from the 
+## Figure 5: Scores for two-week-ahead predictions from the 
 ## EuroCOVIDhub-ensemble madein Germany.
 ## ========================================================================== ##
+
+label_fn <- function(x) {
+  x <- ifelse(x%%1 == 0, 
+              as.integer(x), x)
+  ifelse(x < 1000, 
+         paste(x), 
+         ifelse(x < 1e6, 
+                paste0(x / 1000, "k"),
+                ifelse(x < 1e9, 
+                       paste0(x / 1e6, "m"), 
+                       paste0(x / 1e9, "b"))
+         )
+  )
+}
 
 plot_pred_score <- function(hub_data, scores, model,
                             horizon = 2, type = "Cases", 
@@ -507,6 +521,7 @@ plot_pred_score <- function(hub_data, scores, model,
     ) +
     theme_scoringutils() +
     scale_fill_discrete(type = c("#DF536B", "#61D04F", "#2297E6")) +
+    scale_y_continuous(labels = label_fn) + 
     guides(fill = guide_legend(title = "WIS component")) +
     labs(y = "WIS contributions", x = "Target end date") 
   
@@ -571,14 +586,6 @@ DH"
     theme(legend.position = "bottom")
 }
 
-hub_data |> 
-  filter(location == "DE", 
-         horizon == 2,
-         model == "EuroCOVIDhub-ensemble", 
-         target_type == "Cases") |>
-  pull(target_end_date) |>
-  unique() |> sort()
-
 put_plot_together("EuroCOVIDhub-ensemble")
 ggsave(filename = "output/figures/HUB-model-comparison-ensemble.png", width = 10, height = 8.5)
 
@@ -607,20 +614,6 @@ ggsave(filename = "output/figures/HUB-model-comparison-baseline.png", width = 10
 ## Figure 6: Observations and scores across locations and forecast 
 ##           horizons for the European COVID-19 Forecast Hub data
 ## ========================================================================== ##
-
-label_fn <- function(x) {
-  x <- ifelse(x%%1 == 0, 
-              as.integer(x), x)
-  ifelse(x < 1000, 
-         paste(x), 
-         ifelse(x < 1e6, 
-                paste0(x / 1000, "k"),
-                ifelse(x < 1e9, 
-                       paste0(x / 1e6, "m"), 
-                       paste0(x / 1e9, "b"))
-         )
-  )
-}
 
 label_fn_within <- function(x) {
   x <- gsub(pattern = "___Deaths", "", x)
@@ -717,17 +710,24 @@ box_plot_horizon <- scores |>
     interval_score = fct(interval_score, interval_score[horizon ==1])
       ) |>
   ggplot(aes(y = interval_score,
-             x = as.factor(horizon), fill = target_type)) + 
+             x = as.factor(horizon), 
+             fill = scale)) + 
   geom_hline(aes(yintercept = 1), linetype = "dashed", color = "grey40") +
-  geom_violin(aes(fill = target_type), alpha = 0.2, color = NA) +
+  geom_violin(aes(fill = scale), alpha = 0.2, color = NA) +
   geom_boxplot(alpha = 0.5, position = "dodge2") + 
-  scale_fill_brewer(palette = "Set1", name = "Forecast target") + 
-  facet_wrap(~ scale, nrow = 1) + 
+  scale_fill_brewer(palette = "Set2", name = "Transformation") + 
+  facet_wrap(~ target_type, nrow = 1) + 
   theme_scoringutils() + 
-  theme(legend.position = "none") + 
+  theme(legend.position = "right") + 
   scale_y_continuous(labels = label_fn, trans = "log10") +
   labs(y = "Rel. change in WIS", x = "Forecast horizon (weeks)") + 
   coord_cartesian(ylim = c(0.1, 10))
+
+# legend <- ggpubr::get_legend(box_plot_horizon) |>
+# ggpubr::as_ggplot()
+
+box_plot_horizon <- box_plot_horizon + 
+  theme(legend.position = "bottom") 
 
 layout <- "
 AB
@@ -736,7 +736,7 @@ CD
 EF"
 
 plot_means_obs  + box_plot_obs + plot_mean_scores + box_plot_scores + box_plot_horizon + plot_spacer() +
-  plot_layout(heights = c(1, 2, 1), 
+  plot_layout(heights = c(1, 2, 1.4), 
               widths = c(3, 1)) +
   plot_layout(design = layout) +
   plot_annotation(tag_levels = "A")

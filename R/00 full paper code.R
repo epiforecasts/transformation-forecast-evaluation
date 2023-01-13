@@ -20,8 +20,7 @@ library(covidHubUtils) # remotes::install_github("https://github.com/reichlab/co
 set.seed(1234)
 
 ## ========================================================================== ##
-## FIGURE 1 Numerical comparison of different measures of relative error
-##  + Figure XX
+## FIGURE 1: Numerical comparison of different measures of relative error
 ## ========================================================================== ##
 
 y_hat <- 1
@@ -74,6 +73,11 @@ p2 <- p1 +
 ggsave("output/figures/different-relative-errors.png", width = 7, height = 3)
 
 
+## ========================================================================== ##
+## SI Version of Figure 1 (Figure SI.1) 
+## Numerical comparison square-root transformation
+## ========================================================================== ##
+
 p3 <- data |>
   filter(Metric != "AE after log transformation")|>
   plot_fct() +
@@ -96,7 +100,8 @@ ggsave("output/figures/different-relative-errors-sqrt.png", width = 7, height = 
 
 
 ## ========================================================================== ##
-## FIGURE 2
+## FIGURE 2: Expected CRPS scores as a function of the mean 
+## and variance of the forecast quantity.
 ## ========================================================================== ##
 if (file.exists("output/data/simulation-figure-2.Rda")) {
   scores_fig_2 <- readRDS(file = "output/data/simulation-figure-2.Rda")
@@ -190,7 +195,8 @@ ggsave("output/figures/SIM-mean-state-size.png", width = 7, height = 4.1)
 
 
 ## ========================================================================== ##
-## FIGURE 2 - Appendix version - Figure XX
+## SI Version of Figure 2 (Figure SI.2)
+## Illustration of the approximation
 ## ========================================================================== ##
 
 scores_fig_2 |>
@@ -219,7 +225,7 @@ ggsave("output/figures/SIM-score-approximation.png", width = 7, height = 8)
 
 
 ## ========================================================================== ##
-## FIGURE 3
+## FIGURE 3: llustration of impropriety of log-transformed CRPS. 
 ## ========================================================================== ##
 
 # in this plot the CRPS is approximated by the WIS with 99 quantiles
@@ -433,8 +439,172 @@ hub_data$location |>
 
 
 
+
 ## ========================================================================== ##
-## Figure 5: Observations and scores across locations and forecast 
+## Figure 7: Scores for two-week-ahead predictions from the 
+## EuroCOVIDhub-ensemble madein Germany.
+## ========================================================================== ##
+
+plot_pred_score <- function(hub_data, scores, model,
+                            horizon = 2, type = "Cases", 
+                            remove_x_text = TRUE) {
+  forecast_model <- model
+  h <- horizon
+  filtered_hub <- hub_data |>
+    filter(model == forecast_model, 
+           horizon %in% h, 
+           target_type == type) |>
+    mutate(target_end_date = as.Date(target_end_date))
+  
+  locations <- unique(filtered_hub$location) 
+  
+  filtered_scores <- scores |>
+    filter(model == forecast_model, 
+           horizon %in% h, 
+           location %in% locations,
+           target_type == type) 
+  
+  plot_natural  <- filtered_hub |>  
+    mutate(id = paste(type, "- natural")) |>
+    plot_predictions(x = "target_end_date") +
+    scale_y_continuous(labels = label_fn)  +
+    facet_wrap(~ id) +
+    theme(legend.position = "bottom",
+          axis.text.x = element_blank(),
+          axis.title.x = element_blank()) +
+    labs(y = "Predictions")
+  
+  plot_log <- filtered_hub |>
+    mutate(prediction = log(prediction + 1), 
+           true_value = log(true_value + 1)) |>
+    mutate(id = paste(type, "- log")) |>
+    plot_predictions(x = "target_end_date") +
+    scale_y_continuous(labels = label_fn)  +
+    facet_wrap(~ id) +
+    theme(legend.position = "bottom", 
+          axis.text.x = element_blank(), 
+          axis.title.x = element_blank()) +
+    labs(y = "Predictions")
+  
+  scores_natural <- filtered_scores |>
+    filter(scale == "natural") |>
+    summarise_scores("target_end_date") |>
+    select(-interval_score) |>
+    data.table::melt(measure.vars = c(
+      "overprediction",
+      "underprediction",
+      "dispersion"
+    ),
+    variable.name = "wis_component_name",
+    value.name = "component_value"
+    ) |>
+    mutate(target_end_date = as.Date(target_end_date)) |>
+    head(2000) |>
+    ggplot(aes(x = target_end_date)) +
+    geom_col(
+      position = "stack",
+      aes(y = component_value, fill = wis_component_name)
+    ) +
+    theme_scoringutils() +
+    scale_fill_discrete(type = c("#DF536B", "#61D04F", "#2297E6")) +
+    guides(fill = guide_legend(title = "WIS component")) +
+    labs(y = "WIS contributions", x = "Target end date") 
+  
+  scores_log <- filtered_scores |>
+    filter(scale == "log") |>
+    summarise_scores("target_end_date") |>
+    select(-interval_score) |>
+    data.table::melt(measure.vars = c(
+      "overprediction",
+      "underprediction",
+      "dispersion"
+    ),
+    variable.name = "wis_component_name",
+    value.name = "component_value"
+    ) |>
+    mutate(target_end_date = as.Date(target_end_date)) |>
+    head(2000) |>
+    ggplot(aes(x = target_end_date)) +
+    geom_col(
+      position = "stack",
+      aes(y = component_value, fill = wis_component_name)
+    ) +
+    theme_scoringutils() +
+    scale_fill_discrete(type = c("#DF536B", "#61D04F", "#2297E6")) +
+    guides(fill = guide_legend(title = "WIS component")) +
+    labs(y = "WIS contributions", x = "Target end date") 
+  
+  if (remove_x_text) {
+    scores_natural <- scores_natural +
+      theme(axis.text.x = element_blank(), 
+            axis.title.x = element_blank())
+  }
+  
+  list(plot_natural, scores_natural, plot_log, scores_log )
+}
+
+
+put_plot_together <- function(modelname = "EuroCOVIDhub-ensemble", 
+                              locationname = "DE") {
+  
+  plot_cases <- plot_pred_score(hub_data |> filter(location == locationname), 
+                                scores, modelname, 
+                                remove_x_text = TRUE, 
+                                type = "Cases")
+  
+  plot_deaths <- plot_pred_score(hub_data |> filter(location == locationname), 
+                                 scores, modelname, 
+                                 type = "Deaths")
+  
+  layout <- "
+AE
+BF
+CG
+DH"
+  
+  plot_cases[[1]] + plot_cases[[2]] + plot_cases[[3]] +
+    plot_cases[[4]] + plot_deaths[[1]] +
+    plot_deaths[[2]] + plot_deaths[[3]] + plot_deaths[[4]] +
+    plot_annotation(tag_levels = "A") +
+    plot_layout(guides = "collect", 
+                design = layout) &
+    theme(legend.position = "bottom")
+}
+
+hub_data |> 
+  filter(location == "DE", 
+         horizon == 2,
+         model == "EuroCOVIDhub-ensemble", 
+         target_type == "Cases") |>
+  pull(target_end_date) |>
+  unique() |> sort()
+
+put_plot_together("EuroCOVIDhub-ensemble")
+ggsave(filename = "output/figures/HUB-model-comparison-ensemble.png", width = 10, height = 8.5)
+
+
+## ========================================================================== ##
+## SI variant of Figure 5 (Figure XX)
+## ========================================================================== ##
+
+put_plot_together("epiforecasts-EpiNow2")
+ggsave(filename = "output/figures/HUB-model-comparison-epinow.png", width = 10, height = 8.5)
+
+## ========================================================================== ##
+## SI variant of Figure 5 (Figure XX)
+## ========================================================================== ##
+
+put_plot_together("EuroCOVIDhub-baseline", locationname = "DE")
+ggsave(filename = "output/figures/HUB-model-comparison-baseline.png", width = 10, height = 8.5)
+
+
+
+
+
+
+
+## ========================================================================== ##
+## Figure 6: Observations and scores across locations and forecast 
 ##           horizons for the European COVID-19 Forecast Hub data
 ## ========================================================================== ##
 
@@ -576,8 +746,7 @@ ggsave("output/figures/HUB-mean-obs-location.png", width = 10, height = 10)
 
 
 ## ========================================================================== ##
-## Figure 6: Correlations for median forecasts, 
-##           scores, and rankings on the natural and logarithmic scale
+## Figure 7: Regression analysis
 ## ========================================================================== ##
 
 # run regressions
@@ -710,10 +879,144 @@ p_natural / p_log / p_sqrt +
 ggsave("output/figures/HUB-transformation-regression.png", width = 7, height = 6.3)
 
 
+## ========================================================================== ##
+## Table 1: Regression for the relationship of mean and var
+## ========================================================================== ##
+
+natural_reg <- regression_df(scores, s = "natural", horizons = "all")
+log_reg <- regression_df(scores, s = "log", horizons = "all")
+sqrt_reg <- regression_df(scores, s = "sqrt", horizons = "all")
+
+
+natural_reg_target <- rbindlist(list(
+  regression_df(scores, s = "natural", horizons = "all", targets = "Cases"),
+  regression_df(scores, s = "natural", horizons = "all", targets = "Deaths")
+)) 
+
+log_reg_target <- rbindlist(list(
+  regression_df(scores, s = "log", horizons = "all", targets = "Cases"),
+  regression_df(scores, s = "log", horizons = "all", targets = "Deaths")
+)) 
+
+sqrt_reg_target <- rbindlist(list(
+  regression_df(scores, s = "sqrt", horizons = "all", targets = "Cases"),
+  regression_df(scores, s = "sqrt", horizons = "all", targets = "Deaths")
+)) 
+
+
+natural_reg_horizon <- rbindlist(list(
+  regression_df(scores, s = "natural", horizons = "1", targets = "all"),
+  regression_df(scores, s = "natural", horizons = "2", targets = "all"), 
+  regression_df(scores, s = "natural", horizons = "3", targets = "all"), 
+  regression_df(scores, s = "natural", horizons = "4", targets = "all")
+)) 
+
+log_reg_horizon <- rbindlist(list(
+  regression_df(scores, s = "log", horizons = "1", targets = "all"),
+  regression_df(scores, s = "log", horizons = "2", targets = "all"), 
+  regression_df(scores, s = "log", horizons = "3", targets = "all"), 
+  regression_df(scores, s = "log", horizons = "4", targets = "all")
+)) 
+
+sqrt_reg_horizon <- rbindlist(list(
+  regression_df(scores, s = "sqrt", horizons = "1", targets = "all"),
+  regression_df(scores, s = "sqrt", horizons = "2", targets = "all"), 
+  regression_df(scores, s = "sqrt", horizons = "3", targets = "all"), 
+  regression_df(scores, s = "sqrt", horizons = "4", targets = "all")
+)) 
+
+
+natural_reg_horizon_cases <- rbindlist(list(
+  regression_df(scores, s = "natural", horizons = "1", targets = "Cases"),
+  regression_df(scores, s = "natural", horizons = "2", targets = "Cases"), 
+  regression_df(scores, s = "natural", horizons = "3", targets = "Cases"), 
+  regression_df(scores, s = "natural", horizons = "4", targets = "Cases")
+)) 
+
+natural_reg_horizon_deaths <- rbindlist(list(
+  regression_df(scores, s = "natural", horizons = "1", targets = "Deaths"),
+  regression_df(scores, s = "natural", horizons = "2", targets = "Deaths"), 
+  regression_df(scores, s = "natural", horizons = "3", targets = "Deaths"), 
+  regression_df(scores, s = "natural", horizons = "4", targets = "Deaths")
+)) 
+
+log_reg_horizon_cases <- rbindlist(list(
+  regression_df(scores, s = "log", horizons = "1", targets = "Cases"),
+  regression_df(scores, s = "log", horizons = "2", targets = "Cases"), 
+  regression_df(scores, s = "log", horizons = "3", targets = "Cases"), 
+  regression_df(scores, s = "log", horizons = "4", targets = "Cases")
+)) 
+
+log_reg_horizon_deaths <- rbindlist(list(
+  regression_df(scores, s = "log", horizons = "1", targets = "Deaths"),
+  regression_df(scores, s = "log", horizons = "2", targets = "Deaths"), 
+  regression_df(scores, s = "log", horizons = "3", targets = "Deaths"), 
+  regression_df(scores, s = "log", horizons = "4", targets = "Deaths")
+)) 
+
+sqrt_reg_horizon_cases <- rbindlist(list(
+  regression_df(scores, s = "sqrt", horizons = "1", targets = "Cases"),
+  regression_df(scores, s = "sqrt", horizons = "2", targets = "Cases"), 
+  regression_df(scores, s = "sqrt", horizons = "3", targets = "Cases"), 
+  regression_df(scores, s = "sqrt", horizons = "4", targets = "Cases")
+)) 
+
+sqrt_reg_horizon_deaths <- rbindlist(list(
+  regression_df(scores, s = "sqrt", horizons = "1", targets = "Deaths"),
+  regression_df(scores, s = "sqrt", horizons = "2", targets = "Deaths"), 
+  regression_df(scores, s = "sqrt", horizons = "3", targets = "Deaths"), 
+  regression_df(scores, s = "sqrt", horizons = "4", targets = "Deaths")
+)) 
+
+
+
+df <-rbind(
+  natural_reg, 
+  log_reg, 
+  sqrt_reg,
+  natural_reg_target, 
+  log_reg_target, 
+  sqrt_reg_target,
+  natural_reg_horizon, 
+  log_reg_horizon,
+  sqrt_reg_horizon,
+  natural_reg_horizon_cases, 
+  natural_reg_horizon_deaths, 
+  log_reg_horizon_cases, 
+  log_reg_horizon_deaths, 
+  sqrt_reg_horizon_cases, 
+  sqrt_reg_horizon_deaths
+) |>
+  pivot_wider(names_from = scale, values_from = c(alpha, beta)) |>
+  select(horizon, target_type, alpha_natural, beta_natural, alpha_log, beta_log, alpha_sqrt, beta_sqrt) |>
+  mutate(across(c(alpha_natural, beta_natural, alpha_log, beta_log, alpha_sqrt, beta_sqrt), round, 3))
+
+linesep<-function(x,y=character()){
+  if(!length(x))
+    return(y)
+  linesep(x[-length(x)], c(rep('',x[length(x)]-1),'\\addlinespace',y))  
+}
+
+df |> 
+  kable(format = "latex", 
+        align = c("ccrrrrrr"),
+        booktabs = TRUE,
+        linesep = linesep(c(1, 2, 4, 4, 4, 4)),
+        col.names = c("Horizon", 
+                      "Target",
+                      "$\\alpha$", 
+                      "$\\beta$", 
+                      "$\\alpha^*$", 
+                      "$\\beta^*$", 
+                      "$\\alpha^{**}$", 
+                      "$\\beta^{**}$"), escape = FALSE) |>
+  kable_styling()
+
+
 
 
 ## ========================================================================== ##
-## Figure 7 - Name tbd
+## Figure 8: Correlations for rankings on the natural and logarithmic scale
 ## ========================================================================== ##
 
 df <- scores |>
@@ -770,160 +1073,10 @@ p_cor_scores + p_cor_skill +
 ggsave("output/figures/HUB-correlations.png", width = 7, height = 2.6)
 
 
-## ========================================================================== ##
-## Figure 7 - Example comparisons of forecasts on the log and the natural scale
-## ========================================================================== ##
-
-plot_pred_score <- function(hub_data, scores, model,
-                            horizon = 2, type = "Cases", 
-                            remove_x_text = TRUE) {
-  forecast_model <- model
-  h <- horizon
-  filtered_hub <- hub_data |>
-    filter(model == forecast_model, 
-           horizon %in% h, 
-           target_type == type) |>
-    mutate(target_end_date = as.Date(target_end_date))
-  
-  locations <- unique(filtered_hub$location) 
-  
-  filtered_scores <- scores |>
-    filter(model == forecast_model, 
-           horizon %in% h, 
-           location %in% locations,
-           target_type == type) 
-  
-  plot_natural  <- filtered_hub |>  
-    mutate(id = paste(type, "- natural")) |>
-    plot_predictions(x = "target_end_date") +
-    scale_y_continuous(labels = label_fn)  +
-    facet_wrap(~ id) +
-    theme(legend.position = "bottom",
-          axis.text.x = element_blank(),
-          axis.title.x = element_blank()) +
-    labs(y = "Predictions")
-  
-  plot_log <- filtered_hub |>
-    mutate(prediction = log(prediction + 1), 
-           true_value = log(true_value + 1)) |>
-    mutate(id = paste(type, "- log")) |>
-    plot_predictions(x = "target_end_date") +
-    scale_y_continuous(labels = label_fn)  +
-    facet_wrap(~ id) +
-    theme(legend.position = "bottom", 
-          axis.text.x = element_blank(), 
-          axis.title.x = element_blank()) +
-    labs(y = "Predictions")
-  
-  scores_natural <- filtered_scores |>
-    filter(scale == "natural") |>
-    summarise_scores("target_end_date") |>
-    select(-interval_score) |>
-    data.table::melt(measure.vars = c(
-      "overprediction",
-      "underprediction",
-      "dispersion"
-    ),
-    variable.name = "wis_component_name",
-    value.name = "component_value"
-    ) |>
-    mutate(target_end_date = as.Date(target_end_date)) |>
-    head(2000) |>
-    ggplot(aes(x = target_end_date)) +
-    geom_col(
-      position = "stack",
-      aes(y = component_value, fill = wis_component_name)
-    ) +
-    theme_scoringutils() +
-    scale_fill_discrete(type = c("#DF536B", "#61D04F", "#2297E6")) +
-    guides(fill = guide_legend(title = "WIS component")) +
-    labs(y = "WIS contributions", x = "Target end date") 
-  
-  scores_log <- filtered_scores |>
-    filter(scale == "log") |>
-    summarise_scores("target_end_date") |>
-    select(-interval_score) |>
-    data.table::melt(measure.vars = c(
-                       "overprediction",
-                       "underprediction",
-                       "dispersion"
-                     ),
-                     variable.name = "wis_component_name",
-                     value.name = "component_value"
-    ) |>
-    mutate(target_end_date = as.Date(target_end_date)) |>
-    head(2000) |>
-    ggplot(aes(x = target_end_date)) +
-    geom_col(
-      position = "stack",
-      aes(y = component_value, fill = wis_component_name)
-    ) +
-    theme_scoringutils() +
-    scale_fill_discrete(type = c("#DF536B", "#61D04F", "#2297E6")) +
-    guides(fill = guide_legend(title = "WIS component")) +
-    labs(y = "WIS contributions", x = "Target end date") 
-  
-  if (remove_x_text) {
-    scores_natural <- scores_natural +
-      theme(axis.text.x = element_blank(), 
-            axis.title.x = element_blank())
-  }
-  
-  list(plot_natural, scores_natural, plot_log, scores_log )
-}
-
-
-put_plot_together <- function(modelname = "EuroCOVIDhub-ensemble", 
-                              locationname = "DE") {
-  
-  plot_cases <- plot_pred_score(hub_data |> filter(location == locationname), 
-                                scores, modelname, 
-                                remove_x_text = TRUE, 
-                                type = "Cases")
-  
-  plot_deaths <- plot_pred_score(hub_data |> filter(location == locationname), 
-                                 scores, modelname, 
-                                 type = "Deaths")
-  
-  layout <- "
-AE
-BF
-CG
-DH"
-  
-  plot_cases[[1]] + plot_cases[[2]] + plot_cases[[3]] +
-    plot_cases[[4]] + plot_deaths[[1]] +
-    plot_deaths[[2]] + plot_deaths[[3]] + plot_deaths[[4]] +
-    plot_annotation(tag_levels = "A") +
-    plot_layout(guides = "collect", 
-                design = layout) &
-    theme(legend.position = "bottom")
-}
-
-hub_data |> 
-  filter(location == "DE", 
-         horizon == 2,
-         model == "EuroCOVIDhub-ensemble", 
-         target_type == "Cases") |>
-  pull(target_end_date) |>
-  unique() |> sort()
-
-put_plot_together("EuroCOVIDhub-ensemble")
-ggsave(filename = "output/figures/HUB-model-comparison-ensemble.png", width = 10, height = 8.5)
-
-put_plot_together("epiforecasts-EpiNow2")
-ggsave(filename = "output/figures/HUB-model-comparison-epinow.png", width = 10, height = 8.5)
-
-put_plot_together("EuroCOVIDhub-baseline", locationname = "DE")
-ggsave(filename = "output/figures/HUB-model-comparison-baseline.png", width = 10, height = 8.5)
-
-scores |>
-  filter(model == "ILM-EKF", 
-         interval_score == max(interval_score))
 
 
 ## ========================================================================== ##
-## Figure 8 - Look at pairwise comparisons and changes in rankings (plus Appendix figures)
+## Figure 9 - Changes in model ratings as measured by relative skill
 ## ========================================================================== ##
 
 simple_labels <- function(x) {
@@ -1066,7 +1219,8 @@ ggsave("output/figures/HUB-pairwise-comparisons.png", width = 11.5, height = 6)
 
 
 ## ========================================================================== ##
-## Table 1 - Appendix
+## Table SI.1: Summary statistics for observations and scores for forecasts 
+## from the ECDC data set
 ## ========================================================================== ##
 
 summary <- hub_data |>
@@ -1116,7 +1270,7 @@ table |>
 
 
 ## ========================================================================== ##
-## Figure 9 - Appendix Available Forecasts
+## Figure SI.3 - Appendix Available Forecasts
 ## ========================================================================== ##
 
 hub_data |> 
@@ -1132,150 +1286,9 @@ hub_data |>
 ggsave(filename = "output/figures/number-avail-forecasts.png", height = 4, width = 10)
 
 
-## ========================================================================== ##
-## Figure 10/11: see Figure 7 
-## ========================================================================== ##
-
-
 
 ## ========================================================================== ##
-## Table 2: Regression for the relationship of mean and var
-## ========================================================================== ##
-
-# regression functions defined above for Figure 6
-
-natural_reg <- regression_df(scores, s = "natural", horizons = "all")
-log_reg <- regression_df(scores, s = "log", horizons = "all")
-sqrt_reg <- regression_df(scores, s = "sqrt", horizons = "all")
-
-
-natural_reg_target <- rbindlist(list(
-  regression_df(scores, s = "natural", horizons = "all", targets = "Cases"),
-  regression_df(scores, s = "natural", horizons = "all", targets = "Deaths")
-)) 
-
-log_reg_target <- rbindlist(list(
-  regression_df(scores, s = "log", horizons = "all", targets = "Cases"),
-  regression_df(scores, s = "log", horizons = "all", targets = "Deaths")
-)) 
-
-sqrt_reg_target <- rbindlist(list(
-  regression_df(scores, s = "sqrt", horizons = "all", targets = "Cases"),
-  regression_df(scores, s = "sqrt", horizons = "all", targets = "Deaths")
-)) 
-
-
-natural_reg_horizon <- rbindlist(list(
-  regression_df(scores, s = "natural", horizons = "1", targets = "all"),
-  regression_df(scores, s = "natural", horizons = "2", targets = "all"), 
-  regression_df(scores, s = "natural", horizons = "3", targets = "all"), 
-  regression_df(scores, s = "natural", horizons = "4", targets = "all")
-)) 
-
-log_reg_horizon <- rbindlist(list(
-  regression_df(scores, s = "log", horizons = "1", targets = "all"),
-  regression_df(scores, s = "log", horizons = "2", targets = "all"), 
-  regression_df(scores, s = "log", horizons = "3", targets = "all"), 
-  regression_df(scores, s = "log", horizons = "4", targets = "all")
-)) 
-
-sqrt_reg_horizon <- rbindlist(list(
-  regression_df(scores, s = "sqrt", horizons = "1", targets = "all"),
-  regression_df(scores, s = "sqrt", horizons = "2", targets = "all"), 
-  regression_df(scores, s = "sqrt", horizons = "3", targets = "all"), 
-  regression_df(scores, s = "sqrt", horizons = "4", targets = "all")
-)) 
-
-
-natural_reg_horizon_cases <- rbindlist(list(
-  regression_df(scores, s = "natural", horizons = "1", targets = "Cases"),
-  regression_df(scores, s = "natural", horizons = "2", targets = "Cases"), 
-  regression_df(scores, s = "natural", horizons = "3", targets = "Cases"), 
-  regression_df(scores, s = "natural", horizons = "4", targets = "Cases")
-)) 
-
-natural_reg_horizon_deaths <- rbindlist(list(
-  regression_df(scores, s = "natural", horizons = "1", targets = "Deaths"),
-  regression_df(scores, s = "natural", horizons = "2", targets = "Deaths"), 
-  regression_df(scores, s = "natural", horizons = "3", targets = "Deaths"), 
-  regression_df(scores, s = "natural", horizons = "4", targets = "Deaths")
-)) 
-
-log_reg_horizon_cases <- rbindlist(list(
-  regression_df(scores, s = "log", horizons = "1", targets = "Cases"),
-  regression_df(scores, s = "log", horizons = "2", targets = "Cases"), 
-  regression_df(scores, s = "log", horizons = "3", targets = "Cases"), 
-  regression_df(scores, s = "log", horizons = "4", targets = "Cases")
-)) 
-
-log_reg_horizon_deaths <- rbindlist(list(
-  regression_df(scores, s = "log", horizons = "1", targets = "Deaths"),
-  regression_df(scores, s = "log", horizons = "2", targets = "Deaths"), 
-  regression_df(scores, s = "log", horizons = "3", targets = "Deaths"), 
-  regression_df(scores, s = "log", horizons = "4", targets = "Deaths")
-)) 
-
-sqrt_reg_horizon_cases <- rbindlist(list(
-  regression_df(scores, s = "sqrt", horizons = "1", targets = "Cases"),
-  regression_df(scores, s = "sqrt", horizons = "2", targets = "Cases"), 
-  regression_df(scores, s = "sqrt", horizons = "3", targets = "Cases"), 
-  regression_df(scores, s = "sqrt", horizons = "4", targets = "Cases")
-)) 
-
-sqrt_reg_horizon_deaths <- rbindlist(list(
-  regression_df(scores, s = "sqrt", horizons = "1", targets = "Deaths"),
-  regression_df(scores, s = "sqrt", horizons = "2", targets = "Deaths"), 
-  regression_df(scores, s = "sqrt", horizons = "3", targets = "Deaths"), 
-  regression_df(scores, s = "sqrt", horizons = "4", targets = "Deaths")
-)) 
-
-
-
-df <-rbind(
-  natural_reg, 
-  log_reg, 
-  sqrt_reg,
-  natural_reg_target, 
-  log_reg_target, 
-  sqrt_reg_target,
-  natural_reg_horizon, 
-  log_reg_horizon,
-  sqrt_reg_horizon,
-  natural_reg_horizon_cases, 
-  natural_reg_horizon_deaths, 
-  log_reg_horizon_cases, 
-  log_reg_horizon_deaths, 
-  sqrt_reg_horizon_cases, 
-  sqrt_reg_horizon_deaths
-) |>
-  pivot_wider(names_from = scale, values_from = c(alpha, beta)) |>
-  select(horizon, target_type, alpha_natural, beta_natural, alpha_log, beta_log, alpha_sqrt, beta_sqrt) |>
-  mutate(across(c(alpha_natural, beta_natural, alpha_log, beta_log, alpha_sqrt, beta_sqrt), round, 3))
-
-linesep<-function(x,y=character()){
-  if(!length(x))
-    return(y)
-  linesep(x[-length(x)], c(rep('',x[length(x)]-1),'\\addlinespace',y))  
-}
-
-df |> 
-  kable(format = "latex", 
-        align = c("ccrrrrrr"),
-        booktabs = TRUE,
-        linesep = linesep(c(1, 2, 4, 4, 4, 4)),
-        col.names = c("Horizon", 
-                      "Target",
-                      "$\\alpha$", 
-                      "$\\beta$", 
-                      "$\\alpha^*$", 
-                      "$\\beta^*$", 
-                      "$\\alpha^{**}$", 
-                      "$\\beta^{**}$"), escape = FALSE) |>
-  kable_styling()
-
-
-## ========================================================================== ##
-## Table XX: Erroneous forecasts
+## Table SI.3: Erroneous forecasts
 ## ========================================================================== ##
 
 data.table(

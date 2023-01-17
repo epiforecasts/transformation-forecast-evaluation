@@ -244,7 +244,7 @@ add_median_forecast <- function(scores, hub_data) {
   medians <- hub_data |>
     filter(quantile == 0.5) |> 
     rename(median_prediction = prediction) |>
-    select(-quantile)
+    select(-quantile, -true_value)
   
   out <- scores |>
     inner_join(medians)
@@ -289,68 +289,8 @@ scores_log_alts <-
                           "horizon", "target_type", "scale"), 
                    na.rm = TRUE)
 
-scores_log_alts <- scores_log_alts |>
-  rbind(scores,
-        fill = TRUE)
+scores_log_alts <- add_median_forecast(scores_log_alts, hub_data)
 
-scores_log_alts[scale == "log", scale := "log + 1"]
-scores_log_alts[, type_and_scale := paste0(target_type, " - ", scale)]
-
-
-
-# scores_0.001 <- hub_data |>
-#   mutate(scale = "natural") |>
-#   rbind(hub_data |>
-#           mutate(
-#             scale = "log", 
-#             true_value = log(true_value + 0.001), 
-#             prediction = log(pmax(prediction, 0) + 0.001)
-#           )) |>
-#   rbind(hub_data |>
-#           mutate(scale = "sqrt", 
-#                  true_value = sqrt(true_value), 
-#                  prediction = sqrt(prediction))) |>
-#   score(metrics = c("interval_score")) |>
-#   summarise_scores(by = c("model", "location",
-#                           "target_end_date", "forecast_date",
-#                           "horizon", "target_type", "scale"), 
-#                    na.rm = TRUE)
-# 
-# scores_0.001[, type_and_scale := paste0(target_type, " - ", scale)]
-# 
-# 
-# hub_data |>
-#   group_by(target_type) |>
-#   summarise(max = median(true_value))
-# 
-# scores_10median <- hub_data |>
-#   mutate(scale = "natural") |>
-#   rbind(hub_data |>
-#           mutate(
-#             scale = "log", 
-#             true_value = ifelse(target_type == "Cases", 
-#                                 log(true_value + 101630), 
-#                                 log(true_value + 530)), 
-#             prediction = ifelse(target_type == "Cases", 
-#                                 log(pmax(prediction, 0) + 101630), 
-#                                 log(pmax(prediction, 0) + 530))
-#           )) |>
-#   rbind(hub_data |>
-#           mutate(scale = "sqrt", 
-#                  true_value = sqrt(true_value), 
-#                  prediction = sqrt(prediction))) |>
-#   score(metrics = c("interval_score")) |>
-#   summarise_scores(by = c("model", "location",
-#                           "target_end_date", "forecast_date",
-#                           "horizon", "target_type", "scale"), 
-#                    na.rm = TRUE)
-# 
-# scores_10median[, type_and_scale := paste0(target_type, " - ", scale)]
-# 
-# 
-
-
-
-
+fwrite(scores_log_alts, here("output", "data", "all-scores-european-hub-log-variants.csv"))
 
 

@@ -189,7 +189,7 @@ where $\bar{\hat{r}}$ is the true mean growth rate and $\bar{r}$ is the forecast
 \subsection{Interpretation as a variance-stabilising transformation}
 \label{sec:methods:vst}
 
-When evaluating models across sets of forecasting tasks, it may be desirable for each target to have a similar impact on the overall results. In disease forecasting, this is not the case when using the CRPS, as the latter typically scales with the order of magnitude of the quantity to be predicted. Average scores are then dominated by the results achieved for targets with high expected outcomes. 
+When evaluating models across sets of forecasting tasks, it may be desirable for each target to have a similar impact on the overall results. In disease incidence forecasting, this is not the case when using the CRPS on the natural scale, as the latter typically scales with the order of magnitude of the quantity to be predicted. Average scores are then dominated by the results achieved for targets with high expected outcomes. 
 %Bracher et al. mention this as a desirable feature of the CRPS. 
 % In epidemiological contexts, the variance of the variable of interest usually scales with its mean. 
 Specifically, if the predictive distribution for the quantity $Y$ equals the true data-generating process $F$ (an ideal forecast), the expected CRPS is given by \citep{gneitingStrictlyProperScoring2007}
@@ -226,7 +226,7 @@ To strengthen our intuition on how transforming outcomes prior to applying the C
     These expected CRPS values where computed for different predictive means based on 10,000 samples each and are represented by dots. Solid lines show the corresponding approximation of the expected CRPS based on an assumed normal distribution as discussed in section \ref{sec:methods:vst}. Figure \ref{fig:score-approx} shows the quality of the approximation in more detail. 
     The first distribution (red) is a truncated normal distribution with constant variance (we chose $\sigma = 1$ in order to only obtain positive samples). The second (green) is a negative binomial distribution with variance $\theta = 10$ and variance $\sigma^2 = \mu + 0.1\mu^2$. The third (blue) is a
     Poisson distribution with $\sigma^2 = \mu$. To make the scores for the different distributions comparable, scores were normalised to one, meaning that the mean score for every distribution (red, green, blue) is one. 
-    A: Normalised expected CRPS for ideal forecasts with increasing means for three distribution with different relationships between mean and variance. Expected CRPS was computed on the natural scale (middle), after adding one and applying a log-transformation to the data (middle) and after applying a square-root transformation (left). B: A but with x axis on the log scale.}
+    A: Normalised expected CRPS for ideal forecasts with increasing means for three distribution with different relationships between mean and variance. Expected CRPS was computed on the natural scale (middle), after adding one and applying a log-transformation to the data (middle) and after applying a square-root transformation (right). B: A but with x axis on the log scale.}
     \label{fig:SIM-wis-state-size-mean}
 \end{figure}
 
@@ -243,9 +243,17 @@ Transformations that are strictly monotonic are permissible in the sense that th
 \end{figure}
 
 In practice, one issue with transformations, such as the log transform, is that they are not readily applicable to negative numbers or zero values, which need to be removed or otherwise handled. 
-One common approach to deal with zeros is to add a small quantity, such as 1, to all observations and predictions before taking the logarithm \citep{bellegoDealingLogsZeros2022}. This represents a strictly monotonic transformation and therefore preserves the propriety of the resulting score. The choice of the quantity to add does however influences scores and rankings, as measures of relative errors shrink when adding a constant to the forecast and the observation. The impact is greatest for forecasts of small quantities, as relative errors shrink more the smaller the original value before adding a constant. In principle, it would also be possible to exploit the difference in how scores are affected in order to equalise scores for forecasts of quantities across different scales by adding a larger number (e.g. 100 or 10,000) if average scores are dominated too strongly by forecasts for small quantities. 
+One common approach to deal with zeros is to add a small quantity, such as 1, to all observations and predictions before taking the logarithm \citep{bellegoDealingLogsZeros2022}. This represents a strictly monotonic transformation and therefore preserves the propriety of the resulting score. The choice of the quantity to add does however influences scores and rankings, as measures of relative errors shrink when adding a constant $a$ to the forecast and the observation. We illustrate this in Figure \ref{fig:illustration-effect-log-offset}. As a rule of thumb, if the observation or the forecast is more than 5 times larger than the offset $a$, then deviations from the natural logarithm without offset should be small, and negligible if it is more than 50 times as large as the offset. Choosing a suitable offset $a$ balances two competing concerns: on the one hand, choosing a small $a$ makes sure that the transformation is as close to a natural logarithm as possible and scores can be interpreted as outlined above. On the other hand, choosing a larger $a$ can help stabilise scores for forecasts and observations close to zero and equalise scores across different orders of magnitude, avoiding giving excessive weight to forecasts for small quantities (see Figure \ref{fig:HUB-log-different-offsets}). 
 
-Small discrete observed values can pose an additional problem as it may be difficult to reliably evaluate relative errors. A related issue occurs when the predictive distribution has a large probability mass on zero (or on very small values), as this can translate into an excessively wide forecast in relative terms. This can be seen in Figure \ref{fig:HUB-model-comparison-baseline}, where the dispersion component of the WIS is inflated for scores obtained after applying the natural logarithm where forecasts contained zero in its prediction intervals. 
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.99\textwidth]{output/figures/illustration-effect-offset-log.png}
+    \caption{Illustration of the effect of adding a small quantity to a value before taking the natural logarithm. For increasing x, all lines eventually approach the black line (representing a transformation with no offset applied).
+    For a given solid line, the dashed line of the same colour marks the x-value that  is equal to 5 times the corresponding offset.}
+    \label{fig:illustration-effect-log-offset}
+\end{figure}
+
+Small discrete observed values can pose a problem as it may be difficult to reliably evaluate relative errors. A related issue occurs when the predictive distribution has a large probability mass on zero (or on very small values), as this can translate into an excessively wide forecast in relative terms. This can be seen in Figure \ref{fig:HUB-model-comparison-baseline}, where the dispersion component of the WIS is inflated for scores obtained after applying the natural logarithm where forecasts contained zero in its prediction intervals. 
 
 \subsection{Effects on model rankings}
 \label{sec:methods:rankings}
@@ -255,7 +263,7 @@ Rankings between different forecasters based on the CRPS may change when making 
 \begin{figure}[h!]
 \centering
 \includegraphics[width = 1\textwidth]{output/figures/illustration-effect-log-ranking-crps.png}
-\caption{Illustration of the effect of the log-transformation of the ranking for a single forecast. Shown are CRPS (or WIS, respectively) values as a function of the observed value for two forecasters. Model A issues a geometric distribution (a negative binomial distribution with size parameter $\theta = 1$) with mean $\mu = 10$ and variance $\sigma^2 = \mu + \mu^2 = 110$), while Model B issues a Poisson distribution with mean and variance equal to 10. Zeroes in this illustrative example were handled by adding one before applying the natural logarithm.}
+\caption{Illustration of the effect of the log-transformation of the ranking for a single forecast. Shown are CRPS (or WIS, respectively) values as a function of the observed value for two forecasters. Model A issues a geometric distribution (a negative binomial distribution with size parameter $\theta = 1$) with mean $\mu = 10$ and variance $\sigma^2 = \mu + \mu^2 = 110$, while Model B issues a Poisson distribution with mean and variance equal to 10. Zeroes in this illustrative example were handled by adding one before applying the natural logarithm.}
 \label{fig:illustration-ranking}
 \end{figure}
 
@@ -274,7 +282,7 @@ Overall model rankings would be expected to differ even more when scores are ave
 As an empirical comparison of evaluating forecasts on the natural and on the log scale, we use forecasts from the European Forecast Hub \citep{europeancovid-19forecasthubEuropeanCovid19Forecast2021, sherrattPredictivePerformanceMultimodel2022}. 
 The European COVID-19 Forecast Hub is one of several COVID-19 Forecast Hubs \citep{cramerEvaluationIndividualEnsemble2021, bracherShorttermForecastingCOVID192021} which have been systematically collecting, aggregating and evaluating forecasts of several COVID-19 targets created by different teams every week. Forecasts are made one to four weeks ahead into the future and follow a quantile-based format with a set of 23 quantiles ($0.01, 0.025, 0.05, ..., 0.5, ... 0.95, 0.975, 0.99$). 
 
-The forecasts used for the purpose of this illustration are forecasts submitted between the 8th of March 2021 and the 5th of December 2022 for reported cases and deaths from COVID-19. See \cite{sherrattPredictivePerformanceMultimodel2022} for a more thorough description of the data. We filtered all forecasts submitted to the Hub to only include models which have submitted forecasts for both deaths and cases for 4 horizons in 32 locations on at least 46 forecast dates (see Figure \ref{fig:HUB-num-avail-models}). We removed all observations marked as data anomalies by the European Forecast Hub \citep{sherrattPredictivePerformanceMultimodel2022} as well as all remaining negative observed values. In addition, we filtered out erroneous forecasts defined by any of the conditions listed in Table \ref{tab:erroneous}. Those forecasts were removed in order to be better able to illustrate the effects of the log-transformation on scores and eliminating distortions caused by outlier forecasters. All predictive quantiles were truncated at 0. We applied the log-transformation after adding 1 to all predictions and observed values. The analysis was conducted in \texttt{R} \citep{R}, using the \texttt{scoringutils} package \citep{bosseEvaluatingForecastsScoringutils2022} for forecast evaluation. All code is available on GitHub 
+The forecasts used for the purpose of this illustration are forecasts submitted between the 8th of March 2021 and the 5th of December 2022 for reported cases and deaths from COVID-19. See \cite{sherrattPredictivePerformanceMultimodel2022} for a more thorough description of the data. We filtered all forecasts submitted to the Hub to only include models which have submitted forecasts for both deaths and cases for 4 horizons in 32 locations on at least 46 forecast dates (see Figure \ref{fig:HUB-num-avail-models}). We removed all observations marked as data anomalies by the European Forecast Hub \citep{sherrattPredictivePerformanceMultimodel2022} as well as all remaining negative observed values. In addition, we filtered out erroneous forecasts defined by any of the conditions listed in Table \ref{tab:erroneous}. Those forecasts were removed in order to be better able to illustrate the effects of the log-transformation on scores and eliminating distortions caused by outlier forecasters. All predictive quantiles were truncated at 0. We applied the log-transformation after adding a constant $a = 1$ to all predictions and observed values. The choice of $a = 1$ in part reflects convention, but also represents a suitable choice as it avoids giving excessive weight to forecasts close to zero, while at the same time ensuring that scores for observations $> 5$ can be interpreted reasonably. The analysis was conducted in \texttt{R} \citep{R}, using the \texttt{scoringutils} package \citep{bosseEvaluatingForecastsScoringutils2022} for forecast evaluation. All code is available on GitHub 
 (\url{https://github.com/epiforecasts/transformation-forecast-evaluation}). Where not otherwise stated, we report results for a two-week-ahead forecast horizon. 
 
 In addition to the WIS we use pairwise comparisons \citep{cramerEvaluationIndividualEnsemble2021} to evaluate the relative performance of models across countries in the presence of missing forecasts. In the first step, score ratios are computed for all pairs of models by taking the set of overlapping forecasts between the two models and dividing the score of one model by the score achieved by the other model. The relative skill for a given model compared to others is then obtained by taking the geometric mean of all score ratios which involve that model. Low values are better, and the average model receives a relative skill score of 1. 
@@ -336,27 +344,27 @@ meaning that we estimate a polynomial relationship between the predictive median
 \centering
 \begin{tabular}{ccrrrrrr}
 \toprule
-Horizon & Target & $\alpha$ & $\beta$ & $\alpha_{\log}$ & $\beta_{\log}$ & $\alpha_{\sqrt{\ }}$ & $\beta_{\sqrt{\ }}$\\
+Horizon & Target & $\alpha$ & $\beta$ & $\alpha_\sqrt{\ }$ & $\beta_\sqrt{\ }$ & $\alpha_\log$ & $\beta_\log$\\
 \midrule
-all & all & -1.093 & 0.963 & 0.391 & 0.001 & -0.352 & 0.201\\
+all & all & -1.093 & 0.963 & -0.352 & 0.201 & 0.391 & 0.001\\
 \addlinespace
-all & Cases & 0.036 & 0.858 & 0.751 & -0.033 & 0.043 & 0.201\\
-all & Deaths & -0.884 & 0.868 & 0.436 & -0.023 & 0.273 & 0.121\\
+all & Cases & 0.036 & 0.858 & 0.043 & 0.201 & 0.751 & -0.033\\
+all & Deaths & -0.884 & 0.868 & 0.273 & 0.121 & 0.436 & -0.023\\
 \addlinespace
-1 & all & -1.402 & 0.923 & 0.318 & -0.014 & 0.320 & 0.088\\
-2 & all & -1.221 & 0.967 & 0.364 & -0.003 & 0.112 & 0.164\\
-3 & all & -1.001 & 0.984 & 0.410 & 0.008 & -0.094 & 0.241\\
-4 & all & -0.757 & 0.986 & 0.469 & 0.015 & 0.000 & 0.299\\
+1 & all & -1.402 & 0.923 & 0.320 & 0.088 & 0.318 & -0.014\\
+2 & all & -1.221 & 0.967 & 0.112 & 0.164 & 0.364 & -0.003\\
+3 & all & -1.001 & 0.984 & -0.094 & 0.241 & 0.410 & 0.008\\
+4 & all & -0.757 & 0.986 & 0.000 & 0.299 & 0.469 & 0.015\\
 \addlinespace
-1 & Cases & -0.862 & 0.876 & 0.433 & -0.024 & 0.790 & 0.087\\
-2 & Cases & -0.243 & 0.877 & 0.660 & -0.031 & 0.959 & 0.162\\
-3 & Cases & 0.372 & 0.855 & 0.882 & -0.037 & 1.109 & 0.238\\
-4 & Cases & 0.816 & 0.837 & 1.009 & -0.036 & 1.645 & 0.296\\
+1 & Cases & -0.862 & 0.876 & 0.790 & 0.087 & 0.433 & -0.024\\
+2 & Cases & -0.243 & 0.877 & 0.959 & 0.162 & 0.660 & -0.031\\
+3 & Cases & 0.372 & 0.855 & 1.109 & 0.238 & 0.882 & -0.037\\
+4 & Cases & 0.816 & 0.837 & 1.645 & 0.296 & 1.009 & -0.036\\
 \addlinespace
-1 & Deaths & -1.146 & 0.832 & 0.376 & -0.035 & 0.457 & 0.048\\
-2 & Deaths & -0.981 & 0.867 & 0.416 & -0.028 & 0.443 & 0.084\\
-3 & Deaths & -0.807 & 0.885 & 0.453 & -0.019 & 0.349 & 0.131\\
-4 & Deaths & -0.602 & 0.891 & 0.501 & -0.011 & 0.125 & 0.194\\
+1 & Deaths & -1.146 & 0.832 & 0.457 & 0.048 & 0.376 & -0.035\\
+2 & Deaths & -0.981 & 0.867 & 0.443 & 0.084 & 0.416 & -0.028\\
+3 & Deaths & -0.807 & 0.885 & 0.349 & 0.131 & 0.453 & -0.019\\
+4 & Deaths & -0.602 & 0.891 & 0.125 & 0.194 & 0.501 & -0.011\\
 \bottomrule
 \end{tabular}
 \caption{Coefficients of three regressions for the effect of the magnitude of the median forecast on expected scores. The first regression was 
@@ -473,25 +481,32 @@ Visualisation of expected CRPS values against approximated scores using the appr
 
 
 
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% HUB plots %
+
+
+
+
 \begin{table}[h!]
     \centering
 \begin{tabular}{lllcc}
 \toprule
 target\_type & quantity & measure & natural & log\\
 \midrule
-Cases & Observations & mean & 62004 & 9.19\\
-Cases & Observations & sd & 171723 & 2.10\\
-Cases & Observations & var & 29488651564 & 4.42\\
+Cases & Observations & mean & 61979 & 9.19\\
+Cases & Observations & sd & 171916 & 2.10\\
+Cases & Observations & var & 29555122130 & 4.42\\
+Deaths & Observations & mean & 220 & 3.89\\
+Deaths & Observations & sd & 435 & 1.96\\
 \addlinespace
-Deaths & Observations & mean & 223 & 3.90\\
-Deaths & Observations & sd & 441 & 1.96\\
-Deaths & Observations & var & 194221 & 3.85\\
-\addlinespace
-\hline
-\addlinespace
+Deaths & Observations & var & 189051 & 3.83\\
 Cases & WIS & mean & 15840 & 0.27\\
 Cases & WIS & sd & 53117 & 0.28\\
-\addlinespace
 Deaths & WIS & mean & 31 & 0.23\\
 Deaths & WIS & sd & 65 & 0.28\\
 \bottomrule
@@ -543,6 +558,16 @@ $= 0$ & \  & $>100$\\
     }
     \label{fig:HUB-model-comparison-epinow}
 \end{figure}
+
+
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.99\textwidth]{output/figures/HUB-scores-locations-log-variants.png}
+    \caption{Mean WIS in different locations for different transformations applied before scoring. Shown are scores for two-week-ahead forecasts of the EuroCOVIDhub-ensemble. On the natural scale (with no transformation prior applying the WIS), scores correlate strongly with the average number of observed values in a given location. The same is true for scores obtained after applying a square-root transformation, or after applying a log-transformation with a large offset $a$. For illustrative purposes, $a$ was chosen to be 101630 for cases and 530 for deaths, 10 times the respective median observed value. For large values of $a$, $log(x + a)$ grows linearly in $x$, meaning that we expect to observe the same patterns as in the case with no transformation. For decreasing values of $a$, we give more relative weight to scores in small locations.}
+    \label{fig:HUB-log-different-offsets}
+\end{figure}
+
 
 
 

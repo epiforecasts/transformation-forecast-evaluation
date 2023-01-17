@@ -220,6 +220,7 @@ for (i in 1:length(indices)) {
 ## Score forecasts, adding versions for the log and sqrt transformations
 scores <- hub_data |>
   mutate(scale = "natural") |>
+  # add log data
   rbind(hub_data |>
           mutate(
             scale = "log", 
@@ -255,6 +256,98 @@ scores <- add_median_forecast(scores, hub_data)
 fwrite(scores, here("output", "data", "all-scores-european-hub.csv"))
 
 
+
+
+
+# create variants of the log score with different offsets
+scores_log_alts <- 
+  rbind(hub_data |>
+          mutate(
+            scale = "log + 0.1", 
+            true_value = log(true_value + 0.1), 
+            prediction = log(pmax(prediction, 0) + 0.1)
+          ), 
+        hub_data |> mutate(
+          scale = "log + 0.001", 
+          true_value = log(true_value + 0.001), 
+          prediction = log(pmax(prediction, 0) + 0.001)
+        ), 
+        hub_data |>
+          mutate(
+            scale = "log + 10x median", 
+            true_value = ifelse(target_type == "Cases", 
+                                log(true_value + 101630), 
+                                log(true_value + 530)), 
+            prediction = ifelse(target_type == "Cases", 
+                                log(pmax(prediction, 0) + 101630), 
+                                log(pmax(prediction, 0) + 530))
+          )
+  ) |>
+  score(metrics = c("interval_score")) |>
+  summarise_scores(by = c("model", "location",
+                          "target_end_date", "forecast_date",
+                          "horizon", "target_type", "scale"), 
+                   na.rm = TRUE)
+
+scores_log_alts <- scores_log_alts |>
+  rbind(scores,
+        fill = TRUE)
+
+scores_log_alts[scale == "log", scale := "log + 1"]
+scores_log_alts[, type_and_scale := paste0(target_type, " - ", scale)]
+
+
+
+# scores_0.001 <- hub_data |>
+#   mutate(scale = "natural") |>
+#   rbind(hub_data |>
+#           mutate(
+#             scale = "log", 
+#             true_value = log(true_value + 0.001), 
+#             prediction = log(pmax(prediction, 0) + 0.001)
+#           )) |>
+#   rbind(hub_data |>
+#           mutate(scale = "sqrt", 
+#                  true_value = sqrt(true_value), 
+#                  prediction = sqrt(prediction))) |>
+#   score(metrics = c("interval_score")) |>
+#   summarise_scores(by = c("model", "location",
+#                           "target_end_date", "forecast_date",
+#                           "horizon", "target_type", "scale"), 
+#                    na.rm = TRUE)
+# 
+# scores_0.001[, type_and_scale := paste0(target_type, " - ", scale)]
+# 
+# 
+# hub_data |>
+#   group_by(target_type) |>
+#   summarise(max = median(true_value))
+# 
+# scores_10median <- hub_data |>
+#   mutate(scale = "natural") |>
+#   rbind(hub_data |>
+#           mutate(
+#             scale = "log", 
+#             true_value = ifelse(target_type == "Cases", 
+#                                 log(true_value + 101630), 
+#                                 log(true_value + 530)), 
+#             prediction = ifelse(target_type == "Cases", 
+#                                 log(pmax(prediction, 0) + 101630), 
+#                                 log(pmax(prediction, 0) + 530))
+#           )) |>
+#   rbind(hub_data |>
+#           mutate(scale = "sqrt", 
+#                  true_value = sqrt(true_value), 
+#                  prediction = sqrt(prediction))) |>
+#   score(metrics = c("interval_score")) |>
+#   summarise_scores(by = c("model", "location",
+#                           "target_end_date", "forecast_date",
+#                           "horizon", "target_type", "scale"), 
+#                    na.rm = TRUE)
+# 
+# scores_10median[, type_and_scale := paste0(target_type, " - ", scale)]
+# 
+# 
 
 
 

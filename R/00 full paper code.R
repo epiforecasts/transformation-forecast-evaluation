@@ -609,7 +609,6 @@ ggsave(filename = "output/figures/HUB-model-comparison-baseline.png", width = 10
 
 
 
-
 ## ========================================================================== ##
 ## Figure 6: Observations and scores across locations and forecast 
 ##           horizons for the European COVID-19 Forecast Hub data
@@ -653,30 +652,31 @@ box_plot_obs <- hub_data |>
   labs(y = "Observations", x = "")  +
   theme(axis.title.x = element_blank())
 
+mean_scores_plot <- function(scores) {
+  plot_df <- scores |> 
+    filter(model == "EuroCOVIDhub-ensemble", 
+           horizon == 2) |>
+    group_by(target_type, location, scale, type_and_scale) |>
+    summarise(interval_score = mean(interval_score), 
+              .groups = "drop_last") |> 
+    full_join(mean_observations)
+  
+  plot_mean_scores <- plot_df |>
+    ggplot(aes(y = interval_score,
+               x = reorder_within(location, -mean_value, target_type))) + 
+    geom_bar(stat = "identity") + 
+    scale_fill_brewer(palette = "Set1", name = "Forecast target") + 
+    facet_wrap(~ type_and_scale, scale = "free", ncol = 2) + 
+    theme_scoringutils() + 
+    theme(legend.position = "none") + 
+    scale_y_continuous(labels = label_fn) + 
+    scale_x_discrete(guide = guide_axis(n.dodge=2), labels = label_fn_within) +
+    labs(y = "Mean weighted interval score", x = "Loaction") 
+  
+  return(plot_mean_scores)
+}
 
-plot_df <- scores |> 
-  filter(model == "EuroCOVIDhub-ensemble", 
-         horizon == 2, 
-         scale %in% c("log", "natural")) |>
-  group_by(target_type, location, scale, type_and_scale) |>
-  summarise(interval_score = mean(interval_score), 
-            .groups = "drop_last") |> 
-  full_join(mean_observations)
-
-plot_mean_scores <- plot_df |>
-  ggplot(aes(y = interval_score,
-             x = reorder_within(location, -mean_value, target_type))) + 
-  geom_bar(stat = "identity") + 
-  scale_fill_brewer(palette = "Set1", name = "Forecast target") + 
-  facet_wrap(~ type_and_scale, scale = "free") + 
-  theme_scoringutils() + 
-  theme(legend.position = "none") + 
-  scale_y_continuous(labels = label_fn) + 
-  scale_x_discrete(guide = guide_axis(n.dodge=2), labels = label_fn_within) +
-  labs(y = "Mean weighted interval score", x = "Loaction") 
-
-
-
+plot_mean_scores <- mean_scores_plot(filter(scores, scale %in% c("log", "natural")))
 
 box_plot_scores <- scores |> 
   filter(model == "EuroCOVIDhub-ensemble", 
@@ -744,6 +744,20 @@ plot_means_obs  + box_plot_obs + plot_mean_scores + box_plot_scores + box_plot_h
 ggsave("output/figures/HUB-mean-obs-location.png", width = 10, height = 10)
 
 
+scores_log_alts <- scores_log_alts |>
+  mutate(type_and_scale = factor(type_and_scale, 
+                                 levels = c("Cases - natural", "Deaths - natural", 
+                                            "Cases - sqrt", "Deaths - sqrt", 
+                                            "Cases - log + 10x median", "Deaths - log + 10x median", 
+                                            "Cases - log + 1", "Deaths - log + 1", 
+                                            "Cases - log + 0.1", "Deaths - log + 0.1", 
+                                            "Cases - log + 0.001", "Deaths - log + 0.001" 
+                                            )))
+
+mean_scores_plot(scores_log_alts)
+
+ggsave("output/figures/HUB-scores-locations-log-variants.png", width = 7, height = 10)
+
 
 ## ========================================================================== ##
 ## Figure 7: Regression analysis
@@ -759,13 +773,18 @@ regression <- function(scores, s = "natural", h = 1:4, t) {
   
   if (s == "natural") {
     out <- data |>
-      filter(is.finite(log_wis)) %>%
+      filter(!is.finite(log_wis)) %>%
       lm(log_wis ~ 1 + log(median_prediction + 1), data = .)
   } else if (s == "log"){
     out <- lm(interval_score ~ 1 + log(median_prediction + 1), data = data)
   } else if (s == "sqrt") {
     out <- lm(interval_score ~ 1 + sqrt(median_prediction), data = data)
+  } else if (s == "natural_alternative") {
+    data <- scores |>
+      filter(scale == "natural", horizon %in% h, target_type %in% t)
+    out <- lm(interval_score ~ 1 + median_prediction, data = data)
   }
+  
   return(out$coefficients)
 }
 
@@ -793,6 +812,9 @@ regression_df <- function(scores, s = "natural", horizons = "all", targets = "al
   
   return(df)
 }
+
+regression_df(scores, s = "log", horizons = "2", targets = "Cases")
+regression_df(scores, s = "natural_alternative", horizons = "2", targets = "Deaths")
 
 regs_coef <- rbind(
   regression_df(scores, s = "natural", horizons = "2", targets = "Cases"),  
@@ -1299,3 +1321,46 @@ data.table(
         align = c("cc"),
         booktabs = TRUE) |>
   kable_styling()
+
+
+## ========================================================================== ##
+## Table SI.3: Erroneous forecasts
+## ========================================================================== ##
+
+x <- seq(0.05, 100, 0.05)
+a <- c(0.1, 1, 10)
+
+plot_df <- expand.grid(
+  x = x, 
+  a = c(0, a)
+) |>
+  mutate(y = log(x + a))
+
+as <- data.frame(
+  a = a
+)
+
+cols <- c("0"= "#000000", 
+          "0.1" = "#E69F00", 
+          "1" = "#56B4E9", 
+          "10" = "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+
+
+plot_df |>
+  ggplot(aes(x = x, y = y, color = factor(a), group = a)) +
+  geom_vline(xintercept = 5 * 0.1, 
+             color = "#E69F00",
+             linetype = "dashed", alpha = 0.4) +
+  geom_vline(xintercept = 5 * 1, 
+             color = "#56B4E9",
+             linetype = "dashed", alpha = 0.4) +
+  geom_vline(xintercept = 5 * 10, 
+             color = "#009E73",
+             linetype = "dashed", alpha = 0.4) +
+  geom_line() + 
+  theme_scoringutils() + 
+  scale_x_continuous(trans = "log10", breaks = c(0.05, 0.5, 5, 50), labels = label_fn) + 
+  scale_y_continuous(labels = label_fn) + 
+  scale_colour_manual(values = cols) + 
+  labs(y = "log (x + a)", color = "a")
+

@@ -910,7 +910,7 @@ scatter_wis_pred <- function(scores, filterscale, a = 1) {
            horizon == 2, 
            scale == filterscale) |>
     ggplot(aes(y = interval_score, x = median_prediction)) +
-    geom_point(size = 0.1, color = "grey20") + 
+    geom_point(size = 0.1, color = "grey20", alpha = 0.4) + 
     geom_line(
       data = filter(regs, scale == filterscale), 
       aes(y = yreg), 

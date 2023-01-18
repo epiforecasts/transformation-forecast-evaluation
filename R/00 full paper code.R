@@ -863,6 +863,23 @@ regression_df <- function(scores, s = "natural", horizons = "all", targets = "al
   return(df)
 }
 
+# check scores for median = 10 and median = 1e6
+reg_check_helper <- function(reg_sqrt, reg_log) {
+  print(paste("10 - sqrt:", reg_sqrt[1] + reg_sqrt[2] * sqrt(10)))
+  print(paste("1e5 - sqrt:", reg_sqrt[1] + reg_sqrt[2] * sqrt(1e5)))
+  
+  print(paste("10 - log:", reg_log[1] + reg_log[2] * log(10)))
+  print(paste("1e5 - log:", reg_log[1] + reg_log[2] * log(1e5)))
+}
+
+reg_log <- regression_df(scores, s = "log", horizons = "2", targets = "Cases", a = 1)
+reg_sqrt <- regression_df(scores, s = "sqrt", horizons = "2", targets = "Cases", a = 1)
+
+reg_check_helper(reg_sqrt, reg_log)
+
+
+
+
 scatter_wis_pred <- function(scores, filterscale, a = 1) {
   
   regs_coef <- rbind(

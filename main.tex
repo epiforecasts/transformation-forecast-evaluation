@@ -109,7 +109,7 @@ Our analysis mostly focuses on the CRPS (or WIS) as an evaluation metric for pro
 
 The remainder of the article is structured as follows. In Sections \ref{sec:methods:relative}--\ref{sec:methods:vst} we provide some mathematical intuition on applying the log-transformation prior to evaluating the CRPS, highlighting the connections to relative error measures, the epidemic growth rate and variance stabilizing transformations.
 %We first provide a mathematical intuition of the impact of the log-transformation and its interpretation as relative error (Section \ref{sec:methods:relative}, measure of the accuracy of a forecast of the growth rate (Section \ref{sec:methods:growthrate}) and it's effect as a variance-stabilising transformation that makes can make scores independent of the mean of the forecast target (Section \ref{sec:methods:vst}. 
-We then discuss practical considerations for applying transformations in general and the log-transformation in particular (Section \ref{sec:methods:considerations}) and the effect of the log-transformation on forecast rankings (Section \ref{sec:methods:rankings}). To analyse the real-world implications of the log-transformation we use forecasts submitted to the European COVID-19 Forecast Hub  \citep[Section 3]{europeancovid-19forecasthubEuropeanCovid19Forecast2021, sherrattPredictivePerformanceMultimodel2022}. Finally, we provide scoring recommendations, discuss alternative transformations that may be useful in different contexts, and suggest further research avenues (Section \ref{sec:discussion}). 
+We then discuss practical considerations for applying transformations in general and the log-transformation in particular (Section \ref{sec:methods:considerations}) and the effect of the log-transformation on forecast rankings (Section \ref{sec:methods:rankings}). To analyse the real-world implications of the log-transformation we use forecasts submitted to the European COVID-19 Forecast Hub  \citep[Section \ref{sec:HUB}]{europeancovid-19forecasthubEuropeanCovid19Forecast2021, sherrattPredictivePerformanceMultimodel2022}. Finally, we provide scoring recommendations, discuss alternative transformations that may be useful in different contexts, and suggest further research avenues (Section \ref{sec:discussion}). 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -258,7 +258,7 @@ Rankings between different forecasters based on the CRPS may change when making 
 Overall model rankings would be expected to differ even more when scores are averaged across multiple forecasts or targets. The change in rankings of aggregate scores is mainly driven by the order of magnitude of scores for different forecast targets across time, location and target type and less so by the kind of changes in model rankings for single forecasts discussed above. Large observations will dominate average CRPS values when evaluation is done on the natural scale, but much less so after log transformation. Depending on the relationship between the mean and variance of the forecast target, a log-transformation may even lead to systematically larger scores assigned to small forecast targets, as illustrated in Figure \ref{fig:SIM-wis-state-size-mean}. 
 
 \section{Empirical example: the European Forecast Hub}
-\label{sec:results}
+\label{sec:HUB}
 
 \subsection{Setting}
 \label{sec:HUB-setting}

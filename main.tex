@@ -295,15 +295,15 @@ Across the dataset, the average number of observed cases and deaths varied consi
 \subsection{Regression analysis to determine the variance-stabilizing transformation}
 \label{sec:HUB-regression}
 
-As argued in Section \ref{sec:methods:vst}, the mean-variance, or mean-CRPS, relationship determines which transformation can serve as a VST. We can analyse this relationship empirically by running a regression that explains the CRPS as a function of the central estimate of the predictive distribution. We ran the regression
+As argued in Section \ref{sec:methods:vst}, the mean-variance, or mean-CRPS, relationship determines which transformation can serve as a VST. We can analyse this relationship empirically by running a regression that explains the WIS (which approximates the CRPS) as a function of the central estimate of the predictive distribution. We ran the regression
 \begin{equation*}
-    \log[\text{CRPS}(F, y)] = \alpha + \beta \times \log[\text{median}(F)], 
+    \log[\text{WIS}(F, y)] = \alpha + \beta \times \log[\text{median}(F)], 
 \end{equation*}
 where the predictive distribution $F$ and the observation $y$ are on the natural scale. This is equivalent to
 \begin{equation*}
-    \text{CRPS}(F, y) = \exp(\alpha) \times \text{median}(F)^\beta, 
+    \text{WIS}(F, y) = \exp(\alpha) \times \text{median}(F)^\beta, 
 \end{equation*}
-meaning that we estimate a polynomial relationship between the predictive median and achieved CRPS. Note that we are using predictive medians rather than means as only the former are available in the European COVID-19 Forecast Hub. As the CRPS of an ideal forecaster scales with the standard deviation (see Section \ref{sec:methods:vst}), a value of $\beta = 1$ would imply a quadratic median-variance relationship; the natural logarithm could then serve as a VST. A value of $\beta 0.5$ would imply a linear median-variance relationship, suggesting the square root as a VST. We applied the regression to case and death forecasts, pooled across horizons and stratified for one through four-week-ahead forecasts. Results are provided in Table \ref{tab:HUB-regression}. It can be seen that the estimates of $\beta$ always take a value somewhat below 1, implying a slightly sub-quadratic mean-variance relationship. The logarithmic transformation should thus approximately stabilize the variance (and CRPS), possibly leading to somewhat higher scores for smaller forecast targets. The square-root transformation, on the other hand, can be expected to still lead to higher CRPS values for targets of higher orders of magnitude.
+meaning that we estimate a polynomial relationship between the predictive median and achieved WIS. Note that we are using predictive medians rather than means as only the former are available in the European COVID-19 Forecast Hub. As the WIS/CRPS of an ideal forecaster scales with the standard deviation (see Section \ref{sec:methods:vst}), a value of $\beta = 1$ would imply a quadratic median-variance relationship; the natural logarithm could then serve as a VST. A value of $\beta = 0.5$ would imply a linear median-variance relationship, suggesting the square root as a VST. We applied the regression to case and death forecasts, pooled across horizons and stratified for one through four-week-ahead forecasts. Results are provided in Table \ref{tab:HUB-regression}. It can be seen that the estimates of $\beta$ always take a value somewhat below 1, implying a slightly sub-quadratic mean-variance relationship. The logarithmic transformation should thus approximately stabilize the variance (and WIS), possibly leading to somewhat higher scores for smaller forecast targets. The square-root transformation, on the other hand, can be expected to still lead to higher WIS values for targets of higher orders of magnitude.
 
 \begin{figure}[h!]
     \centering
@@ -340,21 +340,21 @@ all & Deaths & -0.884 & 0.868 & 0.273 & 0.121 & 0.436 & -0.023\\
 \bottomrule
 \end{tabular}
 \caption{Coefficients of three regressions for the effect of the magnitude of the median forecast on expected scores. The first regression was 
-$\log[\text{CRPS}(F, y)] = \alpha + \beta \times \log[\text{median}(F)], $ where $F$ is the predictive distribution and $y$ the observed value. The second one was 
-$\text{CRPS}(F_{\log}, \log y) = \alpha_{\log} + \beta_{\log} \cdot \log{(\text{median}(F))},$ where $F_{\log}$ is the predictive distribution for $\log y$. The third one was $\text{CRPS}(F_{\sqrt{\ }}, \sqrt{y}) = \alpha_{sqrt{\ }} + \beta_{sqrt{\ }} \cdot \sqrt{(\text{median}(F))},$ where $F_{\sqrt{\ }}$ is the predictive distribution for $\sqrt{y}$.
+$\log[\text{WIS}(F, y)] = \alpha + \beta \times \log[\text{median}(F)], $ where $F$ is the predictive distribution and $y$ the observed value. The second one was 
+$\text{WIS}(F_{\log}, \log y) = \alpha_{\log} + \beta_{\log} \cdot \log{(\text{median}(F))},$ where $F_{\log}$ is the predictive distribution for $\log y$. The third one was $\text{WIS}(F_{\sqrt{\ }}, \sqrt{y}) = \alpha_{sqrt{\ }} + \beta_{sqrt{\ }} \cdot \sqrt{(\text{median}(F))},$ where $F_{\sqrt{\ }}$ is the predictive distribution for $\sqrt{y}$.
 }
 \label{tab:HUB-regression}
 \end{table}
 
 To check the relationship after the transformation, we ran the regressions
 \begin{equation*}
-    \text{CRPS}(F_{\log}, \log y) = \alpha_{\log} + \beta_{\log} \cdot \log{(\text{median}(F))},
+    \text{WIS}(F_{\log}, \log y) = \alpha_{\log} + \beta_{\log} \cdot \log{(\text{median}(F))},
 \end{equation*}
 where $F_{\log}$ is the predictive distribution for $\log(y)$, and
 \begin{equation*}
-    \text{CRPS}(F_{\sqrt{\ }}, \sqrt{y}) = \alpha_{\sqrt{\ }} + \beta_{\sqrt{\ }} \cdot \sqrt{\text{median}(F)},
+    \text{WIS}(F_{\sqrt{\ }}, \sqrt{y}) = \alpha_{\sqrt{\ }} + \beta_{\sqrt{\ }} \cdot \sqrt{\text{median}(F)},
 \end{equation*} 
-where $F_{\sqrt{\ }}$ is the predictive distribution on the square-root scale. A value of $\beta_{\log} = 0$ (or $\beta_{\sqrt{\ } = 0}$, respectively, would imply that scores are independent of the median prediction after the transformation. A value smaller (larger) than 0 would imply that smaller (larger) targets lead to higher scores. As can be seen from Table \ref{tab:HUB-regression}, the results indeed indicate that small targets lead to larger average CRPS when using the log transform ($\beta_{\log} < 0$), while the opposite is true for the square-root transform ($\beta_{\sqrt{\ }} > 0$). The results of the three regressions are also displayed in Figure \ref{fig:HUB-regression}. In this empirical example, the log transformation thus helps (albeit not perfectly), to stabilise WIS values, and it does so more successfully than the square-root transformation. As can be seen from Figure \ref{fig:HUB-regression}, the expected CRPS scores for case targets with medians of 10 and 100,000 differ by more then a factor of ten for the square root transformation, but only a factor of around 2 for the logarithm.
+where $F_{\sqrt{\ }}$ is the predictive distribution on the square-root scale. A value of $\beta_{\log} = 0$ (or $\beta_{\sqrt{\ }} = 0$, respectively, would imply that scores are independent of the median prediction after the transformation. A value smaller (larger) than 0 would imply that smaller (larger) targets lead to higher scores. As can be seen from Table \ref{tab:HUB-regression}, the results indeed indicate that small targets lead to larger average WIS when using the log transform ($\beta_{\log} < 0$), while the opposite is true for the square-root transform ($\beta_{\sqrt{\ }} > 0$). The results of the three regressions are also displayed in Figure \ref{fig:HUB-regression}. In this empirical example, the log transformation thus helps (albeit not perfectly), to stabilise WIS values, and it does so more successfully than the square-root transformation. As can be seen from Figure \ref{fig:HUB-regression}, the expected WIS scores for case targets with medians of 10 and 100,000 differ by more then a factor of ten for the square root transformation, but only a factor of around 2 for the logarithm.
 
 \subsection{Impact of logarithmic transformation on model rankings}
 

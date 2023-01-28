@@ -5,6 +5,7 @@
   month = oct,
   pages = {2022.10.12.22280917},
   publisher = {{medRxiv}},
+  note = {Preprint, \url{https://www.medrxiv.org/content/10.1101/2022.10.12.22280917v1}},
   doi = {10.1101/2022.10.12.22280917},
   abstract = {Multi-model and multi-team ensemble forecasts have become widely used to generate reliable short-term predictions of infectious disease spread. Notably, various public health agencies have used them to leverage academic disease modelling during the COVID-19 pandemic. However, ensemble forecasts are difficult to interpret and require extensive effort from numerous participating groups as well as a coordination team. In other fields, resource usage has been reduced by training simplified models that reproduce some of the observed behaviour of more complex models. Here we used observations of the behaviour of the European COVID-19 Forecast Hub ensemble combined with our own forecasting experience to identify a set of properties present in current ensemble forecasts. We then developed a parsimonious forecast model intending to mirror these properties. We assess forecasts generated from this model in real time over six months (the 15th of January 2022 to the 19th of July 2022) and for multiple European countries. We focused on forecasts of cases one to four weeks ahead and compared them to those by the European forecast hub ensemble. We find that the surrogate model behaves qualitatively similarly to the ensemble in many instances, though with increased uncertainty and poorer performance around periods of peak incidence (as measured by the Weighted Interval Score). The performance differences, however, seem to be partially due to a subset of time points, and the proposed model appears better probabilistically calibrated than the ensemble. We conclude that our simplified forecast model may have captured some of the dynamics of the hub ensemble, but more work is needed to understand the implicit epidemiological model that it represents.},
   copyright = {\textcopyright{} 2022, Posted by Cold Spring Harbor Laboratory. This pre-print is available under a Creative Commons License (Attribution 4.0 International), CC BY 4.0, as described at http://creativecommons.org/licenses/by/4.0/},
@@ -35,7 +36,8 @@
   pages = {68--78},
   publisher = {{[Wiley, Royal Statistical Society]}},
   issn = {1466-6162},
-  doi = {10.2307/2983678}
+  doi = {10.2307/2983678}, 
+  note = {DOI: 10.2307/2983678}
 }
 
 @misc{bellegoDealingLogsZeros2022,
@@ -48,6 +50,7 @@
   eprinttype = {arxiv},
   primaryclass = {econ, stat},
   doi = {10.48550/arXiv.2203.11820},
+  note = {Preprint, \url{https://arxiv.org/abs/2203.11820}},
   publisher = {{arXiv}},
   abstract = {Log-linear models are prevalent in empirical research. Yet, how to handle zeros in the dependent variable remains an unsettled issue. This article clarifies it and addresses the log of zero by developing a new family of estimators called iterated Ordinary Least Squares (iOLS). This family nests standard approaches such as log-linear and Poisson regressions, offers several computational advantages, and corresponds to the correct way to perform the popular \$\textbackslash log(Y+1)\$ transformation. We extend it to the endogenous regressor setting (i2SLS) and overcome other common issues with Poisson models, such as controlling for many fixed-effects. We also develop specification tests to help researchers select between alternative estimators. Finally, our methods are illustrated through numerical simulations and replications of landmark publications.},
   archiveprefix = {arXiv},
@@ -67,6 +70,7 @@
   publisher = {{Institute of Mathematical Statistics}},
   issn = {0883-4237, 2168-8745},
   doi = {10.1214/22-STS864},
+  note = {DOI: 10.1214/22-STS864}, 
   abstract = {Averages of proper scoring rules are often used to rank probabilistic forecasts. In many cases, the individual terms in these averages are based on observations and forecasts from different distributions. We show that some of the most popular proper scoring rules, such as the continuous ranked probability score (CRPS), give more importance to observations with large uncertainty, which can lead to unintuitive rankings. To describe this issue, we define the concept of local scale invariance for scoring rules. A new class of generalized proper kernel scoring rules is derived and as a member of this class we propose the scaled CRPS (SCRPS). This new proper scoring rule is locally scale invariant and, therefore, works in the case of varying uncertainty. Like the CRPS, it is computationally available for output from ensemble forecasts, and does not require the ability to evaluate densities of forecasts. We further define robustness of scoring rules, show why this also can be an important concept for average scores unless one is specifically interested in extremes, and derive new proper scoring rules that are robust against outliers. The theoretical findings are illustrated in three different applications from spatial statistics, stochastic volatility models and regression for count data.},
   keywords = {forecast ranking,Model selection,probabilistic forecasting,spatial statistics},
   file = {/Users/nikos/github-synced/zotero-nikos/storage/VN5JJ4X2/Bolin and Wallin - 2023 - Local scale invariance and robustness of proper sc.pdf}
@@ -83,6 +87,7 @@
   primaryclass = {stat},
   publisher = {{arXiv}},
   doi = {10.48550/arXiv.2205.07090},
+  note = {Preprint, \url{https://arxiv.org/abs/2205.07090}},
   abstract = {Evaluating forecasts is essential in order to understand and improve forecasting and make forecasts useful to decision-makers. Much theoretical work has been done on the development of proper scoring rules and other scoring metrics that can help evaluate forecasts. In practice, however, conducting a forecast evaluation and comparison of different forecasters remains challenging. In this paper we introduce scoringutils, an R package that aims to greatly facilitate this process. It is especially geared towards comparing multiple forecasters, regardless of how forecasts were created, and visualising results. The package is able to handle missing forecasts and is the first R package to offer extensive support for forecasts represented through predictive quantiles, a format used by several collaborative ensemble forecasting efforts. The paper gives a short introduction to forecast evaluation, discusses the metrics implemented in scoringutils and gives guidance on when they are appropriate to use, and illustrates the application of the package using example data of forecasts for COVID-19 cases and deaths submitted to the European Forecast Hub between May and September 2021},
   archiveprefix = {arXiv},
   keywords = {Statistics - Applications,Statistics - Computation,Statistics - Methodology},
@@ -90,7 +95,7 @@
 }
 
 @article{boxAnalysisTransformations1964,
-  title = {An {{Analysis}} of {{Transformations}}},
+  title = {An Analysis of Transformations},
   author = {Box, G. E. P. and Cox, D. R.},
   year = {1964},
   journal = {Journal of the Royal Statistical Society. Series B (Methodological)},
@@ -114,6 +119,7 @@
   pages = {e1008618},
   issn = {1553-7358},
   doi = {10.1371/journal.pcbi.1008618},
+  note = {DOI: 10.1371/journal.pcbi.1008618},
   abstract = {For practical reasons, many forecasts of case, hospitalization, and death counts in the context of the current Coronavirus Disease 2019 (COVID-19) pandemic are issued in the form of central predictive intervals at various levels. This is also the case for the forecasts collected in the COVID-19 Forecast Hub (https://covid19forecasthub.org/). Forecast evaluation metrics like the logarithmic score, which has been applied in several infectious disease forecasting challenges, are then not available as they require full predictive distributions. This article provides an overview of how established methods for the evaluation of quantile and interval forecasts can be applied to epidemic forecasts in this format. Specifically, we discuss the computation and interpretation of the weighted interval score, which is a proper score that approximates the continuous ranked probability score. It can be interpreted as a generalization of the absolute error to probabilistic forecasts and allows for a decomposition into a measure of sharpness and penalties for over- and underprediction.},
   langid = {english},
   pmcid = {PMC7880475},
@@ -128,6 +134,7 @@
   journal={{Communications Medicine}},
   year={2022},
   doi={10.1038/s43856-022-00191-8},
+  note = {DOI: 10.1038/s43856-022-00191-8},
   note={article no. 136}
 }
 
@@ -138,6 +145,7 @@
   year    = {2021},
   pages   = {5173},
   doi = {10.1038/s41467-021-25207-0},
+  note = {DOI: 10.1038/s41467-021-25207-0},
   volume  = {12},
 }
 
@@ -146,17 +154,19 @@
   author = {CDC},
   year = {2022},
   month = nov,
+  note = {Data repository, \url{https://github.com/cdcepi/Flusight-forecast-data}},
   howpublished = {CDC Epidemic Prediction Initiative}
 }
 
 @misc{cramerCOVID19ForecastHub2020,
-  title = {{{COVID-19 Forecast Hub}}: 4 {{December}} 2020 Snapshot},
+  title = {{{COVID-19 Forecast Hub}}: 4 {{December}} 2020 Data repository snapshot},
   shorttitle = {{{COVID-19 Forecast Hub}}},
   author = {Cramer, Estee and Nicholas G Reich and Serena Yijin Wang and Jarad Niemi and Abdul Hannan and Katie House and Youyang Gu and Shanghong Xie and Steve Horstman and {aniruddhadiga} and Robert Walraven and {starkari} and Michael Lingzhi Li and Graham Gibson and Lauren Castro and Dean Karlen and Nutcha Wattanachit and {jinghuichen} and {zyt9lsb} and {aagarwal1996} and Spencer Woody and Evan Ray and Frost Tianjian Xu and Hannah Biegel and GuidoEspana and Xinyue X and Johannes Bracher and Elizabeth Lee and {har96} and {leyouz}},
   year = {2020},
   month = dec,
   publisher = {{Zenodo}},
   doi = {10.5281/zenodo.3963371},
+  note = {\url{https://zenodo.org/record/3963372#.Y9U3IOzMI-Q}},
   abstract = {This update to the COVID-19 Forecast Hub repository is a snapshot as of 4 December 2020 of the data hosted by and visualized at~https://covid19forecasthub.org/.},
   file = {/Users/nikos/github-synced/zotero-nikos/storage/AVWA2UPE/4305938.html}
 }
@@ -164,6 +174,7 @@
 @article{cramerEvaluationIndividualEnsemble2021,
   title = {Evaluation of Individual and Ensemble Probabilistic Forecasts of {{COVID-19}} Mortality in the {{US}}},
   author = {Cramer, Estee and Ray, Evan L. and Lopez, Velma K. and Bracher, Johannes and Brennen, Andrea and Rivadeneira, Alvaro J. Castro and Gerding, Aaron and Gneiting, Tilmann and House, Katie H. and Huang, Yuxin and Jayawardena, Dasuni and Kanji, Abdul H. and Khandelwal, Ayush and Le, Khoa and M{\"u}hlemann, Anja and Niemi, Jarad and Shah, Apurv and Stark, Ariane and Wang, Yijin and Wattanachit, Nutcha and Zorn, Martha W. and Gu, Youyang and Jain, Sansiddh and Bannur, Nayana and Deva, Ayush and Kulkarni, Mihir and Merugu, Srujana and Raval, Alpan and Shingi, Siddhant and Tiwari, Avtansh and White, Jerome and Woody, Spencer and Dahan, Maytal and Fox, Spencer and Gaither, Kelly and Lachmann, Michael and Meyers, Lauren Ancel and Scott, James G. and Tec, Mauricio and Srivastava, Ajitesh and George, Glover E. and Cegan, Jeffrey C. and Dettwiller, Ian D. and England, William P. and Farthing, Matthew W. and Hunter, Robert H. and Lafferty, Brandon and Linkov, Igor and Mayo, Michael L. and Parno, Matthew D. and Rowland, Michael A. and Trump, Benjamin D. and Corsetti, Sabrina M. and Baer, Thomas M. and Eisenberg, Marisa C. and Falb, Karl and Huang, Yitao and Martin, Emily T. and McCauley, Ella and Myers, Robert L. and Schwarz, Tom and Sheldon, Daniel and Gibson, Graham Casey and Yu, Rose and Gao, Liyao and Ma, Yian and Wu, Dongxia and Yan, Xifeng and Jin, Xiaoyong and Wang, Yu-Xiang and Chen, YangQuan and Guo, Lihong and Zhao, Yanting and Gu, Quanquan and Chen, Jinghui and Wang, Lingxiao and Xu, Pan and Zhang, Weitong and Zou, Difan and Biegel, Hannah and Lega, Joceline and Snyder, Timothy L. and Wilson, Davison D. and McConnell, Steve and Walraven, Robert and Shi, Yunfeng and Ban, Xuegang and Hong, Qi-Jun and Kong, Stanley and Turtle, James A. and {Ben-Nun}, Michal and Riley, Pete and Riley, Steven and Koyluoglu, Ugur and DesRoches, David and Hamory, Bruce and Kyriakides, Christina and Leis, Helen and Milliken, John and Moloney, Michael and Morgan, James and Ozcan, Gokce and Schrader, Chris and Shakhnovich, Elizabeth and Siegel, Daniel and Spatz, Ryan and Stiefeling, Chris and Wilkinson, Barrie and Wong, Alexander and Gao, Zhifeng and Bian, Jiang and Cao, Wei and Ferres, Juan Lavista and Li, Chaozhuo and Liu, Tie-Yan and Xie, Xing and Zhang, Shun and Zheng, Shun and Vespignani, Alessandro and Chinazzi, Matteo and Davis, Jessica T. and Mu, Kunpeng and y Piontti, Ana Pastore and Xiong, Xinyue and Zheng, Andrew and Baek, Jackie and Farias, Vivek and Georgescu, Andreea and Levi, Retsef and Sinha, Deeksha and Wilde, Joshua and Penna, Nicolas D. and Celi, Leo A. and Sundar, Saketh and Cavany, Sean and Espa{\~n}a, Guido and Moore, Sean and Oidtman, Rachel and Perkins, Alex and Osthus, Dave and Castro, Lauren and Fairchild, Geoffrey and Michaud, Isaac and Karlen, Dean and Lee, Elizabeth C. and Dent, Juan and Grantz, Kyra H. and Kaminsky, Joshua and Kaminsky, Kathryn and Keegan, Lindsay T. and Lauer, Stephen A. and Lemaitre, Joseph C. and Lessler, Justin and Meredith, Hannah R. and {Perez-Saez}, Javier and Shah, Sam and Smith, Claire P. and Truelove, Shaun A. and Wills, Josh and Kinsey, Matt and Obrecht, R. F. and Tallaksen, Katharine and Burant, John C. and Wang, Lily and Gao, Lei and Gu, Zhiling and Kim, Myungjin and Li, Xinyi and Wang, Guannan and Wang, Yueying and Yu, Shan and Reiner, Robert C. and Barber, Ryan and Gaikedu, Emmanuela and Hay, Simon and Lim, Steve and Murray, Chris and Pigott, David and Prakash, B. Aditya and Adhikari, Bijaya and Cui, Jiaming and Rodr{\'i}guez, Alexander and Tabassum, Anika and Xie, Jiajia and Keskinocak, Pinar and Asplund, John and Baxter, Arden and Oruc, Buse Eylul and Serban, Nicoleta and Arik, Sercan O. and Dusenberry, Mike and Epshteyn, Arkady and Kanal, Elli and Le, Long T. and Li, Chun-Liang and Pfister, Tomas and Sava, Dario and Sinha, Rajarishi and Tsai, Thomas and Yoder, Nate and Yoon, Jinsung and Zhang, Leyou and Abbott, Sam and Bosse, Nikos I. and Funk, Sebastian and Hellewel, Joel and Meakin, Sophie R. and Munday, James D. and Sherratt, Katherine and Zhou, Mingyuan and Kalantari, Rahi and Yamana, Teresa K. and Pei, Sen and Shaman, Jeffrey and Ayer, Turgay and Adee, Madeline and Chhatwal, Jagpreet and Dalgic, Ozden O. and Ladd, Mary A. and Linas, Benjamin P. and Mueller, Peter and Xiao, Jade and Li, Michael L. and Bertsimas, Dimitris and Lami, Omar Skali and Soni, Saksham and Bouardi, Hamza Tazi and Wang, Yuanjia and Wang, Qinxia and Xie, Shanghong and Zeng, Donglin and Green, Alden and Bien, Jacob and Hu, Addison J. and Jahja, Maria and Narasimhan, Balasubramanian and Rajanala, Samyak and Rumack, Aaron and Simon, Noah and Tibshirani, Ryan and Tibshirani, Rob and Ventura, Valerie and Wasserman, Larry and O'Dea, Eamon B. and Drake, John M. and Pagano, Robert and Walker, Jo W. and Slayton, Rachel B. and Johansson, Michael and Biggerstaff, Matthew and Reich, Nicholas G.},
+  note = {\Url{https://doi.org/10.1073/pnas.2113561119}},
   year = {2022},
   journal = {Proceedings of the National Academy of Sciences},
   volume = {119},
@@ -182,6 +193,7 @@
   pages = {215--230},
   issn = {03044076},
   doi = {10.1016/j.jeconom.2011.04.001},
+  note = {DOI: 10.1016/j.jeconom.2011.04.001},
   abstract = {We propose new scoring rules based on conditional and censored likelihood for assessing the predictive accuracy of competing density forecasts over a specific region of interest, such as the left tail in financial risk management. These scoring rules can be interpreted in terms of Kullback-Leibler divergence between weighted versions of the density forecast and the true density. Existing scoring rules based on weighted likelihood favor density forecasts with more probability mass in the given region, rendering predictive accuracy tests biased towards such densities. Using our novel likelihood-based scoring rules avoids this problem.},
   langid = {english},
   file = {/Users/nikos/github-synced/zotero-nikos/storage/GCMRVXUV/Diks et al. - 2011 - Likelihood-based scoring rules for comparing densi.pdf}
@@ -196,6 +208,7 @@
   number = {6},
   eprint = {https://doi.org/10.2105/AJPH.2022.306831},
   pages = {839--842},
+  note = {DOI: 10.2105/AJPH.2022.306831};
   doi = {10.2105/AJPH.2022.306831}
 }
 
@@ -210,6 +223,7 @@
   pages = {20201556},
   publisher = {{Royal Society}},
   doi = {10.1098/rspb.2020.1556},
+  note = {DOI: 10.1098/rspb.2020.1556},
   abstract = {An epidemic can be characterized by its strength (i.e., the reproductive number  {$\mathscr{R}$} R ) and speed (i.e., the exponential growth rate r). Disease modellers have historically placed much more emphasis on strength, in part because the effectiveness of an intervention strategy is typically evaluated on this scale. Here, we develop a mathematical framework for the classic, strength-based paradigm and show that there is a dual speed-based paradigm which can provide complementary insights. In particular, we note that r = 0 is a threshold for disease spread, just like  {$\mathscr{R}$}=1 R=1  [ 1], and show that we can measure the strength and speed of an intervention on the same scale as the strength and speed of an epidemic, respectively. We argue that, while the strength-based paradigm provides the clearest insight into certain questions, the speed-based paradigm provides the clearest view in other cases. As an example, we show that evaluating the prospects of `test-and-treat' interventions against the human immunodeficiency virus (HIV) can be done more clearly on the speed than strength scale, given uncertainty in the proportion of HIV spread that happens early in the course of infection. We also discuss evaluating the effects of the importance of pre-symptomatic transmission of the SARS-CoV-2 virus. We suggest that disease modellers should avoid over-emphasizing the reproductive number at the expense of the exponential growth rate, but instead look at these as complementary measures.},
   keywords = {exponential growth rate,mathematical epidemiology,reproductive number,speed and strength},
   file = {/Users/nikos/github-synced/zotero-nikos/storage/3VZUTIGT/Dushoff and Park - 2021 - Speed and strength of an epidemic intervention.pdf}
@@ -224,6 +238,7 @@
   number = {1},
   pages = {81--110},
   doi = {10.1146/annurev-economics-080315-015346},
+  note = {DOI: 10.1146/annurev-economics-080315-015346},
   abstract = {Practices used to address economic forecasting problems have undergone substantial changes over recent years. We review how such changes have influenced the ways in which a range of forecasting questions are being addressed. We also discuss the promises and challenges arising from access to big data. Finally, we review empirical evidence and experience accumulated from the use of forecasting methods to a range of economic and financial variables.},
   keywords = {big data,forecast evaluation,forecast models,model instability,model misspecification,parameter estimation,risk},
   annotation = {\_eprint: https://doi.org/10.1146/annurev-economics-080315-015346},
@@ -234,6 +249,7 @@
   title = {European {{Covid-19 Forecast Hub}}},
   author = {{European Covid-19 Forecast Hub}},
   year = {2021},
+  note = {Website: \url{https://covid19forecasthub.eu/}}
   howpublished = {https://covid19forecasthub.eu/},
   file = {/Users/nikos/github-synced/zotero-nikos/storage/JRFUHRDI/covid19forecasthub.eu.html}
 }
@@ -248,6 +264,7 @@
   pages = {505--531},
   issn = {2211-6753},
   doi = {10.1016/j.spasta.2015.10.001},
+  note = {DOI: 10.1016/j.spasta.2015.10.001},
   abstract = {A stationary spatial model is an idealization and we expect that the true dependence structures of physical phenomena are spatially varying, but how should we handle this non-stationarity in practice? We study the challenges involved in applying a flexible non-stationary model to a dataset of annual precipitation in the conterminous US, where exploratory data analysis shows strong evidence of a non-stationary covariance structure. The aim of this paper is to investigate the modelling pipeline once non-stationarity has been detected in spatial data. We show that there is a real danger of over-fitting the model and that careful modelling is necessary in order to properly account for varying second-order structure. In fact, the example shows that sometimes non-stationary Gaussian random fields are not necessary to model non-stationary spatial data.},
   langid = {english},
   keywords = {Annual precipitation,Gaussian Markov random fields,Gaussian random fields,Non-stationary spatial modelling,Penalized maximum likelihood,Stochastic partial differential equations},
@@ -266,6 +283,7 @@
   pages = {e1006785},
   issn = {1553-7358},
   doi = {10.1371/journal.pcbi.1006785},
+  note = {DOI: 10.1371/journal.pcbi.1006785},
   abstract = {Real-time forecasts based on mathematical models can inform critical decision-making during infectious disease outbreaks. Yet, epidemic forecasts are rarely evaluated during or after the event, and there is little guidance on the best metrics for assessment. Here, we propose an evaluation approach that disentangles different components of forecasting ability using metrics that separately assess the calibration, sharpness and bias of forecasts. This makes it possible to assess not just how close a forecast was to reality but also how well uncertainty has been quantified. We used this approach to analyse the performance of weekly forecasts we generated in real time for Western Area, Sierra Leone, during the 2013\textendash 16 Ebola epidemic in West Africa. We investigated a range of forecast model variants based on the model fits generated at the time with a semi-mechanistic model, and found that good probabilistic calibration was achievable at short time horizons of one or two weeks ahead but model predictions were increasingly unreliable at longer forecasting horizons. This suggests that forecasts may have been of good enough quality to inform decision making based on predictions a few weeks ahead of time but not longer, reflecting the high level of uncertainty in the processes driving the trajectory of the epidemic. Comparing forecasts based on the semi-mechanistic model to simpler null models showed that the best semi-mechanistic model variant performed better than the null models with respect to probabilistic calibration, and that this would have been identified from the earliest stages of the outbreak. As forecasts become a routine part of the toolkit in public health, standards for evaluation of performance will be important for assessing quality and improving credibility of mathematical models, and for elucidating difficulties and trade-offs when aiming to make the most useful and reliable forecasts.},
   langid = {english},
   keywords = {Epidemiology,Forecasting,Infectious disease epidemiology,Infectious diseases,Mathematical models,Probability distribution,Public and occupational health,Sierra Leone},
@@ -281,6 +299,7 @@
   pages = {2020.11.11.20220962},
   publisher = {{Cold Spring Harbor Laboratory Press}},
   doi = {10.1101/2020.11.11.20220962},
+  note = {Preprint, \url{https://www.medrxiv.org/content/10.1101/2020.11.11.20220962v2}},
   abstract = {{$<$}p{$>$}Background: Short-term forecasts of infectious disease can create situational awareness and inform planning for outbreak response. Here, we report on multi-model forecasts of Covid-19 in the UK that were generated at regular intervals starting at the end of March 2020, in order to monitor expected healthcare utilisation and population impacts in real time. Methods: We evaluated the performance of individual model forecasts generated between 24 March and 14 July 2020, using a variety of metrics including the weighted interval score as well as metrics that assess the calibration, sharpness, bias and absolute error of forecasts separately. We further combined the predictions from individual models to ensemble forecasts using a simple mean as well as a quantile regression average that aimed to maximise performance. We further compared model performance to a null model of no change. Results: In most cases, individual models performed better than the null model, and ensembles models were well calibrated and performed comparatively to the best individual models. The quantile regression average did not noticeably outperform the mean ensemble. Conclusions: Ensembles of multi-model forecasts can inform the policy response to the Covid-19 pandemic by assessing future resource needs and expected population impact of morbidity and mortality.{$<$}/p{$>$}},
   copyright = {\textcopyright{} 2020, Posted by Cold Spring Harbor Laboratory. This pre-print is available under a Creative Commons License (Attribution 4.0 International), CC BY 4.0, as described at http://creativecommons.org/licenses/by/4.0/},
   langid = {english},
@@ -299,6 +318,7 @@
   publisher = {{Taylor \& Francis}},
   issn = {0162-1459},
   doi = {10.1198/jasa.2011.r10138},
+  note = {DOI: 10.1198/jasa.2011.r10138},
   abstract = {Typically, point forecasting methods are compared and assessed by means of an error measure or scoring function, with the absolute error and the squared error being key examples. The individual scores are averaged over forecast cases, to result in a summary measure of the predictive performance, such as the mean absolute error or the mean squared error. I demonstrate that this common practice can lead to grossly misguided inferences, unless the scoring function and the forecasting task are carefully matched. Effective point forecasting requires that the scoring function be specified ex ante, or that the forecaster receives a directive in the form of a statistical functional, such as the mean or a quantile of the predictive distribution. If the scoring function is specified ex ante, the forecaster can issue the optimal point forecast, namely, the Bayes rule. If the forecaster receives a directive in the form of a functional, it is critical that the scoring function be consistent for it, in the sense that the expected score is minimized when following the directive. A functional is elicitable if there exists a scoring function that is strictly consistent for it. Expectations, ratios of expectations and quantiles are elicitable. For example, a scoring function is consistent for the mean functional if and only if it is a Bregman function. It is consistent for a quantile if and only if it is generalized piecewise linear. Similar characterizations apply to ratios of expectations and to expectiles. Weighted scoring functions are consistent for functionals that adapt to the weighting in peculiar ways. Not all functionals are elicitable; for instance, conditional value-at-risk is not, despite its popularity in quantitative finance.},
   keywords = {Bayes rule,Bregman function,Conditional value-at-risk (CVaR),Decision theory,Elicitability,Expectile,Mean,Median,Mode,Proper scoring rule,Quantile,Statistical functional},
   annotation = {\_eprint: https://doi.org/10.1198/jasa.2011.r10138},
@@ -315,6 +335,7 @@
   pages = {243--268},
   issn = {1467-9868},
   doi = {10.1111/j.1467-9868.2007.00587.x},
+  note = {DOI: 10.1111/j.1467-9868.2007.00587.x},
   abstract = {Summary. Probabilistic forecasts of continuous variables take the form of predictive densities or predictive cumulative distribution functions. We propose a diagnostic approach to the evaluation of predictive performance that is based on the paradigm of maximizing the sharpness of the predictive distributions subject to calibration. Calibration refers to the statistical consistency between the distributional forecasts and the observations and is a joint property of the predictions and the events that materialize. Sharpness refers to the concentration of the predictive distributions and is a property of the forecasts only. A simple theoretical framework allows us to distinguish between probabilistic calibration, exceedance calibration and marginal calibration. We propose and study tools for checking calibration and sharpness, among them the probability integral transform histogram, marginal calibration plots, the sharpness diagram and proper scoring rules. The diagnostic approach is illustrated by an assessment and ranking of probabilistic forecasts of wind speed at the Stateline wind energy centre in the US Pacific Northwest. In combination with cross-validation or in the time series context, our proposal provides very general, nonparametric alternatives to the use of information criteria for model diagnostics and model selection.},
   langid = {english},
   keywords = {Cross-validation,Density forecast,Ensemble prediction system,Ex post evaluation,Forecast verification,Model diagnostics,Posterior predictive assessment,Predictive distribution,Prequential principle,Probability integral transform,Proper scoring rule},
@@ -332,6 +353,7 @@
   pages = {359--378},
   issn = {0162-1459, 1537-274X},
   doi = {10.1198/016214506000001437},
+  note = {DOI: 10.1198/016214506000001437},
   langid = {english},
   file = {/Users/nikos/github-synced/zotero-nikos/storage/P599P5ZY/Gneiting and Raftery - 2007 - Strictly Proper Scoring Rules, Prediction, and Est.pdf}
 }
@@ -348,6 +370,7 @@
   publisher = {{American Association for the Advancement of Science}},
   issn = {0036-8075, 1095-9203},
   doi = {10.1126/science.1115255},
+  note = {DOI: 10.1126/science.1115255},
   abstract = {{$<$}p{$>$} Traditional weather forecasting has been built on a foundation of deterministic modeling--start with initial conditions, put them into a supercomputer model, and end up with a prediction about future weather. But as Gneiting and Raftery discuss in their Perspective, a new approach--ensemble forecasting--was introduced in the early 1990s. In this method, up to 100 different computer runs, each with slightly different starting conditions or model assumptions, are combined into a weather forecast. In concert with statistical techniques, ensembles can provide accurate statements about the uncertainty in daily and seasonal forecasting. The challenge now is to improve the modeling, statistical analysis, and visualization technologies for disseminating the ensemble results. {$<$}/p{$>$}},
   chapter = {Perspective},
   copyright = {\textcopyright{} 2005 American Association for the Advancement of Science},
@@ -379,6 +402,7 @@
   month     = {12},
   number    = {12},
   pages     = {1-21},
+  note = {\url{https://doi.org/10.1371/journal.pcbi.1008409}},
   volume    = {16}
 }
 
@@ -394,6 +418,7 @@
   pages = {37--48},
   issn = {02776693, 1099131X},
   doi = {10.1002/for.3980120104},
+  note = {DOI: 10.1002/for.3980120104},
   abstract = {This paper presents some procedures aimed at helping an applied timeseries analyst in the use of power transformations. Two methods are proposed for selecting a variance-stabilizing transformation and another for bias-reduction of the forecast in the original scale. Since these methods are essentially model-independent, they can be employed with practically any type of time-series model. Some comparisons are made with other methods currently available and it is shown that those proposed here are either easier to apply or are more general, with a performance similar to or better than other competing procedures.},
   langid = {english},
   file = {/Users/nikos/github-synced/zotero-nikos/storage/MYBS9BRA/Guerrero - 1993 - Time-series analysis supported by power transforma.pdf}
@@ -410,6 +435,7 @@
   pages = {3443--3460},
   issn = {1097-0258},
   doi = {10.1002/sim.7363},
+  note = {DOI: 10.1002/sim.7363},
   abstract = {Routine surveillance of notifiable infectious diseases gives rise to daily or weekly counts of reported cases stratified by region and age group. From a public health perspective, forecasts of infectious disease spread are of central importance. We argue that such forecasts need to properly incorporate the attached uncertainty, so they should be probabilistic in nature. However, forecasts also need to take into account temporal dependencies inherent to communicable diseases, spatial dynamics through human travel and social contact patterns between age groups. We describe a multivariate time series model for weekly surveillance counts on norovirus gastroenteritis from the 12 city districts of Berlin, in six age groups, from week 2011/27 to week 2015/26. The following year (2015/27 to 2016/26) is used to assess the quality of the predictions. Probabilistic forecasts of the total number of cases can be derived through Monte Carlo simulation, but first and second moments are also available analytically. Final size forecasts as well as multivariate forecasts of the total number of cases by age group, by district and by week are compared across different models of varying complexity. This leads to a more general discussion of issues regarding modelling, prediction and evaluation of public health surveillance data. Copyright \textcopyright{} 2017 John Wiley \& Sons, Ltd.},
   copyright = {Copyright \textcopyright{} 2017 John Wiley \& Sons, Ltd.},
   langid = {english},
@@ -446,6 +472,7 @@
   pages = {505--516},
   issn = {1436-3259},
   doi = {10.1007/s00477-013-0768-0},
+  note = {DOI: 10.1007/s00477-013-0768-0},
   abstract = {Probabilistic runoff forecasts generated by stochastic greybox models can be notably useful for the improvement of the decision-making process in real-time control setups for urban drainage systems because the prediction risk relationships in these systems are often highly nonlinear. To date, research has primarily focused on one-step-ahead flow predictions for identifying, estimating, and evaluating greybox models. For control purposes, however, stochastic predictions are required for longer forecast horizons and for the prediction of runoff volumes, rather than flows. This article therefore analyzes the quality of multistep ahead forecasts of runoff volume and considers new estimation methods based on scoring rules for k-step-ahead predictions. The study shows that the score-based methods are, in principle, suitable for the estimation of model parameters and can therefore help the identification of models for cases with noisy in-sewer observations. For the prediction of the overflow risk, no improvement was demonstrated through the application of stochastic forecasts instead of point predictions, although this result is thought to be caused by the notably simplified setup used in this analysis. In conclusion, further research must focus on the development of model structures that allow the proper separation of dry and wet weather uncertainties and simulate runoff uncertainties depending on the rainfall input.},
   langid = {english},
   keywords = {Multistep prediction,Online forecasting,Real-time control,Skill score,Stochastic greybox model,Urban drainage},
@@ -464,6 +491,7 @@
   publisher = {{INFORMS}},
   issn = {0025-1909},
   doi = {10.1287/mnsc.22.10.1087},
+  note = {DOI: 10.1287/mnsc.22.10.1087},
   abstract = {Personal, or subjective, probabilities are used as inputs to many inferential and decision-making models, and various procedures have been developed for the elicitation of such probabilities. Included among these elicitation procedures are scoring rules, which involve the computation of a score based on the assessor's stated probabilities and on the event that actually occurs. The development of scoring rules has, in general, been restricted to the elicitation of discrete probability distributions. In this paper, families of scoring rules for the elicitation of continuous probability distributions are developed and discussed.},
   file = {/Users/nikos/github-synced/zotero-nikos/storage/SVJ7YPP7/Matheson and Winkler - 1976 - Scoring Rules for Continuous Probability Distribut.pdf;/Users/nikos/github-synced/zotero-nikos/storage/H5CNZS4U/mnsc.22.10.html}
 }
@@ -479,6 +507,7 @@
   pages = {40--42},
   issn = {0165-1765},
   doi = {10.1016/j.econlet.2014.11.008},
+  note = {DOI: 10.1016/j.econlet.2014.11.008},
   abstract = {The use of log-transformed data has become standard in macroeconomic forecasting with VAR models. However, its appropriateness in the context of out-of-sample forecasts has not yet been exposed to a thorough empirical investigation. With the aim of filling this void, a broad sample of VAR models is employed in a multi-country set up and approximately 42 million pseudo-out-of-sample forecasts of GDP are evaluated. The results show that, on average, the knee-jerk transformation of the data is at best harmless.},
   langid = {english},
   keywords = {Logarithmic transformation,Out-of-sample experiment,VAR-forecasting},
@@ -497,6 +526,7 @@
   pages = {20200264},
   publisher = {{Royal Society}},
   doi = {10.1098/rstb.2020.0264},
+  note = {DOI: 10.1098/rstb.2020.0264},
   abstract = {Early assessments of the growth rate of COVID-19 were subject to significant uncertainty, as expected with limited data and difficulties in case ascertainment, but as cases were recorded in multiple countries, more robust inferences could be made. Using multiple countries, data streams and methods, we estimated that, when unconstrained, European COVID-19 confirmed cases doubled on average every 3 days (range 2.2\textendash 4.3 days) and Italian hospital and intensive care unit admissions every 2\textendash 3 days; values that are significantly lower than the 5\textendash 7 days dominating the early published literature. Furthermore, we showed that the impact of physical distancing interventions was typically not seen until at least 9 days after implementation, during which time confirmed cases could grow eightfold. We argue that such temporal patterns are more critical than precise estimates of the time-insensitive basic reproduction number R0 for initiating interventions, and that the combination of fast growth and long detection delays explains the struggle in countries' outbreak response better than large values of R0 alone. One year on from first reporting these results, reproduction numbers continue to dominate the media and public discourse, but robust estimates of unconstrained growth remain essential for planning worst-case scenarios, and detection delays are still key in informing the relaxation and re-implementation of interventions. This article is part of the theme issue `Modelling that shaped the early COVID-19 pandemic response in the UK'.},
   keywords = {early growth rate,incubation period,non-pharmaceutical interventions,onset-to-hospitalization delay,reproduction number,unconstrained epidemic},
   file = {/Users/nikos/github-synced/zotero-nikos/storage/FLM9YWNA/Pellis et al. - 2021 - Challenges in control of COVID-19 short doubling .pdf}
@@ -514,6 +544,7 @@
   publisher = {{National Academy of Sciences}},
   issn = {0027-8424, 1091-6490},
   doi = {10.1073/pnas.1812594116},
+  note = {DOI: 10.1073/pnas.1812594116},
   abstract = {Influenza infects an estimated 9\textendash 35 million individuals each year in the United States and is a contributing cause for between 12,000 and 56,000 deaths annually. Seasonal outbreaks of influenza are common in temperate regions of the world, with highest incidence typically occurring in colder and drier months of the year. Real-time forecasts of influenza transmission can inform public health response to outbreaks. We present the results of a multiinstitution collaborative effort to standardize the collection and evaluation of forecasting models for influenza in the United States for the 2010/2011 through 2016/2017 influenza seasons. For these seven seasons, we assembled weekly real-time forecasts of seven targets of public health interest from 22 different models. We compared forecast accuracy of each model relative to a historical baseline seasonal average. Across all regions of the United States, over half of the models showed consistently better performance than the historical baseline when forecasting incidence of influenza-like illness 1 wk, 2 wk, and 3 wk ahead of available data and when forecasting the timing and magnitude of the seasonal peak. In some regions, delays in data reporting were strongly and negatively associated with forecast accuracy. More timely reporting and an improved overall accessibility to novel and traditional data sources are needed to improve forecasting accuracy and its integration with real-time public health decision making.},
   chapter = {PNAS Plus},
   copyright = {Copyright \textcopyright{} 2019 the Author(s). Published by PNAS.. https://creativecommons.org/licenses/by-nc-nd/4.0/This open access article is distributed under Creative Commons Attribution-NonCommercial-NoDerivatives License 4.0 (CC BY-NC-ND).},
@@ -531,6 +562,7 @@
   pages = {2022.06.16.22276024},
   publisher = {{medRxiv}},
   doi = {10.1101/2022.06.16.22276024},
+  note = {DOI: 10.1101/2022.06.16.22276024},
   abstract = {Background Short-term forecasts of infectious disease burden can contribute to situational awareness and aid capacity planning. Based on best practice in other fields and recent insights in infectious disease epidemiology, one can maximise the predictive performance of such forecasts if multiple models are combined into an ensemble. Here we report on the performance of ensembles in predicting COVID-19 cases and deaths across Europe between 08 March 2021 and 07 March 2022. Methods We used open-source tools to develop a public European COVID-19 Forecast Hub. We invited groups globally to contribute weekly forecasts for COVID-19 cases and deaths reported from a standardised source over the next one to four weeks. Teams submitted forecasts from March 2021 using standardised quantiles of the predictive distribution. Each week we created an ensemble forecast, where each predictive quantile was calculated as the equally-weighted average (initially the mean and then from 26th July the median) of all individual models' predictive quantiles. We measured the performance of each model using the relative Weighted Interval Score (WIS), comparing models' forecast accuracy relative to all other models. We retrospectively explored alternative methods for ensemble forecasts, including weighted averages based on models' past predictive performance. Results Over 52 weeks we collected and combined up to 28 forecast models for 32 countries. We found a weekly ensemble had a consistently strong performance across countries over time. Across all horizons and locations, the ensemble performed better on relative WIS than 84\% of participating models' forecasts of incident cases (with a total N=862), and 92\% of participating models' forecasts of deaths (N=746). Across a one to four week time horizon, ensemble performance declined with longer forecast periods when forecasting cases, but remained stable over four weeks for incident death forecasts. In every forecast across 32 countries, the ensemble outperformed most contributing models when forecasting either cases or deaths, frequently outperforming all of its individual component models. Among several choices of ensemble methods we found that the most influential and best choice was to use a median average of models instead of using the mean, regardless of methods of weighting component forecast models. Conclusions Our results support the use of combining forecasts from individual models into an ensemble in order to improve predictive performance across epidemiological targets and populations during infectious disease epidemics. Our findings further suggest that median ensemble methods yield better predictive performance more than ones based on means. Our findings also highlight that forecast consumers should place more weight on incident death forecasts than incident case forecasts at forecast horizons greater than two weeks. Code and data availability All data and code are publicly available on Github: covid19-forecast-hub-europe/euro-hub-ensemble.},
   copyright = {\textcopyright{} 2022, Posted by Cold Spring Harbor Laboratory. This pre-print is available under a Creative Commons License (Attribution 4.0 International), CC BY 4.0, as described at http://creativecommons.org/licenses/by/4.0/},
   langid = {english},
@@ -548,6 +580,7 @@
   primaryclass = {q-bio, stat},
   publisher = {{arXiv}},
   doi = {10.48550/arXiv.2209.04035},
+  note = {DOI: 10.48550/arXiv.2209.04035},
   abstract = {Infectious disease forecasting for ongoing epidemics has been traditionally performed, communicated, and evaluated as numerical targets - 1, 2, 3, and 4 week ahead cases, deaths, and hospitalizations. While there is great value in predicting these numerical targets to assess the burden of the disease, we argue that there is also value in communicating the future trend (description of the shape) of the epidemic -- for instance, if the cases will remain flat or a surge is expected. To ensure what is being communicated is useful we need to be able to evaluate how well the predicted shape matches with the ground truth shape. Instead of treating this as a classification problem (one out of \$n\$ shapes), we define a transformation of the numerical forecasts into a ``shapelet''-space representation. In this representation, each dimension corresponds to the similarity of the shape with one of the shapes of interest (a shapelet). We prove that this representation satisfies the property that two shapes that one would consider similar are mapped close to each other, and vice versa. We demonstrate that our representation is able to reasonably capture the trends in COVID-19 cases and deaths time-series. With this representation, we define an evaluation measure and a measure of agreement among multiple models. We also define the shapelet-space ensemble of multiple models as the mean of their shapelet-space representations. We show that this ensemble is able to accurately predict the shape of the future trend for COVID-19 cases and trends. We also show that the agreement between models can provide a good indicator of the reliability of the forecast.},
   archiveprefix = {arXiv},
   keywords = {Quantitative Biology - Quantitative Methods,Statistics - Applications},
@@ -565,6 +598,7 @@
   pages = {111--128},
   issn = {1099-131X},
   doi = {10.1002/(SICI)1099-131X(199903)18:2<111::AID-FOR713>3.0.CO;2-C},
+  note = {DOI: 10.1002/(SICI)1099-131X(199903)18:2<111::AID-FOR713>3.0.CO;2-C},
   abstract = {A widely used approach to evaluating volatility forecasts uses a regression framework which measures the bias and variance of the forecast. We show that the associated test for bias is inappropriate before introducing a more suitable procedure which is based on the test for bias in a conditional mean forecast. Although volatility has been the most common measure of the variability in a financial time series, in many situations confidence interval forecasts are required. We consider the evaluation of interval forecasts and present a regression-based procedure which uses quantile regression to assess quantile estimator bias and variance. We use exchange rate data to illustrate the proposal by evaluating seven quantile estimators, one of which is a new non-parametric autoregressive conditional heteroscedasticity quantile estimator. The empirical analysis shows that the new evaluation procedure provides useful insight into the quality of quantile estimators. Copyright \textcopyright{} 1999 John Wiley \& Sons, Ltd.},
   langid = {english},
   keywords = {forecast evaluation,interval forecasting,quantile regression,volatility forecasting},
@@ -581,6 +615,7 @@
   number = {1},
   pages = {449--479},
   doi = {10.1146/annurev-financial-110217-022713},
+  note = {DOI: 10.1146/annurev-financial-110217-022713},
   abstract = {Our review highlights some of the key challenges in financial forecasting problems and opportunities arising from the unique features of financial data. We analyze the difficulty of establishing predictability in an environment with a low signal-to-noise ratio, persistent predictors, and instability in predictive relations arising from competitive pressures and investors' learning. We discuss approaches for forecasting the mean, variance, and probability distribution of asset returns. Finally, we discuss how to evaluate financial forecasts while accounting for the possibility that numerous forecasting models may have been considered, leading to concerns of data mining.},
   annotation = {\_eprint: https://doi.org/10.1146/annurev-financial-110217-022713}
 }
@@ -596,6 +631,7 @@
   pages = {449--479},
   issn = {1941-1367, 1941-1375},
   doi = {10.1146/annurev-financial-110217-022713},
+  note = {DOI: 10.1146/annurev-financial-110217-022713},
   abstract = {Our review highlights some of the key challenges in financial forecasting problems and opportunities arising from the unique features of financial data. We analyze the difficulty of establishing predictability in an environment with a low signal-to-noise ratio, persistent predictors, and instability in predictive relations arising from competitive pressures and investors' learning. We discuss approaches for forecasting the mean, variance, and probability distribution of asset returns. Finally, we discuss how to evaluate financial forecasts while accounting for the possibility that numerous forecasting models may have been considered, leading to concerns of data mining.},
   langid = {english},
   file = {/Users/nikos/github-synced/zotero-nikos/storage/9FHI5V4F/Timmermann - 2018 - Forecasting Methods in Finance.pdf}
@@ -612,6 +648,7 @@
   pages = {599--604},
   publisher = {{Royal Society}},
   doi = {10.1098/rspb.2006.3754},
+  note = {DOI: 10.1098/rspb.2006.3754},
   abstract = {Mathematical models of transmission have become invaluable management tools in planning for the control of emerging infectious diseases. A key variable in such models is the reproductive number R. For new emerging infectious diseases, the value of the reproductive number can only be inferred indirectly from the observed exponential epidemic growth rate r. Such inference is ambiguous as several different equations exist that relate the reproductive number to the growth rate, and it is unclear which of these equations might apply to a new infection. Here, we show that these different equations differ only with respect to their assumed shape of the generation interval distribution. Therefore, the shape of the generation interval distribution determines which equation is appropriate for inferring the reproductive number from the observed growth rate. We show that by assuming all generation intervals to be equal to the mean, we obtain an upper bound to the range of possible values that the reproductive number may attain for a given growth rate. Furthermore, we show that by taking the generation interval distribution equal to the observed distribution, it is possible to obtain an empirical estimate of the reproductive number.},
   keywords = {basic reproduction ratio,epidemiology,influenza,Lotka–Euler equation,serial interval},
   file = {/Users/nikos/github-synced/zotero-nikos/storage/LHAEKWXA/Wallinga and Lipsitch - 2007 - How generation intervals shape the relationship be.pdf}
@@ -628,6 +665,7 @@
   pages = {1--60},
   issn = {1863-8260},
   doi = {10.1007/BF02562681},
+  note = {DOI: 10.1007/BF02562681},
   abstract = {In Bayesian inference and decision analysis, inferences and predictions are inherently probabilistic in nature. Scoring rules, which involve the computation of a score based on probability forecasts and what actually occurs, can be used to evaluate probabilities and to provide appropriate incentives for ``good'' probabilities. This paper review scoring rules and some related measures for evaluating probabilities, including decompositions of scoring rules and attributes of ``goodness'' of probabilites, comparability of scores, and the design of scoring rules for specific inferential and decision-making problems},
   langid = {english},
   file = {/Users/nikos/github-synced/zotero-nikos/storage/VHTQR6BK/Winkler et al. - 1996 - Scoring rules and the evaluation of probabilities.pdf}
@@ -644,6 +682,7 @@
   pages = {1621--1629},
   issn = {01677152},
   doi = {10.1016/j.spl.2009.04.010},
+  note = {DOI: 10.1016/j.spl.2009.04.010},
   langid = {english},
   file = {/Users/nikos/github-synced/zotero-nikos/storage/9WEQEI2D/Yu - 2009 - Variance stabilizing transformations of Poisson, b.pdf}
 }

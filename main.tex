@@ -55,7 +55,7 @@ Forecast evaluation plays an essential role in the development cycle of predicti
 
 \bigskip
 
-{\footnotesize $^*$ Correspondence to \url{nikos.bosse@lshtm.ac.uk}}
+{\footnotesize $^*$ Correspondence to \url{nikos.bosse@lshtm.ac.uk}}, 
 {\footnotesize $^\dagger$ Contributed equally}
 
 
@@ -99,7 +99,15 @@ A closely related aspect to relative scores (as opposed to absolute scores) is t
 In many fields, it is common practice to forecast transformed quantities (see e.g. \cite{taylorEvaluatingVolatilityInterval1999} in finance, \cite{mayrLogLevelVAR2015} in macroeconomics, \cite{loweStochasticRainfallrunoffForecasting2014} in hydrology or \cite{fuglstadDoesNonstationarySpatial2015} in meteorology). While the goal of the transformations is usually to improve the accuracy of the predictions, they can also be used to enhance and complement the evaluation process. 
 In this paper, we argue that the aforementioned issues with evaluating epidemic forecasts based on measures of absolute error on the natural scale can be addressed by transforming the forecasts and observations prior to scoring using some strictly monotonic transformation. Strictly monotonic transformations can shift the focus of the evaluation in a way that may be more appropriate for epidemiological forecasts, while preserving the propriety of the score. Many different transformations may be appropriate and useful, depending on the exact context, the desired focus of the evaluation, and specific aspects of the forecasts that forecast consumers care most about (see a broader discussion in Section \ref{sec:discussion}). 
 
-For conceptual clarity and to allow for a more in-depth discussion, we focus mostly on the natural logarithm as a particular transformation (referred to as the log-transformtation in the remainder of this manuscript) in the context of epidemic phenomena. Instead of a score representing the magnitude of absolute errors, applying a log-transformation prior to the CRPS yields a score which a) measures relative error (see Section \ref{sec:methods:relative}), b) provides a measure for how well a forecast captures the exponential growth rate of the target quantity (see Section \ref{sec:methods:growthrate}) and c) is less dependent on the expected order of magnitude of the quantity to be predicted (see Section \ref{sec:methods:vst}). 
+For conceptual clarity and to allow for a more in-depth discussion, we focus mostly on the natural logarithm as a particular transformation (referred to as the log-transformtation in the remainder of this manuscript) in the context of epidemic phenomena. The CRPS after applying a log-transformation can be computed as follows:
+%
+\begin{linenomath*}
+\begin{equation*}
+    \text{CRPS}(F_{\log}, \log y) = \int_{-\infty}^\infty \left( F_{\log}(x) - 1(x \geq \log y) \right)^2 dx,
+\end{equation*}    
+\end{linenomath*}
+%
+where $F_{\log}$ is the log-transformed predictive distribution. Instead of a score representing the magnitude of absolute errors, applying a log-transformation prior to the CRPS yields a score which a) measures relative error (see Section \ref{sec:methods:relative}), b) provides a measure for how well a forecast captures the exponential growth rate of the target quantity (see Section \ref{sec:methods:growthrate}) and c) is less dependent on the expected order of magnitude of the quantity to be predicted (see Section \ref{sec:methods:vst}). 
 We therefore argue that such evaluations on the logarithmic scale should complement the prevailing evaluations on the natural scale. 
 Other transformations may likewise be of interest. We briefly explore the square root transformation as an alternative transformation. 
 Our analysis mostly focuses on the CRPS (or WIS) as an evaluation metric for probabilistic forecasts, given its widespread use throughout the COVID-19 pandemic. 

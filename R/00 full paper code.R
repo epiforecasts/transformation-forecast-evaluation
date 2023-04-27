@@ -264,13 +264,14 @@ summary <- scores |>
   mutate(log_wis = ifelse(scale == "log", log_wis, NA)) |>
   pivot_wider(values_from = wis, names_from = scale) |>
   group_by(sigma) |>
-  summarise(log_wis = sum(log_wis, na.rm = TRUE), 
-            wis_log = sum(log, na.rm = TRUE), 
-            wis = sum(natural, na.rm = TRUE)) |>
-  pivot_longer(cols = c(wis, log_wis, wis_log), values_to = "score", names_to = "type") |>
+  summarise(log_wis = mean(log_wis, na.rm = TRUE), 
+            wis_log = mean(log, na.rm = TRUE), 
+            wis = mean(natural, na.rm = TRUE), 
+            geom_wis = exp(mean(log(natural), na.rm = TRUE))) |>
+  pivot_longer(cols = c(wis, log_wis, wis_log, geom_wis), values_to = "score", names_to = "type") |>
   mutate(type = factor(type, 
-                       levels = c("wis", "wis_log", "log_wis"), 
-                       labels = c("CRPS", "CRPS (log scale)", "log(CRPS)")))
+                       levels = c("wis", "wis_log", "log_wis", "geom_wis"), 
+                       labels = c("CRPS", "CRPS (log scale)", "log(CRPS)", "geom(wis)")))
 
 
 score_plot <- function(summary) {
@@ -572,7 +573,6 @@ plot_pred_score <- function(hub_data, scores, model,
     value.name = "component_value"
     ) |>
     mutate(target_end_date = as.Date(target_end_date)) |>
-    head(2000) |>
     ggplot(aes(x = target_end_date)) +
     geom_col(
       position = "stack",

@@ -1,0 +1,333 @@
+\documentclass{article}
+\usepackage[]{graphicx}
+\usepackage[]{xcolor}
+\usepackage{alltt}
+\usepackage[left=2.3cm,right=2.8cm, top = 2.2cm, bottom = 3cm]{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{natbib}
+\PassOptionsToPackage{hyphens}{url}
+\usepackage{url} 
+\usepackage[disable]{todonotes}
+\usepackage{multicol}
+\usepackage{rotating}
+\usepackage{booktabs}
+\usepackage[colorlinks=false]{hyperref} 
+\setlength{\parskip}{\baselineskip}%
+\setlength{\parindent}{0pt}%
+
+
+\newcommand{\red}{\color{red}}
+\newcommand{\black}{\color{black}}
+\newcommand{\blue}{\color{blue}}
+
+
+\begin{document}
+
+\black \textbf{Black: our comments}
+
+\red \textbf{Reviewer, not addressed}
+
+\blue \textbf{Reviewer, addressed}
+
+
+\black
+We thank the reviewers for their feedback and thoughtful comments which we feel have helped improve the manuscript substantially. Please see our responses to the individual comments as well as explanations on the changes we have made to the manuscript below. 
+
+
+\section{Reviewer \#1}
+
+\blue
+Bosse et al. discuss the important problem of forecast evaluation in the context of epidemiological models. They make a clear and compelling argument for the use of different variance-stabilising transformations to reduce the impact of variation in model outputs and data over several orders of magnitude, a consequence of the exponential nature of epidemic growth (with time-varying growth rate).
+
+I only really have minor, hopefully constructive points to raise — overall I think this is a very nice piece of work that deserves to be published in close to its current form. My big picture and lower level comments and suggestions follow.
+
+\black
+Thank you for your kind words.
+
+\red
+\subsection{Big picture}
+\subsubsection{Proper scoring rules}
+As noted by the authors, proper scoring rules are a commonly used concept in evaluating probabilistic predictions. While probably familiar to a reasonable fraction of readers, I think there is also likely a reasonable set of readers who are not aware of these or are only vaguely aware of them. For this reason I think a little more general background would help. For example on line 38 after the ‘report their true belief about nature’ another sentence or two along the lines of
+
+“For example, some methods of ‘scoring’ probabilistic predictions can be ‘gamed’ in the sense that forecasters can do better by reporting a probability distribution different to their best estimate. A proper scoring rule ensures that the expected score when reporting a distribution Q, as evaluated under their actual best estimate of the probability distribution P, is best when Q = P. Thus a proper scoring rule encourages a forecaster to provide ‘honest’ predictions."
+
+In addition, I suspect there are a few readers (such as myself!) who are more familiar with more ‘basic’ scores such as e.g. logarithmic score or deviance (i.e. essentially the likelihood or related quantities). I spent a bit of time wondering about why these weren’t considered, especially as these avoid the scale issues at the centre of the present article. Such scores were only briefly considered in the discussion, in the second-to-last paragraph. I think it would be helpful to mention/emphasise up front some of these ‘classic’ scores that don’t have the same issues with scaling and then discuss why they aren’t used, e.g. due to ‘robustness’ or other issues (e.g. lack of full probability distributions from forecasts).
+
+
+\subsubsection{Log vs other transformations}
+The authors take the position that the log transformation is generally preferable for their use case, though they discuss and compare others. Relatedly, their arguments in terms of relative error also involve an essentially log-linear (i.e. log data + additive error) form which may be pragmatic but somewhat inelegant imo.
+
+As the authors note, a particularly controversial issue for the log transformation is the issue of zero values. They take the standard pragmatic stance that we can use log (eps + y) instead of log y in such cases. Many communities e.g. econometrics are vehemently opposed to this, preferring e.g. quasi-Poisson regression and robust standard errors in the context of estimation. While not completely opposed to log (eps + y) myself (I have used it too!) it makes me a bit uncomfortable I still can’t help but feel that something along the lines of e.g. logarithmic/quasi-likelihood or deviance scores could be formulated that would be preferable to the log data transform. This would offer both automatic scaling and handling of zero values, in principle. However, I haven’t thought carefully enough to offer a concrete alternative and the log(eps + y) approach appears to work reasonably here. Instead, and in combination with the previous point, perhaps a bit more discussion of the potential alternatives based on quasi-likelihood-style functions rather than data transformations could be added?
+
+\subsubsection{Observation and process models}
+The interpretation in e.g. 2.2 appears to essentially assume a deterministic process model and additive error on the log scale (multiplicative on the natural scale). Although more of a motivating heuristic than strict assumption, a deterministic process model based on a mean will not in general be the same as a stochastic process model, right? Perhaps a further caveat that this is a fairly simplistic motivating tool might be useful?
+
+Furthermore, why not assume that the model mean (say the output of the deterministic model) defines e.g. the mean of something like a Poisson distribution (probably in overdispersed/quasi form)? or negative binomial? The potential use of these distributions is considered in later sections in the context of motivating variance transforms, but then would again seem to motivate a (quasi-)likelihood-style score beyond the approximate transforms (though with pros and cons in terms of robustness, applicability in the presence of partial information).
+
+\subsection{Specific suggestions}
+
+I realised as I was about comment on some equations that none of the equations are numbered. It would probably be good to number them :-)
+
+\black
+We added numbers to all equations. 
+\textbf{I now numbered everything. Are we fine with that?}
+
+\blue
+The first equation (line 43) uses an unbolded indicator function which isn’t defined (this also appears in the same form in the third equation, line 99). The second equation in contrast uses bold and defines the indicator. The definition should be moved forward and a choice of bold or not made.
+
+\black
+We added the definition to equation 1 and used bold throughout the manuscript consistently. 
+
+\red
+I think the term ‘propriety’ (as in having the property of being proper) should either be explicitly defined or re-worded in terms of ‘being proper’.
+
+No reference is provided for the approximate variance-stabilising properties of the square root transformation.
+
+\black
+
+
+
+
+
+
+
+
+
+
+
+\red
+\section{Reviewer \#2}
+
+Summary
+This manuscript develops theory, interpretations, and intuition regarding evalua- tion metrics applied to strictly monotonic transformations of observations and forecasts, with focus on log, shifted log, sqrt, and shifted sqrt transformations, and details the application and impact of using a log1p transformation within an evaluation framework for COVID-19 forecasts.
+The analysis is extensive and covers many facets of selecting and applying such transformations, providing great value. However, it
+\begin{itemize}
+    \item focuses on putting evaluations for different locations and times on an even scale, and does not directly answer the question of how to re-emphasize locations and times of import to forecast consumers, and
+    \item the discussion of which locations and times forecasts consumers would want to emphasize seems incomplete.
+\end{itemize}
+The former point could be addressed by adding additional content regarding re-emphasis. The latter point could be addressed by studying what stakeholders want to emphasize and using that to make a recommendation for a particular transformation or transformation selection rule. Alternatively, both could be addressed simply by more explicitly and prominently noting that
+\begin{itemize}
+    \item when selecting a transformation, one should consider the desired emphasis, which is likely not an even scale for most/all predictions, and
+    \item the “natural logarithm” / log1p selection is not meant as a recommendation but to enable demonstration.
+\end{itemize}
+Additionally, any additional necessary/recommended elements of a scoring proce- dure should be noted more prominently (e.g., dealing with forecast missingness, outlying forecasts, outlying data, selecting a Box-Cox transformation, selecting a shift ($a$ value), etc.).
+
+
+\subsection{Major comments}
+``Natural logarithm'', log1p, and log($a + x$) are conflated in several places, despite the discussion in Section 2.4 noting that this is an important distinction. The terminology should not be overloaded. (E.g., L20 ``Applying the log transformation''.)
+
+L18:
+\begin{itemize}
+    \item ``relative error'' --- Is this what stakeholders want? Or does it overemphasize low steady periods too much?
+    \item ``under the assumption of quadratic mean-variance relationship'' --- And do we expect/observe this sort of relationship in epidemiological surveillance data? This reads more like an arbitrary assumption that will be taken instead of something that is examined in the manuscript. (From Section 3.3 it seems like the answer is ``roughly but not entirely''.)
+    \item These points might be more simply resolved simply by revising L15 ``motivate''.
+\end{itemize}
+\black e.g., \url{https://www.pnas.org/doi/pdf/10.1073/pnas.2103302119} emphasizes that the use of MAPE is motivated by its straightforward interpretation. Can we find another example?
+
+\red
+L150: “it may be desirable” — Is it though? This seems unlikely. Stakeholders likely want to emphasize some locations and times over others, and would benefit from some rules about how to do so while maintaining propriety. (E.g., is scaling by some function of recent observations or the population size okay? Is scaling by the forecast or observed value okay? Or are we limited to monotonic transformations?)
+
+\black
+On what is okay: scaling by recent observations is okay and in a way that's what we are doing with the log (very similar to scaling with last value).Scaling by population size is okay as mentioned in discussion. Scaling with forecast or observation is not okay (I could probably find examples for that).
+
+\red
+L166: “a negative binomial distribution with size parameter $\theta$” — Is this realistic? If so, what’s the interpretation epidemiologically?
+
+\black
+This is an illustrative example. But we could argue via Poisson gamma mixture, similar to the model in \url{https://doi.org/10.1111/rssa.12974}
+
+\red
+Figure 3: is a geometric distribution realistic for epidemiological surveillance data?
+
+\black
+Agree that it is not. Could add something along the lines of ``this can happen in principle, but only in rather constructed cases, such as for the geometric distribution in Fig 3, which is unlikely to occur in an epi setting.
+
+\red
+L236: “better able to illustrate the effects” — Why does this removal help illustrate the effects? Is such a removal procedure required to be able to apply this transformation approach at all? And if so, what are the requirements/considerations for such a removal procedure?
+
+L244: “pairwise comparisons” — The necessity of using an approach to handle missingness when combining evaluations should be noted more prominently from the beginning. The same applies to the outlier removal (if necessary) and a value selection.
+
+Figure 4: The data (not) selected seems to obscure the key period of predicting the start of a case wave, as we expect the CRPS of log data to emphasize missed case increase predictions there more heavily than the natural scale. Deaths are not a substitute because they have access to a leading indicator and the same sort of misses may not be observed. The evaluations here may also miss some overshooting of the case peak. Which rules from Table SI.2 are coming into play and why? Is there a more complete alternative example?
+
+Table 1: The beta for cases and beta for deaths are both around 0.86 individually. But fit together they beta is 0.963; this appears due to trying to fit two different (difficulties of) tasks together that follow different trends, evident from the differing alpha values. A joint fit does not seem appropriate without allowing for a separate alpha per task type. The same thing can be said for the different horizons within cases\&deaths. The fits here seem to better support an argument for something between sd and log.
+
+L279: “higher scores for smaller forecast targets” — This seems undesirable, given argument of Bracher et al. 2021a. Perhaps some forecast consumers would be interested in quality of forecasts for locations with lower activity (e.g., policymakers for smaller populations), but very unlikely would they want to prioritize less-active times in general over more-active times.  
+
+
+
+\subsection{Minor comments}
+\begin{itemize}
+    \item L12 “over space and time” — Which do stakeholders care most about?
+    \item L15 “log-transformed counts” — Immediately sounds problematic due to the possibility of 0 counts, without mention of a shift or threshold. Additionally, there is a truncated normal distribution in the mix; is it rounded to counts, or are these not all count data?
+    \item L23–L24 “more strongly emphasized”, “less severely penalized” — Could note that this is relative to evaluations on the natural scale (not relative to each other).
+    \item L24 “is only one” — Seems a bit too similar to “the only one”, “the only”, etc.
+    \item L46 “WIS is an approximation of the CRPS” — Is it an approximation of CRPS itself or some (2x?) scaling?
+    \item L59 “strength” — The meaning of “strength” is nonintuitive without read-
+ing the citation and understanding the ties to multiplicative interventions on R and r (the latter of which seems unrealistic to achieve). Consider surrounding with quotes, explaining more/less, relating to growth per generation, etc.
+\end{itemize}
+
+L60: “immunity” $\xrightarrow{}$ “population immunity”?
+
+L69: This might benefit from a short justification (e.g.,
+$\left| \frac{x_t e^{(r_t + \epsilon) \Delta t} - x_t e^{r_t \Delta t}}{x_t e^{(r_t - \epsilon) \Delta t} - x_t e^{r_t \Delta t}} \right| = e^{\epsilon\Delta t}$)
+
+
+L70: Clarify: is this suggesting to make the forecasting targets themselves the result of applying some standardized growth rate estimator to current+future observations around the desired time period?
+
+L99: How are atoms at $\exp x = 0$ handled? How are observations of $y = 0$ handled?
+
+L127: “approximation of the absolute percentage error” — Raises a few questions:
+\begin{itemize}
+    \item If a relative error metric is desired, why not just divide CRPS/WIS by y then? (Propriety?)
+    \item How does using a (shifted) log transform differ from dividing by (a constant plus) (a mean of) the most recent observation(s)?
+    \item Is this desired? Though already discussed, seems like the major point of doubt here: are we at risk of overemphasizing very-low-activity periods and very-low-population states where standard-deviation-to- mean ratios are much higher?
+\end{itemize}
+
+L127: As APE, RE, and SAPE are defined differently in other sources (e.g., with scaling factor in APE and SAPE, and with y in the denominator and no absolute value in RE), it may be helpful to also indicate sources for all three (e.g., that the RE definition is also in Gneiting, 2011).
+
+L138: “$\Bar{r}$ is” — Consider $\Bar{r}_t$ etc.
+
+L146: “$\Bar{\hat{r}}$” — Should be $\hat{\Bar{r}}$, or consider $\hat{\Bar{r}}_t$.
+
+L158 “delta method” — Delta method would seem to also require the distribution to be somewhat tightly distributed, concentrated within a nearly-linear region of the transformation function. But putting significant mass on a wider range of values would also mean having non-negligible mass on negative values if “approximately normal”; it would not make sense to apply the logarithm or sqrt transformations in these cases. So perhaps the “tightly distributed” assumption can be taken. But this seems a bit nonobvious and a justification/application of the delta method would be helpful here.
+
+L159 — Need to discuss / spell out the point of the above calculation (— that it is the same for all $\mu$, when paired with the same $c$?).
+
+L168: “grows with the variance” — May read like this a linear growth. Consider “grows with the standard deviation”.
+
+L180: “data-generating” — Consider “fitted”/“believed”.
+
+L186: “incentivizes overconfident predictions” — Needs justifica- tion/citation/removal. This single example disproves propriety but doesn’t establish overconfidence as being encouraged in general.
+
+Figure 2: Were any zeros encountered for the negative binomial or Poisson distributions? Was a shifted log transformation used rather than an unshifted log transformation?
+
+L215: “is mainly driven” — Please add pointer to justification (e.g., Figure 7 / discussion).
+
+L231: “only include models which” — Consider “only include the 7 models that”
+
+Figure 5 caption:
+\begin{itemize}
+    \item “logarithmic” — With what a values? (THe first link to Figure 5 is from before this information was stated.)
+    \item “D: [. . . ] all individual scores” — of EuroCOVIDhub-ensemble or any of the 7 included systems?
+    \item “relative change” — of what change in scores relative to what quantity?
+\end{itemize}
+
+L272: “with the standard deviation” — Also note here that this is for approximately normal data distributions?
+
+L282: “independent” — Consider “linearly independent”.
+
+L288–290: What would stakeholders want this difference to be, and in
+which direction? I would guess the sqrt would generally be preferable unless applying some extra transformation after the log to re-emphasize locations/times of interest.
+
+Figure 7 caption: “one score” — Consider clarifying that/whether there is potentially missingness here.
+
+Figure 8: What is the meaning of the arrow colors? Initially it seems to match the direction, but there is also blue arrow pointing downward. If it is indicating the direction, please fix this and consider a third color for indicating unchanged ranks.
+
+The WIS contribution decomposition suggests that an alternative baseline should be used based on differences in transformed data rather than differences in natural scale data. Or, alternatively, that the a value is too low to give reasonable comparisons (as data that is hard/impossible to distinguish from 0 on a plot on the natural scale corresponds with very high penalization of forecasts considering 0 as a possibility). This could (also) be noted in Figure SI.5’s caption.
+
+L340: “convert [...] rate” — Please clarify. Does “multiplicative growth rate” refer to a setup with $\mathbb{E}[_{t+k} | X_t] = X_t \theta^k$, or only a single step $\mathbb{E}[_{t+\text{one step}} | X_t] = X_t \theta^k$? Does the proposed conversion apply to both, or only to the latter?
+
+L341–342: “natural logarithm as a [. . . ] (VST)” — for what type of relevant distribution(s)?
+
+L344: “take differences between forecasts on the log scale” — Clarify.
+
+L345: “divide each forecast by the forecast” — Caveat about current forecast formats should be included here / in following sentences, without (one mention of) the idea about directly soliciting forecasts of week-on-week ratios in between.
+
+L366: “[...] settings” — (to standardize between measurements, then
+could potentially scale by importance to stakeholders)
+
+Figure SI.2: Would benefit from some more discussion, and perhaps a plot of slightly different quantities. E.g., to select an appropriate value of a, it seems like a common goal would be to deprioritize errors around values of x low enough that we expect there to be primarily noise rather than signal or that are not of concern to policymakers. For count data, this likely includes the values 0 - -10 in any circumstances; how far beyond 10 this range extends depends on the range of realistic growth rates, the forecast horizon, and cleanliness of the data. To assist in this decision, it seems like a similar plot of the evaluations of a particular absolute and/or relative error might be useful, or discussion of how to read it from the current plot. E.g., to illustrate that the same relative error is penalized roughly the same for all the plotted values of a for values of x above 50, but quite differently for $a = 10$ vs. $a = 0.1$ for values of x near 1.
+
+Figure SI.7:
+\begin{itemize}
+    \item Also specify sorting variable\&direction on x axis. (Would a point plot vs. the sorting variable be more informative?)
+    \item Very informative figure, promote to main text? Also would like to see for different “parts” of an epidemic (e.g., steady low periods, increases, peaks/plateaus, decreases). Deaths figures suggest that balancing scores between locations can be tricky, and both cases and deaths suggests that the investigated transformations can’t do this exactly.
+\end{itemize}
+
+\subsubsection{Typographical}
+\blue
+L96: “transformtation” $\xrightarrow{}$ “transformation”
+
+Figure 2 caption: “CRPS values where computed” $\xrightarrow{}$ “[...] were computed”
+
+L192: “does however influences” $\xrightarrow{}$ “does however influence”
+
+L249: use two backticks on the left and two single quotes on the right in LaTeX code for the quoting here
+
+
+\black
+Thank you very much for pointing these errors out. We have corrected them. 
+
+
+
+\red
+Figure 5: “Loaction” → “Location”
+
+Figure SI.7: “Loaction” → “Location”
+
+In several places, e.g., L201, there are links to SI material, when clicked,
+that instead redirect to main text figures.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\black
+\red
+\section{Reviewer \#3}
+
+
+In this manuscript the authors investigate how common scoring rules for probabilistic forecasts can be adjusted by transforming observed data and forecast predictions prior to scoring. They provide three clear motivations for applying such transformations prior to scoring, assess the implications of different transformations in great detail, and evaluate the effects of these transformations using real-world COVID-19 forecasts obtained from the European Forecast Hub. Approaches that can help us improve how we measure the utility of epidemic forecasts for decision-makers are definitely needed. This is a very nice and timely contribution to epidemic forecast evaluation, and I only have a few comments.
+
+\blue
+1. Line 96, typo: "log-transformtation".
+
+\red
+2. Figure 3: out of curiosity, do the rankings of forecasts A and B first switch at the same observed value (somewhere around 7?) in both panels? Zooming in, it looks as though maybe the switch occurs very slightly earlier for the log-transformed scoring.
+
+3. Section 3.2, page 9: remarks concerning Figure 4 refer to months (e.g., May, July) but it's a little difficult to relate them to the figure, because the x-axis only has 6-month breaks and spans two years, so it isn't immediately apparent which year (or both?) the reader should focus on. That being said, it's great to see how the log-transformation yields similar scores when the forecasts miss peaks and troughs.
+
+\blue
+4. Line 281: missing closing parenthesis, "(or $\beta_{\sqrt{}} = 0$, respectively".
+
+\red
+5. Figure 7: I can appreciate that the correlation between the natural and logarithmic scores decreases over the forecast horizon, as the absolute forecast error grows. But I found panel B more challenging to interpret. I gather the key message is that model rankings are quite consistent between the natural and log scales (panel A) even though the absolute scores differ markedly between the two scales — an effect that increases over the forecast horizon (panel B). Perhaps adding a sentence to this effect in the accompanying text (lines 292-295) would help other readers to avoid my confusion.
+
+\blue
+6. Line 296, typo: "Figure Figure 8 shows ...".
+
+\red
+7. Section 3.4, page 14 and Figure 8: it's a welcome outcome that the Hub ensemble forecast remained the top model, given that the log-transformation clearly affects the individual model rankings. Presumably it would be reasonable to expect that ensemble forecasts for other regions, pathogens, etc, should be the best (or near-best) model when using log-transformed case counts?
+
+
+8. Lines 327-329: "A potential downside is that forecast evaluation is unreliable in situations where observed values are zero or very small."
+
+I feel there's an argument to be made here that rather than being a potential limitations, it could be considered an accurate reflection of the inherent uncertainty about the future course of an epidemic when case numbers are very small. This transformation also provides a valuable benefit in these situations, as the authors note a few sentences later: "It also gives higher weight to another type of situation one may care about, namely one in which numbers start to rise from a previously low level". This neatly illustrates the importance (as highlighted by the authors in this manuscript) of using multiple scoring rules to evaluate and compare forecasts.
+
+9. Table SI.2, "Criteria for removing forecasts": forecasts were removed if their median prediction differed greatly from the true value. This should probably be mentioned in the manuscript text, somewhere around line 235 (where Table SI.2 is referenced), to notify the reader that the definition of "erroneous forecasts" includes forecasts that are in extremely poor agreement with the ground truth. Otherwise, I feel that "erroneous" may be open to misinterpretation (e.g., only removing forecasts that predicted negative counts, NaN values, etc).
+
+
+
+
+
+
+
+
+
+
+
+\end{document}

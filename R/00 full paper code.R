@@ -730,7 +730,7 @@ mean_scores_plot <- function(scores) {
     theme(legend.position = "none") + 
     scale_y_continuous(labels = label_fn) + 
     scale_x_discrete(guide = guide_axis(n.dodge=2), labels = label_fn_within) +
-    labs(y = "Mean weighted interval score", x = "Loaction") 
+    labs(y = "Mean weighted interval score", x = "Location") 
   
   return(plot_mean_scores)
 }

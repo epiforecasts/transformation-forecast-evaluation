@@ -337,7 +337,7 @@ ggsave(filename = "output/figures/illustration-effect-offset-log.png", height = 
 
 
 ## ========================================================================== ##
-## FIGURE 5: Illustration of the effect of the log-transformation of 
+## FIGURE 3: Illustration of the effect of the log-transformation of 
 ##           the ranking for a single forecast
 ## ========================================================================== ##
 
@@ -347,14 +347,17 @@ mu <- 10
 theta_1 <- 1
 theta_2 <- 1e9
 
+true_val <- list(1:50)
+# true_val <- list(seq(6.1, 6.6, 0.1))
+
 data <- data.table(
   quantile = quantile,
   model_A = qnbinom(p = quantile, size = theta_1, mu = mu), 
   model_B = qnbinom(p = quantile, size = theta_2, mu = mu)
 ) |>
   pivot_longer(cols = c(model_A, model_B), names_to = "model", values_to = "prediction") |>
-  mutate(true_value = list(1:50), 
-         id = list(1:50)) |>
+  mutate(true_value = true_val, 
+         id = true_val) |>
   unnest(cols = c(true_value, id))
 
 scores_natural <- data |>
@@ -446,7 +449,7 @@ ggsave(filename = "output/figures/illustration-effect-log-ranking-crps.png",
 
 analysis_date <- "2022-12-12"
 start_date <- "2021-03-08"
-end_date <- "2022-05-12"
+end_date <- "2022-12-05"
 
 hub_data <- rbindlist(list(
   fread(here("data", "full-data-european-forecast-hub-1.csv")), 
@@ -499,6 +502,56 @@ hub_data$location |>
 
 
 
+## ========================================================================== ##
+## Figure ?: Number of anomalies filtered out
+## ========================================================================== ##
+
+n_total_obs <- scores$target_end_date |> unique() |> length()
+
+# Number of anomalies filtered out. 
+anomalies <- anomalies |>
+  filter(target_type %in% c("Cases", "Deaths")) |> 
+  group_by(location, target_type) |>
+  summarise(n = n(), 
+            n_total = n_total_obs)
+
+complete_anomalies <- expand.grid(
+  location = unique(anomalies$location), 
+  target_type = unique(anomalies$target_type))
+
+anomalies |>
+  full_join(complete_anomalies) %>%
+  replace(is.na(.), 0) |>
+  ggplot(aes(x = location, y = n)) + 
+  geom_bar(inherit.aes = FALSE, aes(y = 92, x = location), 
+           stat = "identity", fill = "grey95") + 
+  geom_bar(stat = "identity", fill = "grey60") + 
+  geom_hline(yintercept = n_total_obs, linetype = "dashed", colour = "grey60") + 
+  facet_wrap(~ target_type, ncol = 1) + 
+  theme_scoringutils() + 
+  labs(y = "Number of observations removed as anomaly", x = "Location")
+ggsave(filename = "output/figures/number-anomalies.png", 
+       width = 7, height = 4.5)
+
+
+
+removed_forecasts <- fread("data/removed-forecasts.csv")
+
+removed_forecasts |>
+  group_by(model, target_type) |>
+  summarise(total_n = sum(total_n), 
+            n = sum(n)) |> 
+  ggplot(aes(x = model)) + 
+  # geom_bar(aes(y = (total_n)), 
+  #          stat = "identity", fill = "grey95") + 
+  geom_bar(aes(y = (n/total_n)), stat = "identity", fill = "grey60") + 
+  theme_scoringutils() +
+  facet_wrap(~ target_type, ncol = 1) + 
+  scale_y_continuous(label = scales::percent) + 
+  theme(axis.text.x=element_text(angle = 45, hjust = 1)) + 
+  labs(y = "Percentage of erroneous foreccasts", x = "Location")
+ggsave(filename = "output/figures/erroneous-forecasts.png", 
+       width = 7, height = 4.5)
 
 ## ========================================================================== ##
 ## Figure 6: Scores for two-week-ahead predictions from the 
@@ -1246,7 +1299,7 @@ ranking_figure <- function(target = "Cases") {
            x_arrow = ifelse(scale == "natural", 1.7, 2.7)
     ) |>
     group_by(model) |>
-    mutate(custom_color = ifelse(diff(relative_skill) > 0, "deteriorated", "not deteriorated")) |>
+    mutate(custom_color = ifelse(diff(relative_skill) < 0, "better", "worse")) |>
     arrange(scale) 
 
   print(df_ranking_change)  
@@ -1257,7 +1310,8 @@ ranking_figure <- function(target = "Cases") {
       aes(x=x_arrow), 
       arrow = arrow(length = unit(0.09,"npc")), 
       lineend = "round", linejoin = "mitre",
-      size=1, show.legend = FALSE) +
+      size=1) +
+    scale_color_manual(values = c("#00BFC4", "#F8766D")) + 
     coord_cartesian( 
       ylim = c(0.75, 7.25)) +
     theme_scoringutils() +
@@ -1266,8 +1320,8 @@ ranking_figure <- function(target = "Cases") {
           axis.line.y = element_blank(),
           axis.text = element_blank(),
           axis.ticks = element_blank(),
-          panel.grid = element_blank(), 
-          legend.position="none")
+          panel.grid = element_blank()) + 
+    labs(color = "Relative skill")
   
   return(
     list(

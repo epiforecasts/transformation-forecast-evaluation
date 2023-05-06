@@ -2,7 +2,7 @@
 ##               Code to refetch data from the Forecast Hub.                  ##
 ## ========================================================================== ##
 
-library(covidHubUtils)
+library(covidHubUtils) #remotes::install_github("reichlab/covidhubutils")
 library(dplyr)
 library(data.table)
 library(purrr)
@@ -11,6 +11,8 @@ library(here)
 library(stringr)
 
 analysis_date <- "2022-12-12"
+start_date <- "2021-03-08"
+end_date <- "2022-12-05"
 
 ## -------------------------------------------------------------------------- ##  
 ##                  Download and process Forecast Hub data                    ##
@@ -94,30 +96,27 @@ hub_data <- mutate(hub_data,
 # --------------------------- Filter forecast data --------------------------- #
 
 # filter out forecast anomalies based on the Forecast Hub anomalies file
-filter_out_anomalies <- function(hub_data) {
-  anomalies_file <- here::here("data", "anomalies.csv")
-  if (file.exists(anomalies_file)) {
-    anomalies <- data.table::fread(file = anomalies_file)
-  } else {
-    ## get anomalies file at date of last data made
-    owner <- "covid19-forecast-hub-europe"
-    repo <- "covid19-forecast-hub-europe"
-    path <- "data-truth/anomalies/anomalies.csv"
-    commit <- gh::gh(
-      "/repos/{owner}/{repo}/commits?path={path}&until={date}",
-      owner = owner,
-      repo = repo,
-      path = path,
-      until = analysis_date,
-      .limit = 1
-    )
-    anomalies <- data.table::fread(input = URLencode(URL = paste(
-      "https://raw.githubusercontent.com", owner, repo, commit[[1]]$sha, path, sep = "/"
-    )))
-    data.table::fwrite(x = anomalies, file = anomalies_file)
-  }
+anomalies_file <- here::here("data", "anomalies.csv")
+if (file.exists(anomalies_file)) {
+  anomalies <- data.table::fread(file = anomalies_file)
+} else {
+  ## get anomalies file at date of last data made
+  owner <- "covid19-forecast-hub-europe"
+  repo <- "covid19-forecast-hub-europe"
+  path <- "data-truth/anomalies/anomalies.csv"
+  commit <- gh::gh(
+    "/repos/{owner}/{repo}/commits?path={path}&until={date}",
+    owner = owner,
+    repo = repo,
+    path = path,
+    until = analysis_date,
+    .limit = 1
+  )
+  anomalies <- data.table::fread(input = URLencode(URL = paste(
+    "https://raw.githubusercontent.com", owner, repo, commit[[1]]$sha, path, sep = "/"
+  )))
   
-  ## prepare anomalies for mergeing into hub_data
+  ## prepare anomalies for merging into hub_data
   anomalies <- anomalies[, list(
     target_end_date,
     location,
@@ -125,13 +124,17 @@ filter_out_anomalies <- function(hub_data) {
       string = target_variable, pattern = "^inc ")), "s")
   )]
   
+  data.table::fwrite(x = anomalies, file = anomalies_file)
+}
+  
+filter_out_anomalies <- function(hub_data, anomalies) {
   setDT(hub_data)
   hub_data <- hub_data[!anomalies, on = .(target_end_date, location, target_type)]
   hub_data <- hub_data[true_value >= 0][]
   return(hub_data)
 }
 
-hub_data <- filter_out_anomalies(hub_data)
+hub_data <- filter_out_anomalies(hub_data, anomalies)
 
 # remove all models that do not satisfy at least some criteria
 filter_models <- function(hub_data) {
@@ -163,8 +166,18 @@ filter_models <- function(hub_data) {
 }
 hub_data <- filter_models(hub_data)
 
+# some additional filtering
+hub_data <- filter(hub_data, 
+                   target_type != "", 
+                   horizon <= 4, 
+                   forecast_date >= "2021-03-08")
 
-# Remove spurious forecasts
+# Remove spurious forecasts and save the number of forecasts removed
+total_number_forceasts <- 
+  hub_data |> 
+  group_by(location, model, target_type) |>
+  summarise(total_n = n())
+
 remove <- hub_data |> 
   filter(quantile == 0.5) |>
   filter((true_value > 10) & (prediction > 20*true_value) |
@@ -173,15 +186,18 @@ remove <- hub_data |>
          (true_value == 0) & (prediction > 100)) |>
   select(-quantile)
 remove[, forecast_date := as.Date(forecast_date)]
+
+number_removed_forecasts <- remove |>
+  group_by(location, target_type, model) |>
+  summarise(n = n()) 
+removed_forecasts <- full_join(total_number_forceasts, number_removed_forecasts) %>%
+  replace(is.na(.), 0)
+fwrite(removed_forecasts, "data/removed-forecasts.csv")
+
 setDT(hub_data)
 hub_data[, forecast_date := as.Date(forecast_date)]
 hub_data <- hub_data[!remove, on = .(target_end_date, true_value, forecast_date, location, target_type, model, horizon)]
 
-# some additional filtering
-hub_data <- filter(hub_data, 
-                   target_type != "", 
-                   horizon <= 4, 
-                   forecast_date >= "2021-03-08")
 
 
 # --------------------------- Save forecast data ----------------------------- #

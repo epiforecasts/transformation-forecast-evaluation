@@ -508,8 +508,12 @@ hub_data$location |>
 
 n_total_obs <- scores$target_end_date |> unique() |> length()
 
+scores$target_end_date |> min()
+scores$target_end_date |> max()
+
+
 # Number of anomalies filtered out. 
-anomalies <- anomalies |>
+anomalies <- fread(here::here("data", "anomalies.csv")) |>
   filter(target_type %in% c("Cases", "Deaths")) |> 
   group_by(location, target_type) |>
   summarise(n = n(), 
@@ -519,9 +523,11 @@ complete_anomalies <- expand.grid(
   location = unique(anomalies$location), 
   target_type = unique(anomalies$target_type))
 
-anomalies |>
+anomalies <- anomalies |>
   full_join(complete_anomalies) %>%
-  replace(is.na(.), 0) |>
+  replace(is.na(.), 0) 
+
+anomalies |>
   ggplot(aes(x = location, y = n)) + 
   geom_bar(inherit.aes = FALSE, aes(y = 92, x = location), 
            stat = "identity", fill = "grey95") + 
@@ -532,6 +538,11 @@ anomalies |>
   labs(y = "Number of observations removed as anomaly", x = "Location")
 ggsave(filename = "output/figures/number-anomalies.png", 
        width = 7, height = 4.5)
+
+anomalies |>
+  group_by(target_type) |>
+  summarise(n = mean(n), 
+            n_rel = mean(n) / 92)
 
 
 

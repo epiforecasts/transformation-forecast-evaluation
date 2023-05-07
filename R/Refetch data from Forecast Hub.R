@@ -92,6 +92,7 @@ hub_data <- merge_pred_and_obs(prediction_data, truth,
 hub_data <- mutate(hub_data, 
                    forecast_date = calc_submission_due_date(forecast_date))
 
+fwrite(hub_data, "data/raw-hub-data.csv")
 
 # --------------------------- Filter forecast data --------------------------- #
 

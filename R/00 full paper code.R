@@ -1158,6 +1158,8 @@ df |>
                       "$\\beta_\\log{}$"), escape = FALSE) |>
   kable_styling()
 
+# we removed the first 7 lines from the table following the suggestion from 
+# a reviewer as the regressions may not be particularly meaningful
 
 
 

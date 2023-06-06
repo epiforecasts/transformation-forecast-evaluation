@@ -113,7 +113,10 @@ We reworded occurences of the term `propriety'.
 No reference is provided for the approximate variance-stabilising properties of the square root transformation.
 
 \black
-We added a reference to the following book:  \url{https://www.google.fr/books/edition/Generalized_Linear_Models_With_Examples/tBh5DwAAQBAJ?hl=en&gbpv=1&dq=variance-stabilizing+transformation+square+root&pg=PA119&printsec=frontcover}, page 118
+We added a reference to the following book:
+Dunn, P.K., Smyth, G.K.(2018). Generalized Linear Models With Examples in R. Germany: Springer New York, page 118. 
+
+\url{https://www.google.fr/books/edition/Generalized_Linear_Models_With_Examples/tBh5DwAAQBAJ?hl=en&gbpv=1&dq=variance-stabilizing+transformation+square+root&pg=PA119&printsec=frontcover}, page 118
 
 
 
@@ -159,13 +162,15 @@ Hm potentially an interesting point. At the moment the paper kind of assumes you
 \red
 
 \subsection{Major comments}
+\blue
 ``Natural logarithm'', log1p, and log($a + x$) are conflated in several places, despite the discussion in Section 2.4 noting that this is an important distinction. The terminology should not be overloaded. (E.g., L20 ``Applying the log transformation''.)
 
 \black
-L20 refers to the abstract. I changed ``Applying the log transformation'' to ``Applying a transformation of log($x + 1$)''. 
+L20 refers to the abstract. We changed ``Applying the log transformation'' to ``Applying a transformation of log($x + 1$)''. 
 
-In a more principled sense I'm not sure overloading the terminology is that much of a problem, since we explicitly analyse that adding 1 doesn't make that much of difference. We could make it more explicit though. 
+We slightly disagree with the notion that the terminology should not be overloaded. Not introducing another term for transformations of $\log_{e}(x + \varepsilon)$ makes the manuscript more readable and accessible to readers. In addition, our analyses suggest that adding a small context doesn't make much of a difference in most practical applications. We nevertheless completely agree that this should be made clear to the reader and have added the following text: 
 
+\textit{For conceptual clarity and to allow for a more in-depth discussion, we focus mostly on the natural logarithm as a particular transformation in the context of epidemic phenomena. We refer to this transformation as 'log-transformation' and to scores that have been log-transformed as scores 'on the log scale' (as opposed to scores 'on the natural scale', which have not been transformed). In the theoretical discussion in Section \ref{sec:methods}, 'log-transformation' and 'log scale' generally refer to a transformation of $\log_{e}(x)$. For practical applications (Section \ref{sec:HUB}) we also use these terms to describe a transformation of $\log_{e}(x + \varepsilon)$ in order to keep the notation simple.}
 
 \red
 L18:
@@ -207,25 +212,18 @@ Paper Sebastian Lerch?
 
 Do we need to update anything in the manuscript? 
 
-\red
+\blue
 L166: “a negative binomial distribution with size parameter $\theta$” — Is this realistic? If so, what’s the interpretation epidemiologically?
 
 \black
-Nikos: This is an illustrative example and is not meant to be completely realistic. Rather, the point is to illustrate that for observations which have a standard deviation that grows linearly with the mean, the log transformation can serve as a variance-stabilising transformation. However, negative binomial distributions / Poisson gamma mixtures have been used in the past to model epidemiological processes. 
+This is an illustrative example and is not meant to be completely realistic. Rather, the point is to illustrate that for observations which have a standard deviation that grows linearly with the mean, the log transformation can serve as a variance-stabilising transformation. However, negative binomial distributions / Poisson gamma mixtures have been used in the past (see e.g. \url{https://doi.org/10.1111/rssa.12974}) to model epidemiological processes. We agree with the reviewer that a size parameter of 0.1 is not realistic, but still think that the example is valuable as an illustration. 
 
-Endo et al. (https://pubmed.ncbi.nlm.nih.gov/32685698/ ) for example estimated that the distribution of COVID cases could be well described using a negative binomial distribution with size $\Theta = 0.1$. This is a much stronger overdispersion then what we use in our example. 
-\textbf{I'm actually somewhat confused about this. I remember Johannes rejecting my initial $\Theta = 0.1$ because he thought it was unrealistic. Am I severely misunderstanding Akira's paper?}
-
-
-Johannes: But we could argue via Poisson gamma mixture, similar to the model in \url{https://doi.org/10.1111/rssa.12974}
-
-\red
+\blue
 Figure 3: is a geometric distribution realistic for epidemiological surveillance data?
 
 \black
-Nikos: Again refer to Akira's paper? 
+Again, we agree that this is not a typical example we would expect to see in an epidemiological setting. It could happen in principle, but only in rather constructed cases. We still believe the example is valuable to illustrate the general point that the rankings between two forecasts can change even for a single observation. 
 
-Johannes: Agree that it is not. Could add something along the lines of ``this can happen in principle, but only in rather constructed cases, such as for the geometric distribution in Fig 3, which is unlikely to occur in an epi setting.
 
 \blue
 L236: “better able to illustrate the effects” — Why does this removal help illustrate the effects? Is such a removal procedure required to be able to apply this transformation approach at all? And if so, what are the requirements/considerations for such a removal procedure?
@@ -260,13 +258,11 @@ We added the percentages of observed values in the main text and added the follo
 \end{figure}
 
 
-\red
+\blue
 Table 1: The beta for cases and beta for deaths are both around 0.86 individually. But fit together they beta is 0.963; this appears due to trying to fit two different (difficulties of) tasks together that follow different trends, evident from the differing alpha values. A joint fit does not seem appropriate without allowing for a separate alpha per task type. The same thing can be said for the different horizons within cases\&deaths. The fits here seem to better support an argument for something between sd and log.
 
 \black
-Johannes to the rescue: Any ideas for a smart response? 
-
-So we remoe the joint fit / the first 7 lines of the table. 
+We agree with the point, thank you for raising it. We removed the joint fit from the table. 
 
 \blue
 L279: “higher scores for smaller forecast targets” — This seems undesirable, given argument of Bracher et al. 2021a. Perhaps some forecast consumers would be interested in quality of forecasts for locations with lower activity (e.g., policymakers for smaller populations), but very unlikely would they want to prioritize less-active times in general over more-active times.  
@@ -333,17 +329,21 @@ L69: This might benefit from a short justification (e.g.,
 $\left| \frac{x_t e^{(r_t + \epsilon) \Delta t} - x_t e^{r_t \Delta t}}{x_t e^{(r_t - \epsilon) \Delta t} - x_t e^{r_t \Delta t}} \right| = e^{\epsilon\Delta t}$)
 
 \black
-Do we want to add this? 
+This is a great suggestion, thank you. We updated the corresponding paragraph, which now reads: 
 
-\red
+\textit{If case numbers are evolving based on an exponential process and the  modelling task revolves around estimating and forecasting the reproduction number or the corresponding growth rate, then evaluating forecasts based on the absolute distance between forecast and observed value penalises underprediction (of the reproduction number or growth rate) less than overprediction by the same amount. Consider a forecast that misses the correct growth rate by either $+\epsilon$ or $-\epsilon$:}
+
+\begin{equation}
+\left| \frac{x_t e^{(r_t + \epsilon) \Delta t} - x_t e^{r_t \Delta t}}{x_t e^{(r_t - \epsilon) \Delta t} - x_t e^{r_t \Delta t}} \right| = e^{\epsilon\Delta t}
+\end{equation}
+
+\textit{For exponential processes errors on the observed value grow exponentially with the error on the estimated reproduction number or growth rate.} 
+
+\black
 L70: Clarify: is this suggesting to make the forecasting targets themselves the result of applying some standardized growth rate estimator to current+future observations around the desired time period?
 
 \black 
-I am confused...
-I think what we want to say is that it would be preferable to evaluate a forecast on the growth rate if one were available. Luckily, we can do that by using a log transformation. 
-
-Say that we have something in the discussion that suggests transforming to growth rates directly. 
-
+Here we aren't suggesting a specific transformation yet, but rather just say that it would be desirable to score a forecast of the growth rate (regardless of how that can be achieved). Specific suggestions for how to achieve this (either by taking a log transformation or by using another transformation to obtain growth rates directly as mentioned in the Discussion) are discussed in more detail in the remainder of the text. We added the word 'conceptually' to the sentence to make this a bit clearer. 
 
 \red
 L99: How are atoms at $\exp x = 0$ handled? How are observations of $y = 0$ handled?
@@ -369,16 +369,12 @@ Johannes to the rescue!
 
 L138: “$\Bar{r}$ is” — Consider $\Bar{r}_t$ etc.
 
-\black
-thoughts?
-
 L146: “$\Bar{\hat{r}}$” — Should be $\hat{\Bar{r}}$, or consider $\hat{\Bar{r}}_t$.
 
 \black
-thoughts?
+We applied the suggested changes.
 
 \red
-
 L158 “delta method” — Delta method would seem to also require the distribution to be somewhat tightly distributed, concentrated within a nearly-linear region of the transformation function. But putting significant mass on a wider range of values would also mean having non-negligible mass on negative values if “approximately normal”; it would not make sense to apply the logarithm or sqrt transformations in these cases. So perhaps the “tightly distributed” assumption can be taken. But this seems a bit nonobvious and a justification/application of the delta method would be helpful here.
 
 \black
@@ -435,8 +431,11 @@ Figure 2: Were any zeros encountered for the negative binomial or Poisson distri
 As indicated in the Figure legend ("Expected CRPS was computed on the natural scale (left), after applying a square-root transformation (middle), and after adding one and applying a log-transformation to the data (right)), we have added 1 before applying the log transformation to deal with zero values. 
 
 
-\red
+\blue
 L215: “is mainly driven” — Please add pointer to justification (e.g., Figure 7 / discussion).
+
+\black
+We added a reference to Figure 7. 
 
 \blue
 L231: “only include models which” — Consider “only include the 7 models that”
@@ -518,9 +517,7 @@ L345: “divide each forecast by the forecast” — Caveat about current foreca
 \black
 We updated the paragraph which now reads:
 
-Johannes is that first sentence correct? 
-
-\textit{We suggested using the natural logarithm as a variance-stabilising transformation (VST). This is appropriate for variables that are approximately normally distributed and have a quadratic mean-variance relationship with $\sigma^2 = c \times \mu^2$ (this is e.g. approximately true for the negative binomoial distribution and large $\mu$. 
+\textit{We suggested using the natural logarithm as a variance-stabilising transformation (VST). This is appropriate for variables that are approximately normally distributed and have a quadratic mean-variance relationship with $\sigma^2 = c \times \mu^2$ (this is e.g. approximately true for the negative binomoial distribution and large $\mu$). 
 
 
 or alternatively the square-root transformation in the case of a Poisson distributed variable. Other VST like the Box-Cox (Box and Cox, 1964) are conceivable as well.

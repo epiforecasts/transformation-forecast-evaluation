@@ -62,7 +62,7 @@ We updated the paragraph, which now reads:
 
 \indented
 
-Proper scoring rules are constructed such that they encourage honest forecasting and cannot be `gamed' or `cheated'. % In expectation, a forecaster receives the best score if their forecast $F$ coincides with the data-generating distribution $G$, that is if $F = G$.
+Proper scoring rules are constructed such that they encourage honest forecasting and cannot be `gamed' or `cheated'. 
 Assuming that the forecaster's actual best judgement corresponds to a predictive distribution $F$, a proper score is constructed such that under $F$, no other distribution $G$ yields a better expected score. Forecasters (anyone or anything that issues a forecast) are thus incentivised to report their true belief $F$ about the future. Common proper scoring rules are the logarithmic or log score \citep{goodRationalDecisions1952} or the continuous ranked probability score~\citep[CRPS,][]{gneitingStrictlyProperScoring2007}. The log score is the log-likelihood of the predictive density at the observed value and is scale-invariant under monotonous transformations. The log score does not suffer from the issues we address in this paper, but due to a number of reasons is not as widely used in fields such as weather forecasting or epidemiology (see e.g., \citealt{Johansson2019} for an exception). For example, the log score assigns particularly severe penalties to occasional misguided forecasts. This lack of robustness may limit its practical applicability \cite{bracherEvaluatingEpidemicForecasts2021}. Moreover, it is not easily applied to forecasts reported as samples or quantiles, as used in many recent disease forecasting efforts. 
 For these reasons, the CRPS or its discrete equivalent, the ranked probability score~\citep[RPS,][]{funkAssessingPerformanceRealtime2019}, and the weighted interval score ~\citep[WIS,][]{bracherEvaluatingEpidemicForecasts2021} are more commonly used in epidemiology. 
 
@@ -80,8 +80,7 @@ In the theoretical part of the manuscript we simplify the equations a little bit
 As the authors note, a particularly controversial issue for the log transformation is the issue of zero values. They take the standard pragmatic stance that we can use log (eps + y) instead of log y in such cases. Many communities e.g. econometrics are vehemently opposed to this, preferring e.g. quasi-Poisson regression and robust standard errors in the context of estimation. While not completely opposed to log (eps + y) myself (I have used it too!) it makes me a bit uncomfortable I still can’t help but feel that something along the lines of e.g. logarithmic/quasi-likelihood or deviance scores could be formulated that would be preferable to the log data transform. This would offer both automatic scaling and handling of zero values, in principle. However, I haven’t thought carefully enough to offer a concrete alternative and the log(eps + y) approach appears to work reasonably here. Instead, and in combination with the previous point, perhaps a bit more discussion of the potential alternatives based on quasi-likelihood-style functions rather than data transformations could be added?
 
 \black
-Thank you for raising this interesting point. The log score is indeed an alternative which is scale invariant under monotonic transformations. We mention this in the introduction and the the discussion and state that for the log score the question of which scale to evaluate forecasts on does not arise. In our understanding, a quasi-likelihood approach (as opposed to an actual likelihood approach as in the log score) may not actually be necessary as at least in theory full predictive distributions are to be evaluated. Developing further ideas based on some form of quasi-likelihood would likely require more in-depth investigation. In any case, developing these ideas would require more in-depth investigation and we feel this is beyond the scope of the current paper. % and therefore did not include it in this work. 
-
+Thank you for raising this interesting point. The log score is indeed an alternative which is scale invariant under monotonic transformations. We mention this in the introduction and the the discussion and state that for the log score the question of which scale to evaluate forecasts on does not arise. In our understanding, a quasi-likelihood approach (as opposed to an actual likelihood approach as in the log score) may not actually be necessary as at least in theory full predictive distributions are to be evaluated. Developing further ideas based on some form of quasi-likelihood would likely require more in-depth investigation. In any case, developing these ideas would require more in-depth investigation and we feel this is beyond the scope of the current paper. 
 
 \blue
 \subsubsection{Observation and process models}
@@ -152,7 +151,7 @@ We added the following to the discussion to make our intentions clearer regardin
 In this paper, we did not make any particular assumptions about policy makers' priorities and preferences. Rather, we aimed to enable users to make an informed choice by showing how different transformations lead to different relative weights for the kinds of prediction errors forecast consumers may care about, such as absolute vs. relative errors or the size of penalties for over- vs. underprediction. In practice, engagement with decision makers is important to determine what their priorities are and how different ways to measure predictive importance should be weighed.
 
 \notindented
-It is important to note that changing the relative weight for different times and locations is one effect of the scoring forecasts on the log scale, but not necessarily the main point of the transformation. Rather, we do recommend to evaluate forecasts on the log scale as we believe the interpretation as a score of the exponential growth rate is meaningful in an epidemiological context. As stated explicitly in the manuscript, we moreover recommend to use this in complement to rather than as a replacement of the common evaluation on the ``natural scale''. Evaluators will then becoma aware of whether their results depend strongly on this decision and the implied weighting of different forecasting tasks.
+It is important to note that changing the relative weight for different times and locations is one effect of the scoring forecasts on the log scale, but not necessarily the main point of the transformation. Rather, we do recommend to evaluate forecasts on the log scale as we believe the interpretation as a score of the exponential growth rate is meaningful in an epidemiological context. As stated explicitly in the manuscript, we moreover recommend to use this in complement to rather than as a replacement of the common evaluation on the ``natural scale''. Evaluators will then become aware of whether their results depend strongly on this decision and the implied weighting of different forecasting tasks.
 
 Users who are explicitly concerned about the relative weights of different times and locations can e.g. find information in Figure SI.7 where we show how different forecast targets are emphasized by evaluation on the natural or log-transformed scale. A user could e.g. reproduce such a display with different values of the offset $a$ and choose $a$ such that the relative weighting of times and regions with high and low incidence correspond to their preferences. 
 
@@ -168,13 +167,6 @@ We note that in the practical evaluation of operational forecasting systems  sev
 
 \notindented
 
-\red not sure what to make of Box-Cox.
-
-
-
-Hm potentially an interesting point. At the moment the paper kind of assumes you know what you're doing and suggests to do it differently. One could I guess add a paragraph that walks through all the steps? Add it where? Maybe this should be done in another piece that talks about best practices? 
-
-
 \blue
 \subsection{Major comments}
 
@@ -183,7 +175,7 @@ Hm potentially an interesting point. At the moment the paper kind of assumes you
 \black
 We changed ``Applying the log transformation'' to ``Applying a transformation of log($x + 1$)'' in L20 (in the abstract). 
 
-We slightly disagree with the notion that the terminology should not be overloaded. Not introducing another term for transformations of $\log_{e}(x + \varepsilon)$ makes the manuscript more readable and accessible to readers. In addition, our analyses suggest that adding a small context doesn't make much of a difference in most practical applications. We nevertheless completely agree that this should be made clear to the reader and have added the following text: 
+We slightly disagree with the notion that the terminology should not be overloaded. Not introducing another term for transformations of $\log_{e}(x + \varepsilon)$ makes the manuscript more readable and accessible to readers. In addition, our analyses suggest that adding a small offset doesn't make much of a difference in most practical applications. We nevertheless completely agree that this should be made clear to the reader and have added the following text: 
 
 \indented
 For conceptual clarity and to allow for a more in-depth discussion, we focus mostly on the natural logarithm as a particular transformation in the context of epidemic phenomena. We refer to this transformation as 'log-transformation' and to scores that have been computed from log-transformed forecasts and observations as scores 'on the log scale' (as opposed to scores 'on the natural scale', which involve no transformation). In the theoretical discussion in Section 2, 'log-transformation' and 'log scale' generally refer to a transformation of $\log_{e}(x)$. For practical applications (Section 3) we also use these terms to describe a transformation of $\log_{e}(x + \varepsilon)$ in order to keep the terminology and notation simple.
@@ -223,7 +215,7 @@ The assumption of a quadratic mean-variance relationship is closely linked to th
 L150: “it may be desirable” — Is it though? This seems unlikely. Stakeholders likely want to emphasize some locations and times over others, and would benefit from some rules about how to do so while maintaining propriety. (E.g., is scaling by some function of recent observations or the population size okay? Is scaling by the forecast or observed value okay? Or are we limited to monotonic transformations?)
 
 \black
-We think that while it is certainly not the only relevant approach, there is a case to be made for an evaluation which gives each foreasting target a similar weight. This is attractive if the goal of the evaluation is to find the best forecasting model for future use and if one assumes that the difficulty of the forecasting task is similar in different locations. Take for example two models that make independent forecasts for cases of COVID-19 in Germany, Luxembourg and Liechtenstein. CRPS scores on the natural scale would be dominated by the predictive performance in Germany. One model could be a lot better in Luxembourg and Liechtenstein and slightly worse in Germany and end up looking worse in terms of overall CRPS. However, it is unclear whether predictive performance in Germany really provides e.g. 100 times more information about how good a model is at predicting disease dynamics. If the question is which model to deploy in another location in the future, then it might be desirable to not have average scores be dominated by a single location. 
+We think that while it is certainly not the only relevant approach, there is a case to be made for an evaluation which gives each forecasting target a similar weight. This is attractive if the goal of the evaluation is to find the best forecasting model for future use and if one assumes that the difficulty of the forecasting task is similar in different locations. Take for example two models that make independent forecasts for cases of COVID-19 in Germany, Luxembourg and Liechtenstein. CRPS scores on the natural scale would be dominated by the predictive performance in Germany. One model could be a lot better in Luxembourg and Liechtenstein and slightly worse in Germany and end up looking worse in terms of overall CRPS. However, it is unclear whether predictive performance in Germany really provides e.g. 100 times more information about how good a model is at predicting disease dynamics. If the question is which model to deploy in another location in the future, then it might be desirable to not have average scores be dominated by a single location. 
 
 We have updated the paragraph as such: 
 
@@ -269,10 +261,10 @@ This illustrates that a quadratic mean-variance relationship can arise from a si
 Figure 3: is a geometric distribution realistic for epidemiological surveillance data?
 
 \black
-We agree that this is not a typical example we would expect to see in an epidemiological setting. It could happen in principle, but only in rather constructed cases. We still believe the example is valuable to illustrate the general point that the rankings between two forecasts can change even for a single observation. We added the two following sentences:
+We agree that this is not a typical example we would expect to see in an epidemiological setting. It could happen in principle, but only in rather constructed cases. We still believe the example is valuable to illustrate the general point that the rankings between two forecasts can change even for a single observation. We added the following sentence:
 
 \indented
-We note that the chosen example involving a geometric forecast distribution is somewhat constructed; for more similarly shaped pairs of forecast distributions this phenomenon will not typically occur.
+We note that the chosen example involving a geometric forecast distribution is somewhat constructed; as shown in Section \ref{sec:Hub:cor} and Figure \ref{fig:HUB-cors}A, rankings between models usually stay quite stable for a single forecast. .
 
 \notindented
 
@@ -298,8 +290,7 @@ We added the following short paragraph to Section 2.4 to ensure these aspects ar
 We note that in the practical evaluation of operational forecasting systems  several additional challenges arise, which we do not study in detail. These concern e.g., the removal of outlying observations and forecasts and the handling of missing forecasts. The solutions we employed in practice are provided in Section 3.1.
 
 \notindented
-% I'm not sure where we should note this. This is already more or less the beginning of the example part. 
-% And for the theoretical part it's not that relevant, because missingness is somewhat independent of whether we transform forecasts. 
+
 
 
 \blue
@@ -420,7 +411,7 @@ L127: “approximation of the absolute percentage error” — Raises a few ques
     \black
 Yes, dividing by the observed value generally disturbs propriety. This approach would correspond to weighting CRPS scores with weights depending on the observed value, and it has been shown that the resulting average scores are no longer proper; see Lerch et al (2017, Statistical Science, preprint: \url{https://arxiv.org/abs/1512.09244})
     \item \blue How does using a (shifted) log transform differ from dividing by (a constant plus) (a mean of) the most recent observation(s)?\\
-    \black Like in the related arguments in the paper we address this question for the simpler case of the aboslute error rather than CRPS. Using a shifted log transform corresponds to (in lsight variation of equation (8))
+    \black Like in the related arguments in the paper we address this question for the simpler case of the absolute error rather than CRPS. Using a shifted log transform corresponds to (in slight variation of equation (8))
     \begin{equation}
     |\varepsilon^*_t| = |\log (\hat{y_t} + a) - \log(y_t + a)| = \left|\log\left(\frac{\hat{y}_t + a}{y_t + a}\right) \right| \ \ \stackrel{\text{if } \hat{y}_t \ \approx \ y_t}{\approx} \ \ \left| \frac{\hat{y}_t + a}{y_t + a} - 1 \right| \ \ = \ \ \left| \frac{\hat{y}_t - y_t}{y_t + a} \right|.
     \end{equation}
@@ -440,17 +431,12 @@ Yes, dividing by the observed value generally disturbs propriety. This approach 
 
 
 
-
-
-
 \red
 
 L127: As APE, RE, and SAPE are defined differently in other sources (e.g., with scaling factor in APE and SAPE, and with y in the denominator and no absolute value in RE), it may be helpful to also indicate sources for all three (e.g., that the RE definition is also in Gneiting, 2011).
 
 \black
 We added a reference to Gneiting (2011) for the relative error. SAPE is not defined in that paper, and we reference the paper by Flores (1986) instead. It seems that the earliest occurrence of the SAPE is due to a book by Armstrong (\textit{Long-range Forecasting: From Crystal Ball to Computer}, 1985); however, as we were unable to access the full text of this book we consider Flores (1986) the more helpful reference.
-
-% Is there a good source for the SAPE? It's not in the Gneiting paper. I found this, but not entirely convinced: https://bmcinfectdis.biomedcentral.com/articles/10.1186/s12879-017-2365-1. Wikipedia (\url{https://en.wikipedia.org/wiki/Symmetric_mean_absolute_percentage_error})also suggests Armstrong and Flores. 
 
 \blue
 
@@ -481,7 +467,7 @@ The current paragraph reads:
 
 \indented
 
-If the mean-variance relationship is quadratic with $\sigma^2 = c \times \mu^2$, the natural logarithm can serve as the VST \citep{guerreroTimeseriesAnalysisSupported1993}. Denoting by $F_{\log}$ the predictive distribution for $\log(Y)$, we can use the delta method (a first-order Taylor approximation, see e.g., \citealt{Dunn2018}), to show that
+If the mean-variance relationship of the data-generating distribution is quadratic with $\sigma^2 = c \times \mu^2$, the natural logarithm can serve as the VST \citep{guerreroTimeseriesAnalysisSupported1993}. Denoting by $F_{\log}$ the predictive distribution for $\log(Y)$, we can use the delta method (a first-order Taylor approximation, see e.g., \citealt{Dunn2018}), to show that
 
 \begin{equation}
 \mathbb{E}_F[\text{CRPS}\{F_{\log}, \log(y)\}] \approx \frac{\sigma/\mu}{\sqrt{\pi}} 
@@ -696,7 +682,7 @@ Figure SI.7:
 \black
 We added a statement to the legend "Locations are sorted according to the mean observed value in that location." We also followed your suggestion to make this a main figure. 
 
-We would expect that one could find a value for a (e.g. 10?) that would eventually yield a more or less flat line, but we haven't tested this in practice. 
+We would expect that one could find a value for a that would eventually yield a more or less flat line, but we haven't investigated this in practice. 
 
 \blue
 \subsubsection{Typographical}

@@ -27,11 +27,9 @@
 
 \begin{document}
 
-\black \textbf{Black: our comments}
-
-\red \textbf{Reviewer, not addressed}
-
-\blue \textbf{Reviewer, addressed}
+%\black \textbf{Black: our comments}
+%\red \textbf{Reviewer, not addressed}
+%\blue \textbf{Reviewer, addressed} 
 
 
 \black
@@ -153,9 +151,9 @@ In this paper, we did not make any particular assumptions about policy makers' p
 \notindented
 It is important to note that changing the relative weight for different times and locations is one effect of the scoring forecasts on the log scale, but not necessarily the main point of the transformation. Rather, we do recommend to evaluate forecasts on the log scale as we believe the interpretation as a score of the exponential growth rate is meaningful in an epidemiological context. As stated explicitly in the manuscript, we moreover recommend to use this in complement to rather than as a replacement of the common evaluation on the ``natural scale''. Evaluators will then become aware of whether their results depend strongly on this decision and the implied weighting of different forecasting tasks.
 
-Users who are explicitly concerned about the relative weights of different times and locations can e.g. find information in Figure SI.7 where we show how different forecast targets are emphasized by evaluation on the natural or log-transformed scale. A user could e.g. reproduce such a display with different values of the offset $a$ and choose $a$ such that the relative weighting of times and regions with high and low incidence correspond to their preferences. 
+Users who are explicitly concerned about the relative weights of different times and locations can e.g. find information in Figure 3 where we show how different forecast targets are emphasized by evaluation on the natural or log-transformed scale. A user could e.g. reproduce such a display with different values of the offset $a$ and choose $a$ such that the relative weighting of times and regions with high and low incidence correspond to their preferences. 
 
-\red
+\blue
 Additionally, any additional necessary/recommended elements of a scoring procedure should be noted more prominently (e.g., dealing with forecast missingness, outlying forecasts, outlying data, selecting a Box-Cox transformation, selecting a shift ($a$ value), etc.).
 
 \black
@@ -164,8 +162,9 @@ To direct the readers' attention to the mentioned challenges already in the conc
 
 \indented
 We note that in the practical evaluation of operational forecasting systems  several additional challenges arise, which we do not study in detail. These concern e.g., the removal of outlying observations and forecasts and the handling of missing forecasts. The solutions we employed in practice are provided in Section 3.1.
-
 \notindented
+
+We agree that it would be useful to have a more thorough discussion of all the considerations involved in evaluating forecasts, but feel this is slightly beyond the scope of this paper. 
 
 \blue
 \subsection{Major comments}
@@ -254,9 +253,6 @@ So a conditional negative binomial distribution with quadratic mean-variance rel
 
 This illustrates that a quadratic mean-variance relationship can arise from a simple yet not completely unreasonable renewal equation model.
 
-
-% to model epidemiological processes. We agree with the reviewer that a size parameter of 0.1 is not realistic, but still think that the example is valuable as an illustration. 
-
 \blue
 Figure 3: is a geometric distribution realistic for epidemiological surveillance data?
 
@@ -264,7 +260,7 @@ Figure 3: is a geometric distribution realistic for epidemiological surveillance
 We agree that this is not a typical example we would expect to see in an epidemiological setting. It could happen in principle, but only in rather constructed cases. We still believe the example is valuable to illustrate the general point that the rankings between two forecasts can change even for a single observation. We added the following sentence:
 
 \indented
-We note that the chosen example involving a geometric forecast distribution is somewhat constructed; as shown in Section \ref{sec:Hub:cor} and Figure \ref{fig:HUB-cors}A, rankings between models usually stay quite stable for a single forecast. .
+We note that the chosen example involving a geometric forecast distribution is somewhat constructed; as shown in Section 3.4 and Figure 8A, rankings between models usually stay quite stable for a single forecast. .
 
 \notindented
 
@@ -276,11 +272,11 @@ L236: “better able to illustrate the effects” — Why does this removal help
 We updated the paragraph as follows: 
 
 \indented
-In addition, we filtered out erroneous forecasts that were in extremely poor agreement with the observed data, as defined by any of the conditions listed in Table \ref{tab:erroneous}. Figure \ref{fig:erroneous-forecasts.png} shows the percentage of forecasts removed for each model. Those few (less than 0.2\%  of forecasts for each model) erroneous outlier forecasts had excessive influence on average scores and relative skill scores in a way that was not representative of normal model behaviour. We removed them here in order to better illustrate the effects of the log-transformation on scores that one would expect in a well-behaved scenario. In a regular forecast evaluation such erroneous forecasts should usually not be removed and would count towards overall model scores.
+In addition, we filtered out erroneous forecasts that were in extremely poor agreement with the observed data, as defined by any of the conditions listed in Table SI.2. Figure SI.6 shows the percentage of forecasts removed for each model. Those few (less than 0.2\%  of forecasts for each model) erroneous outlier forecasts had excessive influence on average scores and relative skill scores in a way that was not representative of normal model behaviour. We removed them here in order to better illustrate the effects of the log-transformation on scores that one would expect in a well-behaved scenario. In a regular forecast evaluation such erroneous forecasts should usually not be removed and would count towards overall model scores.
 
 \notindented
 
-\red
+\blue
 L244: “pairwise comparisons” — The necessity of using an approach to handle missingness when combining evaluations should be noted more prominently from the beginning. The same applies to the outlier removal (if necessary) and a value selection.
 
 \black
@@ -335,7 +331,10 @@ L15 “log-transformed counts” — Immediately sounds problematic due to the p
 \black
 We changed "log-transformed counts" to "log-transformed values" and updated the abstract to point out that we're applying a transformation of log($x + 1$) to our example data: 
 
-\textit{Applying a transformation of log(x + 1) to data and forecasts from the European COVID-19 Forecast Hub}
+\indented
+Applying a transformation of log(x + 1) to data and forecasts from the European COVID-19 Forecast Hub
+
+\notindented
 
 The truncated normal distribution used as an example in Figure 2 is based directly on samples from the normal distribution, so here no rounding was applied. 
 
@@ -345,7 +344,10 @@ L23–L24 “more strongly emphasized”, “less severely penalized” — Coul
 \black
 Thank you for the suggestion. We updated the abstract as such: 
 
-\textit{Situations in which models missed the beginning of upward swings are more strongly emphasised while failing to predict a downturn following a peak is less severely penalised when scoring transformed forecasts as opposed to untransformed ones.}
+\indented
+Situations in which models missed the beginning of upward swings are more strongly emphasised while failing to predict a downturn following a peak is less severely penalised when scoring transformed forecasts as opposed to untransformed ones.
+
+\notindented
 
 \blue
 L24 “is only one” — Seems a bit too similar to “the only one”, “the only”, etc.
@@ -366,7 +368,10 @@ L59 “strength” — The meaning of “strength” is nonintuitive without rea
 \black
 We updated the sentence to make this clearer. The new sentence is now: 
 
-\textit{The reproduction number $R$ describes the number of people each infected person is expected to infect in turn (irrespective of the time between infections) and therefore is a measure of the strength of epidemic growth. The growth rate $r$ describes the speed of epidemic growth.}
+\indented
+The reproduction number $R$ describes the number of people each infected person is expected to infect in turn (irrespective of the time between infections) and therefore is a measure of the strength of epidemic growth. The growth rate $r$ describes the speed of epidemic growth.
+
+\notindented
 
 \blue
 L60: “immunity” $\xrightarrow{}$ “population immunity”?
@@ -431,7 +436,7 @@ Yes, dividing by the observed value generally disturbs propriety. This approach 
 
 
 
-\red
+\blue
 
 L127: As APE, RE, and SAPE are defined differently in other sources (e.g., with scaling factor in APE and SAPE, and with y in the denominator and no absolute value in RE), it may be helpful to also indicate sources for all three (e.g., that the RE definition is also in Gneiting, 2011).
 
@@ -447,7 +452,7 @@ L146: “$\Bar{\hat{r}}$” — Should be $\hat{\Bar{r}}$, or consider $\hat{\Ba
 \black
 We applied the suggested changes.
 
-\red
+\blue
 L158 “delta method” — Delta method would seem to also require the distribution to be somewhat tightly distributed, concentrated within a nearly-linear region of the transformation function. But putting significant mass on a wider range of values would also mean having non-negligible mass on negative values if “approximately normal”; it would not make sense to apply the logarithm or sqrt transformations in these cases. So perhaps the “tightly distributed” assumption can be taken. But this seems a bit nonobvious and a justification/application of the delta method would be helpful here.
 
 \black
@@ -461,7 +466,7 @@ $$
 Hence, the transformation $y^* = h(y)$ will approximately stabilize the variance if $h'(\mu)$ is proportional to $\text{var}(y)^{-1/2} = V(\mu)^{-1/2}$. When $V(\mu) = \mu^2$ [...], the variance-stabilizing transformation is the logarithm, because then $h'(\mu) = 1/\mu$.  When $V(\mu) = \mu$, the variance-stabilizing transformation is the square root because $h'(\mu) = 1/\mu^{1/2}$.
 \end{quote}
 
-We added a reference to this source. We nonetheless agree with the referee that this approximation will work best if the distribution is tight and added a short remark to this regard.
+We added a reference to this source. We nonetheless agree with you that this approximation will work best if the distribution is tight and added a short remark to this regard.
 
 The current paragraph reads: 
 
@@ -478,7 +483,7 @@ If the mean-variance relationship of the data-generating distribution is quadrat
 The addition on ``tightly distributed'' probability mass reads
 
 \indented
-We note that while standard in the derivation of variance-stabilizing transformations, the application of the delta method in equations \eqref{eq:taylor_quadratic} and \eqref{eq:taylor_linear} requires the probability mass of $F$ to be tightly distributed. If this is not the case, the approximation may be less accurate.
+We note that while standard in the derivation of variance-stabilizing transformations, the application of the delta method in equations (16) and (17) requires the probability mass of $F$ to be tightly distributed. If this is not the case, the approximation may be less accurate.
 
 \notindented
 
@@ -558,10 +563,9 @@ We have updated the caption, which now reads:
 \indented
 Scores for two-week-ahead forecasts from the EuroCOVIDhub-ensemble (averaged across all forecast dates) for different locations, evaluated on the natural scale as well as after transforming counts by adding one and applying the natural logarithm. D: Corresponding boxplots of all individual scores of the EuroCOVIDhub-ensemble for two-week-ahead predictions. E: Boxplots for the relative change of scores for the EuroCOVIDhub-ensemble across forecast horizons. For any given forecast date and location, forecasts were made for four different forecast horizons, resulting in four scores. All scores were divided by the score for forecast horizon one. To enhance interpretability, the range of visible relative changes in scores (relative to horizon = 1) was restricted to [0.1, 10].
 
-
 \notindented
-\red
 
+\blue
 L272: “with the standard deviation” — Also note here that this is for approximately normal data distributions?
 
 \black 
@@ -666,11 +670,17 @@ It is possible to go beyond choosing a single transformation by constructing com
 \notindented
 
 
-\red
+\blue
 Figure SI.2: Would benefit from some more discussion, and perhaps a plot of slightly different quantities. E.g., to select an appropriate value of a, it seems like a common goal would be to deprioritize errors around values of x low enough that we expect there to be primarily noise rather than signal or that are not of concern to policymakers. For count data, this likely includes the values 0 - -10 in any circumstances; how far beyond 10 this range extends depends on the range of realistic growth rates, the forecast horizon, and cleanliness of the data. To assist in this decision, it seems like a similar plot of the evaluations of a particular absolute and/or relative error might be useful, or discussion of how to read it from the current plot. E.g., to illustrate that the same relative error is penalized roughly the same for all the plotted values of a for values of x above 50, but quite differently for $a = 10$ vs. $a = 0.1$ for values of x near 1.
 
 \black
-I'm not sure I can follow. In my mind the plot is there to show you that once your values are like 5 times larger than the offset you choose than the offset doesn't have much of an effect. So it's designed to show that for most practical purposes, doing log(x + a) should be mostly equivalent to log(x). So to me it's less about choosing an appropriate a and more about showing that probably it's just fine to go with some random small a. I think Figure SI.7 is more about "choosing an a". 
+
+We added some more explanation to the caption of Figure SI.2. This makes the trade-off involved in choosing a suitable $a$ value clearer, without prescribing a 'correct' solution. 
+
+\indented
+For a given solid line, the dashed line of the same colour marks the x-value that  is equal to 5 times the corresponding offset. It can be seen that for $a$ values smaller than one fifth of the transformed quantity, the effect of adding an offset is generally small. When choosing a suitable $a$, the trade-off is between staying close to the interpretation of a pure log-transformation (choosing a small $a$) and not giving excessive weights to small observations (by choosing a larger $a$, see Figure 3).
+
+\notindented
 
 \blue
 Figure SI.7:

@@ -482,8 +482,8 @@ scores_log_alts <- scores_log_alts |>
                                  levels = c("Cases - natural", "Deaths - natural", 
                                             "Cases - sqrt", "Deaths - sqrt", 
                                             "Cases - log + 10x median", "Deaths - log + 10x median", 
+                                            "Cases - log + 100", "Deaths - log + 100", 
                                             "Cases - log + 1", "Deaths - log + 1", 
-                                            "Cases - log + 0.1", "Deaths - log + 0.1", 
                                             "Cases - log + 0.001", "Deaths - log + 0.001" 
                                  )))
 

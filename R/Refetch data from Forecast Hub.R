@@ -280,9 +280,9 @@ fwrite(scores, here("output", "data", "all-scores-european-hub.csv"))
 scores_log_alts <- 
   rbind(hub_data |>
           mutate(
-            scale = "log + 0.1", 
-            true_value = log(true_value + 0.1), 
-            prediction = log(pmax(prediction, 0) + 0.1)
+            scale = "log + 100", 
+            true_value = log(true_value + 100), 
+            prediction = log(pmax(prediction, 0) + 100)
           ), 
         hub_data |> mutate(
           scale = "log + 0.001", 

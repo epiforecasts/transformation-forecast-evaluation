@@ -413,12 +413,12 @@ plot_fct <- function(scores, scale_factor, nbinom, filter_scale = "natural") {
     labs(y = "CRPS", x = "Observed value") + 
     coord_cartesian(xlim = c(0, 30)) +
     scale_colour_discrete(
-      labels=c(TeX(r'(A: $\sigma^2 = \mu + \mu^2$)'), 
-               TeX(r'(B: $\sigma^2 = \mu$)'))
+      labels=c("A: Geometric distribution", 
+               "B: Poisson distribution")
     ) + 
     scale_fill_discrete(
-      labels=c(TeX(r'(A: $\sigma^2 = \mu + \mu^2$)'), 
-               TeX(r'(B: $\sigma^2 = \mu$)'))
+      labels=c("A: Geometric distribution", 
+               "B: Poisson distribution")
     ) + 
     facet_wrap(~ scale)
 }

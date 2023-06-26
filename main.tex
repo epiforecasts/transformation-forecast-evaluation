@@ -378,7 +378,7 @@ meaning that we estimate a polynomial relationship between the predictive median
 \centering
 \begin{tabular}{ccrrrrrr}
 \toprule
-Horizon & Target & $\alpha$ & $\beta$ & $\alpha_\sqrt{\ }$ & $\beta_\sqrt{\ }$ & $\alpha_\log$ & $\beta_\log$ \\
+Horizon & Target & $\alpha$ & $\beta$ & $\alpha_{\sqrt{~}}$ & $\beta_{\sqrt{~}}$ & $\alpha_{\log}$ & $\beta_{\log}$ \\
 \midrule
 % all & all & -1.093 & 0.963 & -0.352 & 0.201 & 0.391 & 0.001\\
 % \addlinespace
@@ -402,7 +402,7 @@ Horizon & Target & $\alpha$ & $\beta$ & $\alpha_\sqrt{\ }$ & $\beta_\sqrt{\ }$ &
 \end{tabular}
 \caption{Coefficients of three regressions for the effect of the magnitude of the median forecast on expected scores. The first regression was 
 $\log[\text{WIS}(F, y)] = \alpha + \beta \times \log[\text{median}(F)], $ where $F$ is the predictive distribution and $y$ the observed value. The second one was 
-$\text{WIS}(F_{\log}, \log y) = \alpha_{\log} + \beta_{\log} \cdot \log{(\text{median}(F))},$ where $F_{\log}$ is the predictive distribution for $\log y$. The third one was $\text{WIS}(F_{\sqrt{\ }}, \sqrt{y}) = \alpha_{sqrt{\ }} + \beta_{sqrt{\ }} \cdot \sqrt{(\text{median}(F))},$ where $F_{\sqrt{\ }}$ is the predictive distribution for $\sqrt{y}$.
+$\text{WIS}(F_{\log}, \log y) = \alpha_{\log} + \beta_{\log} \cdot \log{(\text{median}(F))},$ where $F_{\log}$ is the predictive distribution for $\log y$. The third one was $\text{WIS}(F_{\sqrt{\ }}, \sqrt{y}) = \alpha_{\sqrt{\ }} + \beta_{\sqrt{\ }} \cdot \sqrt{(\text{median}(F))},$ where $F_{\sqrt{\ }}$ is the predictive distribution for $\sqrt{y}$.
 }
 \label{tab:HUB-regression}
 \end{table}

@@ -9,6 +9,8 @@ main.pdf
 main.log
 main.bbl
 main.blg
+main.aux
+main.out
 main.synctex.gz
 main.toc
 data-processed/

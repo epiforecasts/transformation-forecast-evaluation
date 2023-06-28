@@ -34,7 +34,7 @@
 
 \black
 We thank the reviewers for their feedback and thoughtful comments which we feel have helped improve the manuscript substantially. Please see our responses to the individual comments as well as explanations on the changes we have made to the manuscript below. 
-In addition to the changes outlined below we some general edits to the paper. We changed the title to make it more concise, we altered the order of some sections and shortened the introduction a bit, which became quite lengthy after incorporating all the suggestions. 
+In addition to the changes outlined below we made some general edits to the paper. We changed the title to make it more concise, we altered the order of some sections and shortened the introduction a bit, which had after the revision had become somewhat long. 
 
 
 \section{Reviewer \#1}
@@ -72,14 +72,14 @@ Common proper scoring rules are the logarithmic or log score \citep{goodRational
 The authors take the position that the log transformation is generally preferable for their use case, though they discuss and compare others. Relatedly, their arguments in terms of relative error also involve an essentially log-linear (i.e. log data + additive error) form which may be pragmatic but somewhat inelegant imo.
 
 \black
-In the theoretical part of the manuscript we simplify the equations a little bit by looking at the case of a single point forecast, rather than a probabilistic forecast that comes in the form of a predictive distribution. We feel this makes the discussion more intuitive. We want to emphasise that the log-linear error is really the error that is measured by the score, not the error model that would be assumed by any forecaster making a prediction. 
+In the theoretical part of the manuscript we simplify the equations by looking at the case of a single point forecast, rather than a probabilistic forecast that comes in the form of a predictive distribution. We feel this makes the discussion more intuitive. We want to emphasise that the log-linear error $\varepsilon^*$ is really the error that is measured by the score, not the error model that would be assumed by any forecaster making a prediction. 
 
 
 \blue
 As the authors note, a particularly controversial issue for the log transformation is the issue of zero values. They take the standard pragmatic stance that we can use log (eps + y) instead of log y in such cases. Many communities e.g. econometrics are vehemently opposed to this, preferring e.g. quasi-Poisson regression and robust standard errors in the context of estimation. While not completely opposed to log (eps + y) myself (I have used it too!) it makes me a bit uncomfortable I still can’t help but feel that something along the lines of e.g. logarithmic/quasi-likelihood or deviance scores could be formulated that would be preferable to the log data transform. This would offer both automatic scaling and handling of zero values, in principle. However, I haven’t thought carefully enough to offer a concrete alternative and the log(eps + y) approach appears to work reasonably here. Instead, and in combination with the previous point, perhaps a bit more discussion of the potential alternatives based on quasi-likelihood-style functions rather than data transformations could be added?
 
 \black
-Thank you for raising this interesting point. The log score is indeed an alternative which is scale invariant under monotonic transformations. We mention this in the introduction and state that for the log score the question of which scale to evaluate forecasts on does not arise. In our understanding, a quasi-likelihood approach (as opposed to an actual likelihood approach as in the log score) may not actually be necessary as at least in theory full predictive distributions are to be evaluated. Developing further ideas based on some form of quasi-likelihood would likely require more in-depth investigation. In any case, developing these ideas would require more in-depth investigation and we feel this is beyond the scope of the current paper. 
+Thank you for raising this interesting point. The log score is indeed an alternative which is scale-invariant under strictly monotonic transformations. We now mention this in the introduction and state that for the log score the question of which scale to evaluate forecasts on does not arise. In our understanding, a quasi-likelihood approach (as opposed to an actual likelihood approach as in the log score) may not actually be necessary as at least in theory full predictive distributions are to be evaluated. Developing further ideas based on some form of quasi-likelihood would likely require more in-depth investigation, which we feel is beyond the scope of the current paper. 
 
 \blue
 \subsubsection{Observation and process models}
@@ -88,7 +88,7 @@ The interpretation in e.g. 2.2 appears to essentially assume a deterministic pro
 Furthermore, why not assume that the model mean (say the output of the deterministic model) defines e.g. the mean of something like a Poisson distribution (probably in overdispersed/quasi form)? or negative binomial? The potential use of these distributions is considered in later sections in the context of motivating variance transforms, but then would again seem to motivate a (quasi-)likelihood-style score beyond the approximate transforms (though with pros and cons in terms of robustness, applicability in the presence of partial information).
 
 \black
-It is important to note that the equations in 2.2 do not refer to any particular model used by a forecaster or any model that was fit to data. Rather, we define the instantaneous growth rate for a single realised epidemic and then show that scoring forecasts for that on the log scale equates to scoring a forecast of the average growth rate according to this definition. The forecaster themselves who would make a forecast could assume any error model or model structure they like. 
+It is important to note that the equations in 2.2 do not refer to any particular model used by a forecaster or any model that was fit to data. Rather, we define the instantaneous growth rate for a single realised epidemic and then show that scoring forecasts for that on the log scale equates to scoring a forecast of the average growth rate according to this definition (this is essentially the same argument as in the first comment of Section 1.1.2 above). The forecaster themselves who would make a forecast could assume any error model or model structure they like. 
 
 \blue
 \subsection{Specific suggestions}
@@ -163,6 +163,7 @@ To direct the readers' attention to the mentioned challenges already in the conc
 
 \indented
 We note that in the practical evaluation of operational forecasting systems  several additional challenges arise, which we do not study in detail. These concern e.g., the removal of outlying observations and forecasts and the handling of missing forecasts. The solutions we employed in practice are provided in Section 3.1.
+
 \notindented
 
 We added a paragraph on which kinds of transformations are permissible in Section 4 (see comments below). We agree that it would be useful to have a more thorough discussion of all the considerations involved in evaluating forecasts, but feel this is slightly beyond the scope of this paper. 
@@ -175,7 +176,7 @@ We added a paragraph on which kinds of transformations are permissible in Sectio
 \black
 We changed ``Applying the log transformation'' to ``Applying a transformation of log($x + 1$)'' in L20 (in the abstract). 
 
-We slightly disagree with the notion that the terminology should not be overloaded. Not introducing another term for transformations of $\log_{e}(x + \varepsilon)$ makes the manuscript more readable and accessible to readers. In addition, our analyses suggest that adding a small offset doesn't make much of a difference in most practical applications. We nevertheless completely agree that this should be made clear to the reader and have added the following text: 
+We slightly disagree with the notion that the terminology should not be overloaded. Not introducing another term for transformations of $\log_{e}(x + \varepsilon)$ makes the manuscript more readable and accessible to readers. In addition, our analyses suggest that adding a small offset does not make much of a difference in most practical applications. We nevertheless completely agree that this should be made clear to the reader and have added the following text: 
 
 \indented
 For conceptual clarity and to allow for a more in-depth discussion, we focus mostly on the natural logarithm as a particularly attractive transformation in the context of epidemic phenomena. We refer to this transformation as 'log-transformation' and to scores that have been computed from log-transformed forecasts and observations as scores 'on the log scale' (as opposed to scores 'on the natural scale', which involve no transformation). In the theoretical discussion in Section 2, 'log-transformation' and 'log scale' generally refer to a transformation of $\log_{e}(x)$. For practical applications (Section 3) we also use these terms to describe a transformation of $\log_{e}(x + a)$ with a small $a > 0$ in order to keep the terminology and notation simple. For a prediction target with strictly positive support, the CRPS after applying a log-transformation is given by
@@ -210,6 +211,8 @@ The assumption of a quadratic mean-variance relationship is closely linked to th
 
 \notindented
 
+For a specific motivation in a simple branching process model please see our reply to comment ``L166'' below.
+
 
 \blue
 L150: “it may be desirable” — Is it though? This seems unlikely. Stakeholders likely want to emphasize some locations and times over others, and would benefit from some rules about how to do so while maintaining propriety. (E.g., is scaling by some function of recent observations or the population size okay? Is scaling by the forecast or observed value okay? Or are we limited to monotonic transformations?)
@@ -220,7 +223,7 @@ We think that while it is certainly not the only relevant approach, there is a c
 We have updated the paragraph as such: 
 
 \indented
-When evaluating models across sets of forecasting tasks, it may be desirable for each target to have a similar impact on the overall results. This could be motivated by the assumption that forecasts from different geographical units and time periods provide similar amounts of information about how well a forecaster performs. One would then like the resulting scores to be independent of the order of magnitude of the target to predict. CRPS values on the natural scale, however, typically scale with the order of magnitude of the quantity to be predicted. Average scores are then dominated by the results achieved for targets with high expected outcomes in a way that does not necessarily reflect the underlying predictive ability well.
+When evaluating models across sets of forecasting tasks, it may be desirable for each target to have a similar impact on the overall results. This could be motivated by the assumption that forecasts from different geographical units and time periods provide similar amounts of information about how well a forecaster performs. One would then like the resulting scores to be independent of the order of magnitude of the target to predict. CRPS values on the natural scale, however, typically scale with the order of magnitude of the quantity to be predicted.
 
 \notindented
 
@@ -257,9 +260,10 @@ This is an illustrative example and is not meant to be completely realistic. Rat
     $$
     \theta \sim \text{Gamma}(\text{shape} = \psi, \text{rate} = \psi).
     $$
+    $R_t$ thus fluctuates around an average value of $R_0$.
     \item This implies
     $$
-    Y_t \mid Y_{t - 1} \sim \text{NegBin}(R_t \times Y_{t - 1}, \psi).
+    Y_t \mid Y_{t - 1} \sim \text{NegBin}(\text{mean} = R_t \times Y_{t - 1}, \text{size} = \psi).
     $$
 \end{itemize}
 So a conditional negative binomial distribution with quadratic mean-variance relationship arises if we assume that a suitably distributed environmental factor $\theta_t$ modifies the reproductive number. While the assumption of this specific gamma distribution is arbitrary, a quadratic mean-variance relationship will also arise for other distributions of $\theta_t$.
@@ -270,7 +274,7 @@ This illustrates that a quadratic mean-variance relationship can arise from a si
 Figure 3: is a geometric distribution realistic for epidemiological surveillance data?
 
 \black
-We agree that this is not a typical example we would expect to see in an epidemiological setting. It could happen in principle, but only in rather constructed cases. We still believe the example is valuable to illustrate the general point that the rankings between two forecasts can change even for a single observation. We added the following sentence:
+We agree that this is not a typical example we would expect to see in an epidemiological setting. We still believe the example is valuable to illustrate the general point that the rankings between two forecasts can change even for a single observation. We added the following sentence:
 
 \indented
 We note that the chosen example involving a geometric forecast distribution is somewhat constructed; as shown in Section 3.4 and Figure 8A, rankings between models usually stay quite stable for a single forecast. .
@@ -373,7 +377,7 @@ L46 “WIS is an approximation of the CRPS” — Is it an approximation of CRPS
 
 \black
 The weighted interval score is a weighted sum of interval scores for the individual prediction intervals. When weighing the individual interval scores for the central $1 - \alpha$ prediction intervals by 
-$w = \alpha / 2$ (which is generally standard), then the WIS converges exactly to the CRPS for an increasing number of equally spaced prediction intervals. For an illustration see Figure 2 in \cite{bracherEvaluatingEpidemicForecasts2021}.
+$w = \alpha / 2$ (which is generally standard), then the WIS converges exactly to the CRPS for an increasing number of equally spaced prediction intervals. For an illustration see Figure 2 in the referenced paper by Bracher, Ray, Gneiting and Reich (2021).
 
 \blue
 L59 “strength” — The meaning of “strength” is nonintuitive without reading the citation and understanding the ties to multiplicative interventions on R and r (the latter of which seems unrealistic to achieve). Consider surrounding with quotes, explaining more/less, relating to growth per generation, etc.
@@ -420,7 +424,7 @@ Here we aren't suggesting a specific transformation yet, but rather just say tha
 L99: How are atoms at $\exp x = 0$ handled? How are observations of $y = 0$ handled?
 
 \black
-In the theoretical discussion in Section 2 we defined prediction targets to have strictly positive support, so these cases are excluded. In the later parts we follow the common strategy to add an offset before taking the logarithm. 
+In the theoretical discussion in Section 2 we defined prediction targets to have strictly positive support, so these cases are excluded. In the later parts we follow the common strategy to add an offset $a$ before taking the logarithm. 
 
 \blue
 
@@ -787,7 +791,7 @@ We corrected the typo
 5. Figure 7: I can appreciate that the correlation between the natural and logarithmic scores decreases over the forecast horizon, as the absolute forecast error grows. But I found panel B more challenging to interpret. I gather the key message is that model rankings are quite consistent between the natural and log scales (panel A) even though the absolute scores differ markedly between the two scales — an effect that increases over the forecast horizon (panel B). Perhaps adding a sentence to this effect in the accompanying text (lines 292-295) would help other readers to avoid my confusion.
 
 \black
-You'r right, we adapted the text and hopefully made it more clear: 
+You are right, we adapted the text and hopefully made it more clear: 
 
 \indented
 

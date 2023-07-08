@@ -1,7 +1,7 @@
 \documentclass{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL first submission/Manuscript_first_submission.tex   Mon Jun 26 15:38:59 2023
-%DIF ADD main.tex                                           Mon Jun 26 15:33:23 2023
+%DIF DEL first submission/Manuscript_first_submission.tex           Mon Jun 26 15:38:59 2023
+%DIF ADD second submission after review/Manuscript-without-SI.tex   Sat Jul  8 19:48:04 2023
 \usepackage[]{graphicx}
 \usepackage[]{xcolor}
 \usepackage{alltt}
@@ -330,8 +330,10 @@ the resulting absolute error $\left|\varepsilon^*\right|$ can be interpreted as 
 
 \begin{figure}[h!]
 \centering
-\includegraphics[width = 1\textwidth]{output/figures/different-relative-errors.png}
-\caption{Numerical comparison of different measures of relative error: absolute percentage error (APE), relative error (RE), symmetric absolute percentage error (SAPE) and the absolute error applied to log-transformed predictions and observations. We denote the predicted value by $\hat{y}$ and display errors as a function of the ratio of observed and predicted value. A: x-axis shown on a linear scale. B: x-axis shown on a logarithmic scale.}
+\DIFdelbeginFL %DIFDELCMD < \includegraphics[width = 1\textwidth]{output/figures/different-relative-errors.png}
+%DIFDELCMD < %%%
+\DIFdelendFL \DIFaddbeginFL \includegraphics[width = 1\textwidth]{../output/figures/different-relative-errors.png}
+\DIFaddendFL \caption{Numerical comparison of different measures of relative error: absolute percentage error (APE), relative error (RE), symmetric absolute percentage error (SAPE) and the absolute error applied to log-transformed predictions and observations. We denote the predicted value by $\hat{y}$ and display errors as a function of the ratio of observed and predicted value. A: x-axis shown on a linear scale. B: x-axis shown on a logarithmic scale.}
 \label{fig:SAPE}
 \end{figure}
 
@@ -450,8 +452,10 @@ To strengthen our intuition on how transforming outcomes prior to applying the C
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.99\textwidth]{output/figures/SIM-mean-state-size.png}
-    \caption{Expected CRPS scores as a function of the mean and variance of the forecast quantity. We computed expected CRPS values  for three different distributions, assuming an ideal forecaster with predictive distribution equal to the \DIFaddbeginFL \DIFaddFL{true underlying (}\DIFaddendFL data-generating\DIFaddbeginFL \DIFaddFL{) }\DIFaddendFL distribution. 
+    \DIFdelbeginFL %DIFDELCMD < \includegraphics[width=0.99\textwidth]{output/figures/SIM-mean-state-size.png}
+%DIFDELCMD <     %%%
+\DIFdelendFL \DIFaddbeginFL \includegraphics[width=0.99\textwidth]{../output/figures/SIM-mean-state-size.png}
+    \DIFaddendFL \caption{Expected CRPS scores as a function of the mean and variance of the forecast quantity. We computed expected CRPS values  for three different distributions, assuming an ideal forecaster with predictive distribution equal to the \DIFaddbeginFL \DIFaddFL{true underlying (}\DIFaddendFL data-generating\DIFaddbeginFL \DIFaddFL{) }\DIFaddendFL distribution. 
     These expected CRPS values \DIFdelbeginFL \DIFdelFL{where }\DIFdelendFL \DIFaddbeginFL \DIFaddFL{were }\DIFaddendFL computed for different predictive means based on 10,000 samples each and are represented by dots. Solid lines show the corresponding \DIFdelbeginFL \DIFdelFL{approximation }\DIFdelendFL \DIFaddbeginFL \DIFaddFL{approximations }\DIFaddendFL of the expected CRPS \DIFdelbeginFL \DIFdelFL{based on an assumed normal distribution as discussed in section \ref{sec:methods:vst}}\DIFdelendFL \DIFaddbeginFL \DIFaddFL{from equations \eqref{eq:taylor_quadratic} and \eqref{eq:taylor_linear}}\DIFaddendFL . Figure \ref{fig:score-approx} shows the quality of the approximation in more detail. 
     The first distribution (red) is a truncated normal distribution with constant variance (we chose $\sigma = 1$ in order to only obtain positive samples). The second (green) is a negative binomial distribution with variance $\theta = 10$ and variance $\sigma^2 = \mu + 0.1\mu^2$. The third (blue) is a
     Poisson distribution with $\sigma^2 = \mu$. To make the scores for the different distributions comparable, scores were normalised to one, meaning that the mean score for every distribution (red, green, blue) is one. 
@@ -472,7 +476,7 @@ To strengthen our intuition on how transforming outcomes prior to applying the C
 
 \begin{figure}[h!]
 \centering
-\includegraphics[width = 1\textwidth]{output/figures/illustration-effect-log-ranking-crps.png}
+\includegraphics[width = 1\textwidth]{../output/figures/illustration-effect-log-ranking-crps.png}
 \caption{\DIFaddFL{Illustration of the effect of the log-transformation of the ranking for a single forecast. Shown are CRPS (or WIS, respectively) values as a function of the observed value for two forecasters. Model A issues a geometric distribution (a negative binomial distribution with size parameter $\theta = 1$) with mean $\mu = 10$ and variance $\sigma^2 = \mu + \mu^2 = 110$), while Model B issues a Poisson distribution with mean and variance equal to 10. Zeroes in this illustrative example were handled by adding one before applying the natural logarithm.}}
 \label{fig:illustration-ranking}
 \end{figure}
@@ -551,8 +555,10 @@ In addition to the WIS we use pairwise comparisons \citep{cramerEvaluationIndivi
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.99\textwidth]{output/figures/HUB-model-comparison-ensemble.png}
-    \caption{
+    \DIFdelbeginFL %DIFDELCMD < \includegraphics[width=0.99\textwidth]{output/figures/HUB-model-comparison-ensemble.png}
+%DIFDELCMD <     %%%
+\DIFdelendFL \DIFaddbeginFL \includegraphics[width=0.99\textwidth]{../output/figures/HUB-model-comparison-ensemble.png}
+    \DIFaddendFL \caption{
     Forecasts and scores for two-week-ahead predictions from the EuroCOVIDhub-ensemble made in Germany. Missing values are due to data anomalies that were removed (see section \ref{sec:HUB-setting}. 
     A, E: 50\% and 90\% prediction intervals and observed values for cases and deaths on the natural scale. B, F: Corresponding scores. C, G: Forecasts and observations on the log scale. D, H: Corresponding scores. 
     }
@@ -563,8 +569,10 @@ When comparing examples of forecasts on the natural scale with those on the log 
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.99\textwidth]{output/figures/HUB-mean-obs-location.png}
-    \caption{Observations and scores across locations and forecast horizons for the European COVID-19 Forecast Hub data. Locations are sorted according to the mean observed value in that location. 
+    \DIFdelbeginFL %DIFDELCMD < \includegraphics[width=0.99\textwidth]{output/figures/HUB-mean-obs-location.png}
+%DIFDELCMD <     %%%
+\DIFdelendFL \DIFaddbeginFL \includegraphics[width=0.99\textwidth]{../output/figures/HUB-mean-obs-location.png}
+    \DIFaddendFL \caption{Observations and scores across locations and forecast horizons for the European COVID-19 Forecast Hub data. Locations are sorted according to the mean observed value in that location. 
     A: Average (across all time points) of observed cases and deaths for different locations. B: Corresponding boxplot (y-axis on log-scale) of all cases and deaths. C: Scores for two-week-ahead forecasts from the EuroCOVIDhub-ensemble (averaged across all forecast dates) for different locations, evaluated on the natural \DIFaddbeginFL \DIFaddFL{scale }\DIFaddendFL as well as \DIFaddbeginFL \DIFaddFL{after transforming counts by adding one and applying }\DIFaddendFL the \DIFdelbeginFL \DIFdelFL{logarithmic scale}\DIFdelendFL \DIFaddbeginFL \DIFaddFL{natural logarithm}\DIFaddendFL . D: Corresponding boxplots of all individual scores \DIFaddbeginFL \DIFaddFL{of the EuroCOVIDhub-ensemble }\DIFaddendFL for two-week-ahead predictions. E: Boxplots for the relative change of scores for the EuroCOVIDhub-ensemble across forecast horizons. For any given forecast date and location, forecasts were made for four different forecast horizons, resulting in four scores. All scores were divided by the score for forecast horizon one. To enhance interpretability, the range of visible relative changes \DIFaddbeginFL \DIFaddFL{in scores (relative to horizon = 1) }\DIFaddendFL was restricted to [0.1, 10].}
     \label{fig:HUB-mean-locations}
 \end{figure}
@@ -577,7 +585,7 @@ Across the dataset, the average number of observed cases and deaths varied consi
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.99\textwidth]{output/figures/HUB-scores-locations-log-variants.png}
+    \includegraphics[width=0.99\textwidth]{../output/figures/HUB-scores-locations-log-variants.png}
     \caption{\DIFaddFL{Mean WIS in different locations for different transformations applied before scoring. Locations are sorted according to the mean observed value in that location. Shown are scores for two-week-ahead forecasts of the EuroCOVIDhub-ensemble. On the natural scale (with no transformation prior to applying the WIS), scores correlate strongly with the average number of observed values in a given location. The same is true for scores obtained after applying a square-root transformation, or after applying a log-transformation with a large offset $a$. For illustrative purposes, $a$ was chosen to be 101630 for cases and 530 for deaths, 10 times the respective median observed value. For large values of $a$, $\log(x + a)$ grows roughly linearly in $x$, meaning that we expect to observe the same patterns as in the case with no transformation. For decreasing values of $a$, we give more relative weight to scores in small locations.}}
     \label{fig:HUB-log-different-offsets}
 \end{figure}
@@ -608,8 +616,10 @@ As argued in Section \ref{sec:methods:vst}, the mean-variance, or mean-CRPS, rel
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.99\textwidth]{output/figures/HUB-transformation-regression.png}
-    \caption{Relationship between median forecasts and scores. Black dots represent WIS values for two-week ahead predictions of the EuroCOVIDhub-ensemble. Shown in red are the regression lines discussed in Section \ref{sec:HUB-regression} shown in Table \ref{tab:HUB-regression}. A: WIS for two-week-ahead predictions of the EuroCOVIDhub-ensemble against median predicted values. B: Same as A, with scores obtained after applying a square-root-transformation to the data. C: Same as A, with scores obtained after applying a log-transformation to the data.} 
+    \DIFdelbeginFL %DIFDELCMD < \includegraphics[width=0.99\textwidth]{output/figures/HUB-transformation-regression.png}
+%DIFDELCMD <     %%%
+\DIFdelendFL \DIFaddbeginFL \includegraphics[width=0.99\textwidth]{../output/figures/HUB-transformation-regression.png}
+    \DIFaddendFL \caption{Relationship between median forecasts and scores. Black dots represent WIS values for two-week ahead predictions of the EuroCOVIDhub-ensemble. Shown in red are the regression lines discussed in Section \ref{sec:HUB-regression} shown in Table \ref{tab:HUB-regression}. A: WIS for two-week-ahead predictions of the EuroCOVIDhub-ensemble against median predicted values. B: Same as A, with scores obtained after applying a square-root-transformation to the data. C: Same as A, with scores obtained after applying a log-transformation to the data.} 
     \label{fig:HUB-regression}
 \end{figure}
 
@@ -734,8 +744,10 @@ where $F_{\sqrt{\ }}$ is the predictive distribution on the square-root scale. A
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.99\textwidth]{output/figures/HUB-correlations.png}
-    \caption{Correlations of rankings on the natural and logarithmic scale. A: Average Spearman rank correlation of scores for individual forecasts\DIFdelbeginFL \DIFdelFL{from all models}\DIFdelendFL . For every individual target (defined by a combination of forecast date, target type, horizon, location), one score was obtained per model. Then, \DIFaddbeginFL \DIFaddFL{for every forecast target, }\DIFaddendFL the \DIFaddbeginFL \DIFaddFL{Spearman }\DIFaddendFL rank correlation was computed between \DIFdelbeginFL \DIFdelFL{the }\DIFdelendFL scores \DIFdelbeginFL \DIFdelFL{for all models }\DIFdelendFL on the natural scale \DIFdelbeginFL \DIFdelFL{vs. }\DIFdelendFL \DIFaddbeginFL \DIFaddFL{and }\DIFaddendFL on the log scale \DIFaddbeginFL \DIFaddFL{for all the models that had made a forecast for that specific target}\DIFaddendFL . \DIFdelbeginFL \DIFdelFL{All }\DIFdelendFL \DIFaddbeginFL \DIFaddFL{These individual }\DIFaddendFL rank correlations were \DIFaddbeginFL \DIFaddFL{then }\DIFaddendFL averaged across locations \DIFdelbeginFL \DIFdelFL{, }\DIFdelendFL and \DIFdelbeginFL \DIFdelFL{target types }\DIFdelendFL \DIFaddbeginFL \DIFaddFL{time }\DIFaddendFL and \DIFaddbeginFL \DIFaddFL{are displayed }\DIFaddendFL stratified by horizon and target \DIFdelbeginFL \DIFdelFL{type}\DIFdelendFL \DIFaddbeginFL \DIFaddFL{types, representing average accordance of model ranks for a single forecast target on the natural and on the log scale}\DIFaddendFL . B: Correlation between relative skill scores. For every forecast horizon and target type, a separate relative skill score was computed per model using pairwise comparisons\DIFaddbeginFL \DIFaddFL{, which is a measure of performance of a model relative to the others for a given horizon and target type that accounts for missing values}\DIFaddendFL . The plot shows the correlation between the relative skill scores on the natural vs. on the log scale\DIFaddbeginFL \DIFaddFL{, representing accordance of overall model performance as judged by scores on the natural and on the log scale}\DIFaddendFL .}
+    \DIFdelbeginFL %DIFDELCMD < \includegraphics[width=0.99\textwidth]{output/figures/HUB-correlations.png}
+%DIFDELCMD <     %%%
+\DIFdelendFL \DIFaddbeginFL \includegraphics[width=0.99\textwidth]{../output/figures/HUB-correlations.png}
+    \DIFaddendFL \caption{Correlations of rankings on the natural and logarithmic scale. A: Average Spearman rank correlation of scores for individual forecasts\DIFdelbeginFL \DIFdelFL{from all models}\DIFdelendFL . For every individual target (defined by a combination of forecast date, target type, horizon, location), one score was obtained per model. Then, \DIFaddbeginFL \DIFaddFL{for every forecast target, }\DIFaddendFL the \DIFaddbeginFL \DIFaddFL{Spearman }\DIFaddendFL rank correlation was computed between \DIFdelbeginFL \DIFdelFL{the }\DIFdelendFL scores \DIFdelbeginFL \DIFdelFL{for all models }\DIFdelendFL on the natural scale \DIFdelbeginFL \DIFdelFL{vs. }\DIFdelendFL \DIFaddbeginFL \DIFaddFL{and }\DIFaddendFL on the log scale \DIFaddbeginFL \DIFaddFL{for all the models that had made a forecast for that specific target}\DIFaddendFL . \DIFdelbeginFL \DIFdelFL{All }\DIFdelendFL \DIFaddbeginFL \DIFaddFL{These individual }\DIFaddendFL rank correlations were \DIFaddbeginFL \DIFaddFL{then }\DIFaddendFL averaged across locations \DIFdelbeginFL \DIFdelFL{, }\DIFdelendFL and \DIFdelbeginFL \DIFdelFL{target types }\DIFdelendFL \DIFaddbeginFL \DIFaddFL{time }\DIFaddendFL and \DIFaddbeginFL \DIFaddFL{are displayed }\DIFaddendFL stratified by horizon and target \DIFdelbeginFL \DIFdelFL{type}\DIFdelendFL \DIFaddbeginFL \DIFaddFL{types, representing average accordance of model ranks for a single forecast target on the natural and on the log scale}\DIFaddendFL . B: Correlation between relative skill scores. For every forecast horizon and target type, a separate relative skill score was computed per model using pairwise comparisons\DIFaddbeginFL \DIFaddFL{, which is a measure of performance of a model relative to the others for a given horizon and target type that accounts for missing values}\DIFaddendFL . The plot shows the correlation between the relative skill scores on the natural vs. on the log scale\DIFaddbeginFL \DIFaddFL{, representing accordance of overall model performance as judged by scores on the natural and on the log scale}\DIFaddendFL .}
     \label{fig:HUB-cors}
 \end{figure}
 
@@ -743,8 +755,10 @@ For \textit{individual} forecasts, rankings between models for single forecasts 
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.99\textwidth]{output/figures/HUB-pairwise-comparisons.png}
-    \caption{Changes in model ratings as measured by relative skill for two-week-ahead predictions for cases (top row) and deaths (bottom row). A: Relative skill scores for case forecasts from different models submitted to the European COVID-19 Forecast Hub computed on the natural scale. B: Change in rankings as determined by relative skill scores when moving from an evaluation on the natural scale to one on the logarithmic scale. \DIFaddbeginFL \DIFaddFL{Red arrows indicate that the relative skill score deteriorated when moving from the natural to the log scale, green arrows indicate they improved. }\DIFaddendFL C: Relative skill scores based on scores on the log scale. D: Difference in relative skill scores computed on the natural and on the logarithmic scale, ordered as in C. E: Relative contributions of the different WIS components (overprediction, underprediction, and dispersion) to overall model scores on the natural and the logarithmic scale. F, G, H, I, J, K: Analogously for deaths.}
+    \DIFdelbeginFL %DIFDELCMD < \includegraphics[width=0.99\textwidth]{output/figures/HUB-pairwise-comparisons.png}
+%DIFDELCMD <     %%%
+\DIFdelendFL \DIFaddbeginFL \includegraphics[width=0.99\textwidth]{../output/figures/HUB-pairwise-comparisons.png}
+    \DIFaddendFL \caption{Changes in model ratings as measured by relative skill for two-week-ahead predictions for cases (top row) and deaths (bottom row). A: Relative skill scores for case forecasts from different models submitted to the European COVID-19 Forecast Hub computed on the natural scale. B: Change in rankings as determined by relative skill scores when moving from an evaluation on the natural scale to one on the logarithmic scale. \DIFaddbeginFL \DIFaddFL{Red arrows indicate that the relative skill score deteriorated when moving from the natural to the log scale, green arrows indicate they improved. }\DIFaddendFL C: Relative skill scores based on scores on the log scale. D: Difference in relative skill scores computed on the natural and on the logarithmic scale, ordered as in C. E: Relative contributions of the different WIS components (overprediction, underprediction, and dispersion) to overall model scores on the natural and the logarithmic scale. F, G, H, I, J, K: Analogously for deaths.}
     \label{fig:HUB-rank-order}
 \end{figure}
 
@@ -796,168 +810,284 @@ for a more detailed discussion.
 \setcounter{figure}{0}
 \renewcommand{\thetable}{SI.\arabic{table}} \setcounter{table}{0}
 
-\subsection{Alternative Formulation of the WIS}
-\label{sec:alternative-wis}
 
-Instead of defining the WIS as an average of scores for individual quantiles, we can define it using an average of scores for symmetric predictive intervals. For a single prediction interval, the interval \DIFdelbegin \DIFdel{scoren }\DIFdelend \DIFaddbegin \DIFadd{score }\DIFaddend (IS) is computed as the sum of three penalty components, dispersion (width of the prediction interval), underprediction and overprediction,  
-%
-\begin{linenomath*}
-\DIFdelbegin \begin{align*}
+\DIFdelbegin \subsection{\DIFdel{Alternative Formulation of the WIS}}
+%DIFAUXCMD
+\addtocounter{subsection}{-1}%DIFAUXCMD
+\DIFdelend \DIFaddbegin \paragraph{\DIFadd{S1 Text.}}
+\DIFaddend \label{sec:alternative-wis}
+\DIFaddbegin \textbf{\DIFadd{Alternative Formulation of the WIS.}}
+\DIFaddend 
+
+\DIFdelbegin \DIFdel{Instead of defining the WIS as an average of scores for individual quantiles, we can define it using an average of scores for symmetric predictive intervals. For a single prediction interval, }\DIFdelend \DIFaddbegin \paragraph{\DIFadd{S1 Figure.}}
+\label{fig:log-improper}
+\textbf{\DIFadd{Illustration of the effect of applying a transformation after scoring. }}
+\DIFadd{We assume $Y \sim \text{LogNormal}(0, 1)$ and evaluate the expected CRPS for predictive distributions $\text{LogNormal}(0, \sigma)$ with varying values of $\sigma \in [0.1, 2]$. For the regular CRPS (left) and CRPS applied to log-transformed outcomes (middle), the lowest expectation is achieved for the true value $\sigma = 1$. For }\DIFaddend the \DIFdelbegin \DIFdel{interval scoren (IS)is computed as the sum of three penalty components, dispersion (width of the prediction interval) , underprediction and overprediction, %DIF < 
+}%DIFDELCMD < \begin{linenomath*}
+%DIFDELCMD < %%%
+\begin{align*}
  \DIFdel{IS_\alpha(F,y) }&\DIFdel{= (u-l) + \frac{2}{\alpha} \cdot (l-y) \cdot 1(y \leq l) + \frac{2}{\alpha} \cdot (y-u) \cdot 1(y \geq u) }\\
  &\DIFdel{= \text{dispersion} + \text{underprediction} + \text{overprediction},    
 }\end{align*}%DIFAUXCMD
-\DIFdelend \DIFaddbegin \begin{align}
- \DIFadd{IS_\alpha(F,y) }&\DIFadd{= (u-l) + \frac{2}{\alpha} \cdot (l-y) \cdot \boldsymbol{1}(y \leq l) + \frac{2}{\alpha} \cdot (y-u) \cdot \boldsymbol{1}(y \geq u) }\\
- &\DIFadd{= \text{dispersion} + \text{underprediction} + \text{overprediction},    
-}\end{align}\DIFaddend 
-\end{linenomath*}
-%
-where \DIFdelbegin \DIFdel{$1()$ }\DIFdelend \DIFaddbegin \DIFadd{$\boldsymbol{1}()$ }\DIFaddend is the indicator function, $y$ is the observed value, and $l$ and $u$ are the $\frac{\alpha}{2}$ and $1 - \frac{\alpha}{2}$ quantiles of the predictive distribution, i.e. the lower and upper bound of a single central prediction interval. For a set of $K^*$ prediction intervals and the median $m$, the WIS is computed as a weighted sum, 
-\begin{linenomath*}
-\DIFdelbegin \begin{displaymath}
+%DIFDELCMD < \end{linenomath*}
+%DIFDELCMD < %%%
+%DIF < 
+\DIFdel{where $1()$ is the indicator function, $y$ is the observed value, and $l$ and $u$ are the $\frac{\alpha}{2}$ and $1 - \frac{\alpha}{2}$ quantiles of the predictive distribution, i.e. the lower and upper bound of a single central prediction interval. For a set of $K^*$ prediction intervals and the median $m$, the WIS is computed as a weighted sum, }%DIFDELCMD < \begin{linenomath*}
+%DIFDELCMD < %%%
+\begin{displaymath}
 \DIFdel{\text{WIS} = \frac{1}{K^* + 0.5} \cdot \left(w_0 \cdot |y - m| + \sum_{k = 1}^{K^*} w_k \cdot IS_{\alpha_{k}}(F, y)\right),    
 }\end{displaymath}%DIFAUXCMD
-\DIFdelend \DIFaddbegin \begin{equation}
-\DIFadd{\text{WIS} = \frac{1}{K^* + 0.5} \cdot \left(w_0 \cdot |y - m| + \sum_{k = 1}^{K^*} w_k \cdot IS_{\alpha_{k}}(F, y)\right),    
-}\end{equation}\DIFaddend  
-\end{linenomath*}
-where $w_k$ is a weight for every interval. Usually, $w_k = \frac{\alpha_k}{2}$ and $w_0 = 0.5$. 
+%DIFDELCMD <  
+%DIFDELCMD < \end{linenomath*}
+%DIFDELCMD < %%%
+\DIFdel{where $w_k$ is a weight for every interval. Usually, $w_k = \frac{\alpha_k}{2}$ and $w_0 = 0.5$. }\DIFdelend \DIFaddbegin \DIFadd{log-transformed CRPS, the optimal value is  0.9, i.e. there is an incentive to report a forecast that is too sharp. The score is therefore no longer proper.
+}\DIFaddend 
 
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.99\textwidth]{output/figures/example-log-first.png}
-    \caption{Illustration of \DIFdelbeginFL \DIFdelFL{impropriety }\DIFdelendFL \DIFaddbeginFL \DIFaddFL{the effect }\DIFaddendFL of \DIFdelbeginFL \DIFdelFL{log-transformed CRPS}\DIFdelendFL \DIFaddbeginFL \DIFaddFL{applying a transformation after scoring}\DIFaddendFL . We assume $Y \sim \text{LogNormal}(0, 1)$ and evaluate the expected CRPS for predictive distributions $\text{LogNormal}(0, \sigma)$ with varying values of $\sigma \in [0.1, 2]$. For the regular CRPS (left) and CRPS applied to log-transformed outcomes (middle), the lowest expectation is achieved for the true value $\sigma = 1$. For the log-transformed CRPS, the optimal value is  0.9, i.e. there is an incentive to report a forecast that is too sharp. \DIFaddbeginFL \DIFaddFL{The score is therefore no longer proper.}\DIFaddendFL }
-    \label{fig:log-improper}
-\end{figure}
-
-
-
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.99\textwidth]{output/figures/illustration-effect-offset-log.png}
-    \caption{Illustration of the effect of adding a small quantity to a value before taking the natural logarithm. For increasing x, all lines eventually approach the black line (representing a transformation with no offset applied).
-    For a given solid line, the dashed line of the same colour marks the x-value that  is equal to 5 times the corresponding offset. \DIFaddbeginFL \DIFaddFL{It can be seen that for $a$ values smaller than one fifth of the transformed quantity, the effect of adding an offset is generally small. When choosing a suitable $a$, the trade-off is between staying close to the interpretation of a pure log-transformation (choosing a small $a$) and not giving excessive weights to small observations (by choosing a larger $a$, see Figure \ref{fig:HUB-log-different-offsets}).}\DIFaddendFL }
-    \label{fig:illustration-effect-log-offset}
-\end{figure}
-
-
-\begin{figure}[h!]
-\centering
-\includegraphics[width = 1\textwidth]{output/figures/SIM-score-approximation.png}
-\caption{
-Visualisation of expected CRPS values against approximated scores using the approximation detailed in Section \ref{sec:methods:rankings} (see also Figure \ref{fig:SIM-wis-state-size-mean}). Expected CRPS scores are shown for three different distributions once on the natural scale (top row) and once scored on the log scale (bottom row).  
-}
-\label{fig:score-approx}
-\end{figure}
-
-
-
-
-
-
-
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% HUB plots %
-
-
-
-
-\begin{table}[h!]
-    \centering
-\begin{tabular}{lllcc}
-\toprule
-target \DIFdelbeginFL \DIFdelFL{\_}\DIFdelendFL type & quantity & measure & natural & log\\
-\midrule
-Cases & Observations & mean & 61979 & 9.19\\
-Cases & Observations & sd & 171916 & 2.10\\
-Cases & Observations & var & 29555122130 & 4.42\\
-Deaths & Observations & mean & 220 & 3.89\\
-Deaths & Observations & sd & 435 & 1.96\\
-\addlinespace
-Deaths & Observations & var & 189051 & 3.83\\
-Cases & WIS & mean & 15840 & 0.27\\
-Cases & WIS & sd & 53117 & 0.28\\
-Deaths & WIS & mean & 31 & 0.23\\
-Deaths & WIS & sd & 65 & 0.28\\
-\bottomrule
-\end{tabular}
-    \caption{Summary statistics for observations and scores for forecasts from the ECDC data set.}
-    \label{tab:HUB-summary}
-\end{table}
-
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.99\textwidth]{output/figures/number-avail-forecasts.png}
-    \caption{
-    Number of forecasts available from different models for each forecast date. 
-    }
-    \label{fig:HUB-num-avail-models}
-\end{figure}
-
-
-\DIFaddbegin \begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.99\textwidth]{output/figures/number-anomalies.png}
-    \caption{
-    \DIFaddFL{Number of observed values that were removed as anomalous. The values were marked as anomalous by the European Forecast Hub team. 
-    }}
-    \label{fig:number-anomalies}
-\end{figure}
-
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.99\textwidth]{output/figures/erroneous-forecasts.png}
-    \caption{
-    \DIFaddFL{Number of forecasts marked as erroneous and removed. Forecasts that were in extremely poor agreement with the observed values were removed from the analysis according to the criteria shown in Table \ref{tab:erroneous}. 
-    }}
-    \label{fig:erroneous-forecasts}
-\end{figure}
-
-
-
-
-
-
-\DIFaddend \begin{table}
-\centering
-\begin{tabular}{ccc}
-\toprule
-True value & \& & Median prediction\\
-\midrule
-$>0$ & \ & $>100\times$ true value\\
-$>10$ & \  & $>20\times$ true value\\
-$>50$ & \  & $<1/50\times$ true value\\
-$= 0$ & \  & $>100$\\
-\bottomrule
-\end{tabular}
-\caption{Criteria for removing forecasts. Any forecast that met one of the listed criteria (represented by a row in the table), was removed. Those forecasts were removed in order to be better able to illustrate the effects of the log-transformation on scores and eliminating distortions caused by outlier forecasters. When evaluating models against each other (rather than illustrating the effect of a transformation), one would prefer not to condition on the outcome when deciding whether a forecast should be taken into account. }
-\label{tab:erroneous}
-\end{table}
-
-
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.99\textwidth]{output/figures/HUB-model-comparison-baseline.png}
-    \caption{
-    Forecasts and scores for two-week-ahead predictions from the EuroCOVIDhub-baseline made in Germany. The model had zero included in some of its 50 percent intervals (e.g. for case forecasts in July \DIFaddbeginFL \DIFaddFL{2021}\DIFaddendFL ), leading to excessive dispersion values on the log scale. One could argue that including zero in the prediction intervals constituted an unreasonable forecast that was rightly penalised, but in general care has to be taken with small numbers. \DIFaddbeginFL \DIFaddFL{One potential way to do deal with this could be to use a higher $a$ value when applying a transformation $\log(x + a)$, for example $a = 10$ instead of $a = 1$. }\DIFaddendFL A, E: 50\% and 90\% prediction intervals and observed values for cases and deaths on the natural scale. B, F: Corresponding scores. C, G: Forecasts and observations on the log scale. D, H: Corresponding scores. 
-    }
-    \label{fig:HUB-model-comparison-baseline}
-\end{figure}
-
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.99\textwidth]{output/figures/HUB-model-comparison-epinow.png}
-    \caption{
-    Forecasts and scores for two-week-ahead predictions from the epiforecasts-EpiNow2 model \citep{epinow2} made in Germany. A, E: 50\% and 90\% prediction intervals and observed values for cases and deaths on the natural scale. B, F: Corresponding scores. C, G: Forecasts and observations on the log scale. D, H: Corresponding scores. 
-    }
-    \label{fig:HUB-model-comparison-epinow}
-\DIFdelbeginFL %DIFDELCMD < \end{figure}
+\DIFdelbegin %DIFDELCMD < \begin{figure}[h!]
+%DIFDELCMD <     \centering
+%DIFDELCMD <     \includegraphics[width=0.99\textwidth]{output/figures/example-log-first.png}
+%DIFDELCMD <     %%%
+%DIFDELCMD < \caption{%
+{%DIFAUXCMD
+\DIFdelFL{Illustration of impropriety of log-transformed CRPS. We assume $Y \sim \text{LogNormal}(0, 1)$ and evaluate the expected CRPS for predictive distributions $\text{LogNormal}(0, \sigma)$ with varying values of $\sigma \in [0.1, 2]$. For the regular CRPS (left) and CRPS applied to log-transformed outcomes (middle), the lowest expectation is achieved for the true value $\sigma = 1$. For the log-transformed CRPS, the optimal value is  0.9, i.e. there is an incentive to report a forecast that is too sharp.}}
+    %DIFAUXCMD
+%DIFDELCMD < \label{fig:log-improper}
+%DIFDELCMD < \end{figure}
 %DIFDELCMD < 
 
 %DIFDELCMD < \begin{figure}[h!]
+%DIFDELCMD <     \centering
+%DIFDELCMD <     \includegraphics[width=0.99\textwidth]{output/figures/illustration-effect-offset-log.png}
+%DIFDELCMD <     %%%
+%DIFDELCMD < \caption{%
+{%DIFAUXCMD
+\DIFdelFL{Illustration of the effect of adding a small quantity to a value before taking the natural logarithm. For increasing x, all lines eventually approach the black line (representing a transformation with no offset applied).
+    For a given solid line, the dashed line of the same colour marks the x-value that  is equal to 5 times the corresponding offset.}}
+    %DIFAUXCMD
+\DIFdelendFL \DIFaddbeginFL \paragraph{\DIFaddFL{S2 Figure.}}
+\DIFaddendFL \label{fig:illustration-effect-log-offset}
+\DIFdelbeginFL %DIFDELCMD < \end{figure}
+%DIFDELCMD < %%%
+\DIFdelend \DIFaddbegin \textbf{\DIFadd{Illustration of the effect of adding a small quantity to a value before taking the natural logarithm. }}
+\DIFadd{For increasing x, all lines eventually approach the black line (representing a transformation with no offset applied).
+    For a given solid line, the dashed line of the same colour marks the x-value that  is equal to 5 times the corresponding offset. It can be seen that for $a$ values smaller than one fifth of the transformed quantity, the effect of adding an offset is generally small. When choosing a suitable $a$, the trade-off is between staying close to the interpretation of a pure log-transformation (choosing a small $a$) and not giving excessive weights to small observations (by choosing a larger $a$, see Figure \ref{fig:HUB-log-different-offsets}).
+    }\DIFaddend 
+
+\DIFdelbegin %DIFDELCMD < \begin{figure}[h!]
+%DIFDELCMD < \centering
+%DIFDELCMD < \includegraphics[width = 1\textwidth]{output/figures/SIM-score-approximation.png}
+%DIFDELCMD < %%%
+%DIFDELCMD < \caption{%
+{%DIFAUXCMD
+\DIFdelFL{Visualisation of expected CRPS values against approximated scores using the approximation detailed in Section \ref{sec:methods:rankings} (see also Figure \ref{fig:SIM-wis-state-size-mean}). Expected CRPS scores are shown for three different distributions once on the natural scale (top row) and once scored on the log scale (bottom row).  
+}}
+%DIFAUXCMD
+\DIFdelendFL \DIFaddbeginFL \paragraph{\DIFaddFL{S3 Figure.}}
+\DIFaddendFL \label{fig:score-approx}
+\DIFdelbeginFL %DIFDELCMD < \end{figure}
+%DIFDELCMD < %%%
+\DIFdelend \DIFaddbegin \textbf{\DIFadd{Visualisation of expected CRPS values against approximated scores.}} 
+\DIFadd{This is using the approximation detailed in Section \ref{sec:methods:rankings} (see also Figure \ref{fig:SIM-wis-state-size-mean}). Expected CRPS scores are shown for three different distributions once on the natural scale (top row) and once scored on the log scale (bottom row). 
+}\DIFaddend 
+
+%DIF < %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%DIF <  HUB plots %
+\DIFdelbegin %DIFDELCMD < 
+
+%DIFDELCMD < \begin{table}[h!]
+%DIFDELCMD <     \centering
+%DIFDELCMD < \begin{tabular}{lllcc}
+%DIFDELCMD < \toprule
+%DIFDELCMD < %%%
+\DIFdelFL{target\_type }%DIFDELCMD < & %%%
+\DIFdelFL{quantity }%DIFDELCMD < & %%%
+\DIFdelFL{measure }%DIFDELCMD < & %%%
+\DIFdelFL{natural }%DIFDELCMD < & %%%
+\DIFdelFL{log}%DIFDELCMD < \\
+%DIFDELCMD < \midrule
+%DIFDELCMD < %%%
+\DIFdelFL{Cases }%DIFDELCMD < & %%%
+\DIFdelFL{Observations }%DIFDELCMD < & %%%
+\DIFdelFL{mean }%DIFDELCMD < & %%%
+\DIFdelFL{61979 }%DIFDELCMD < & %%%
+\DIFdelFL{9.19}%DIFDELCMD < \\
+%DIFDELCMD < %%%
+\DIFdelFL{Cases }%DIFDELCMD < & %%%
+\DIFdelFL{Observations }%DIFDELCMD < & %%%
+\DIFdelFL{sd }%DIFDELCMD < & %%%
+\DIFdelFL{171916 }%DIFDELCMD < & %%%
+\DIFdelFL{2.10}%DIFDELCMD < \\
+%DIFDELCMD < %%%
+\DIFdelFL{Cases }%DIFDELCMD < & %%%
+\DIFdelFL{Observations }%DIFDELCMD < & %%%
+\DIFdelFL{var }%DIFDELCMD < & %%%
+\DIFdelFL{29555122130 }%DIFDELCMD < & %%%
+\DIFdelFL{4.42}%DIFDELCMD < \\
+%DIFDELCMD < %%%
+\DIFdelFL{Deaths }%DIFDELCMD < & %%%
+\DIFdelFL{Observations }%DIFDELCMD < & %%%
+\DIFdelFL{mean }%DIFDELCMD < & %%%
+\DIFdelFL{220 }%DIFDELCMD < & %%%
+\DIFdelFL{3.89}%DIFDELCMD < \\
+%DIFDELCMD < %%%
+\DIFdelFL{Deaths }%DIFDELCMD < & %%%
+\DIFdelFL{Observations }%DIFDELCMD < & %%%
+\DIFdelFL{sd }%DIFDELCMD < & %%%
+\DIFdelFL{435 }%DIFDELCMD < & %%%
+\DIFdelFL{1.96}%DIFDELCMD < \\
+%DIFDELCMD < \addlinespace
+%DIFDELCMD < %%%
+\DIFdelFL{Deaths }%DIFDELCMD < & %%%
+\DIFdelFL{Observations }%DIFDELCMD < & %%%
+\DIFdelFL{var }%DIFDELCMD < & %%%
+\DIFdelFL{189051 }%DIFDELCMD < & %%%
+\DIFdelFL{3.83}%DIFDELCMD < \\
+%DIFDELCMD < %%%
+\DIFdelFL{Cases }%DIFDELCMD < & %%%
+\DIFdelFL{WIS }%DIFDELCMD < & %%%
+\DIFdelFL{mean }%DIFDELCMD < & %%%
+\DIFdelFL{15840 }%DIFDELCMD < & %%%
+\DIFdelFL{0.27}%DIFDELCMD < \\
+%DIFDELCMD < %%%
+\DIFdelFL{Cases }%DIFDELCMD < & %%%
+\DIFdelFL{WIS }%DIFDELCMD < & %%%
+\DIFdelFL{sd }%DIFDELCMD < & %%%
+\DIFdelFL{53117 }%DIFDELCMD < & %%%
+\DIFdelFL{0.28}%DIFDELCMD < \\
+%DIFDELCMD < %%%
+\DIFdelFL{Deaths }%DIFDELCMD < & %%%
+\DIFdelFL{WIS }%DIFDELCMD < & %%%
+\DIFdelFL{mean }%DIFDELCMD < & %%%
+\DIFdelFL{31 }%DIFDELCMD < & %%%
+\DIFdelFL{0.23}%DIFDELCMD < \\
+%DIFDELCMD < %%%
+\DIFdelFL{Deaths }%DIFDELCMD < & %%%
+\DIFdelFL{WIS }%DIFDELCMD < & %%%
+\DIFdelFL{sd }%DIFDELCMD < & %%%
+\DIFdelFL{65 }%DIFDELCMD < & %%%
+\DIFdelFL{0.28}%DIFDELCMD < \\
+%DIFDELCMD < \bottomrule
+%DIFDELCMD < \end{tabular}
+%DIFDELCMD <     %%%
+%DIFDELCMD < \caption{%
+{%DIFAUXCMD
+\DIFdelFL{Summary statistics for observations and scores for forecasts from the ECDC data set.}}
+    %DIFAUXCMD
+\DIFdelendFL \DIFaddbeginFL \paragraph{\DIFaddFL{S1 Table.}}
+\DIFaddendFL \label{tab:HUB-summary}
+\DIFdelbeginFL %DIFDELCMD < \end{table}
+%DIFDELCMD < %%%
+\DIFdelend \DIFaddbegin \textbf{\DIFadd{Summary statistics for observations and scores for forecasts from the ECDC data set.}}
+\DIFaddend 
+
+\DIFdelbegin %DIFDELCMD < \begin{figure}[h!]
+%DIFDELCMD <     \centering
+%DIFDELCMD <     \includegraphics[width=0.99\textwidth]{output/figures/number-avail-forecasts.png}
+%DIFDELCMD <     %%%
+%DIFDELCMD < \caption{%
+{%DIFAUXCMD
+\DIFdelFL{Number of forecasts available from different models for each forecast date. 
+    }}
+    %DIFAUXCMD
+\DIFdelendFL \DIFaddbeginFL \paragraph{\DIFaddFL{S4 Figure.}}
+\DIFaddendFL \label{fig:HUB-num-avail-models}
+\DIFdelbeginFL %DIFDELCMD < \end{figure}
+%DIFDELCMD < %%%
+\DIFdelend \DIFaddbegin \textbf{\DIFadd{Number of forecasts available from different models for each forecast date.}}
+    \DIFaddend 
+
+\DIFdelbegin %DIFDELCMD < \begin{table}
+%DIFDELCMD < \centering
+%DIFDELCMD < \begin{tabular}{ccc}
+%DIFDELCMD < \toprule
+%DIFDELCMD < %%%
+\DIFdelFL{True value }%DIFDELCMD < & %%%
+\DIFdelFL{\& }%DIFDELCMD < & %%%
+\DIFdelFL{Median prediction}%DIFDELCMD < \\
+%DIFDELCMD < \midrule
+%DIFDELCMD < %%%
+\DIFdelFL{$>0$ }%DIFDELCMD < & %%%
+\DIFdelFL{\ }%DIFDELCMD < & %%%
+\DIFdelFL{$>100\times$ true value}%DIFDELCMD < \\
+%DIFDELCMD < %%%
+\DIFdelFL{$>10$ }%DIFDELCMD < & %%%
+\DIFdelFL{\  }%DIFDELCMD < & %%%
+\DIFdelFL{$>20\times$ true value}%DIFDELCMD < \\
+%DIFDELCMD < %%%
+\DIFdelFL{$>50$ }%DIFDELCMD < & %%%
+\DIFdelFL{\  }%DIFDELCMD < & %%%
+\DIFdelFL{$<1/50\times$ true value}%DIFDELCMD < \\
+%DIFDELCMD < %%%
+\DIFdelFL{$= 0$ }%DIFDELCMD < & %%%
+\DIFdelFL{\  }%DIFDELCMD < & %%%
+\DIFdelFL{$>100$}%DIFDELCMD < \\
+%DIFDELCMD < \bottomrule
+%DIFDELCMD < \end{tabular}
+%DIFDELCMD < %%%
+%DIFDELCMD < \caption{%
+{%DIFAUXCMD
+\DIFdelFL{Criteria for removing forecasts. Any forecast that met one of the listed criteria (represented by a row in the table), was removed. Those forecasts were removed in order to be better able to illustrate the effects of the log-transformation on scores and eliminating distortions caused by outlier forecasters. When evaluating models against each other (rather than illustrating the effect of a transformation), one would prefer not to condition on the outcome when deciding whether a forecast should be taken into account. }}
+%DIFAUXCMD
+\DIFdelendFL \DIFaddbeginFL \paragraph{\DIFaddFL{S5 Figure.}}
+\label{fig:number-anomalies}
+\textbf{\DIFaddFL{Number of observed values that were removed as anomalous. }}
+\DIFaddFL{The values were marked as anomalous by the European Forecast Hub team. 
+    }
+
+\paragraph{\DIFaddFL{S6 Figure.}}
+\label{fig:erroneous-forecasts}
+\textbf{\DIFaddFL{Number of forecasts marked as erroneous and removed. }} 
+\DIFaddFL{Forecasts that were in extremely poor agreement with the observed values were removed from the analysis according to the criteria shown in Table \ref{tab:erroneous}. 
+}
+
+\paragraph{\DIFaddFL{S2 Table.}}
+\DIFaddendFL \label{tab:erroneous}
+\DIFdelbeginFL %DIFDELCMD < \end{table}
+%DIFDELCMD < %%%
+\DIFdelend \DIFaddbegin \textbf{\DIFadd{Criteria for removing forecasts. }}
+\DIFadd{Any forecast that met one of the listed criteria (represented by a row in the table), was removed. Those forecasts were removed in order to be better able to illustrate the effects of the log-transformation on scores and eliminating distortions caused by outlier forecasters. When evaluating models against each other (rather than illustrating the effect of a transformation), one would prefer not to condition on the outcome when deciding whether a forecast should be taken into account. 
+}\DIFaddend 
+
+\DIFdelbegin %DIFDELCMD < \begin{figure}[h!]
+%DIFDELCMD <     \centering
+%DIFDELCMD <     \includegraphics[width=0.99\textwidth]{output/figures/HUB-model-comparison-baseline.png}
+%DIFDELCMD <     %%%
+%DIFDELCMD < \caption{%
+{%DIFAUXCMD
+\DIFdelFL{Forecasts and scores for two-week-ahead predictions from the EuroCOVIDhub-baseline made in Germany. The model had zero included in some of its 50 percent intervals (e.g. for case forecasts in July), leading to excessive dispersion values on the log scale. One could argue that including zero in the prediction intervals constituted an unreasonable forecast that was rightly penalised, but in general care has to be taken with small numbers. A, E: 50\% and 90\% prediction intervals and observed values for cases and deaths on the natural scale. B, F: Corresponding scores. C, G: Forecasts and observations on the log scale. D, H: Corresponding scores. 
+    }}
+    %DIFAUXCMD
+\DIFdelendFL \DIFaddbeginFL \paragraph{\DIFaddFL{S7 Figure.}}
+\DIFaddendFL \label{fig:HUB-model-comparison-baseline}
+\DIFdelbeginFL %DIFDELCMD < \end{figure}
+%DIFDELCMD < %%%
+\DIFdelend \DIFaddbegin \textbf{\DIFadd{Forecasts and scores for two-week-ahead predictions from the EuroCOVIDhub-baseline made in Germany. }}
+\DIFadd{The model had zero included in some of its 50 percent intervals (e.g. for case forecasts in July 2021), leading to excessive dispersion values on the log scale. One could argue that including zero in the prediction intervals constituted an unreasonable forecast that was rightly penalised, but in general care has to be taken with small numbers. One potential way to do deal with this could be to use a higher $a$ value when applying a transformation $\log(x + a)$, for example $a = 10$ instead of $a = 1$. A, E: 50\% and 90\% prediction intervals and observed values for cases and deaths on the natural scale. B, F: Corresponding scores. C, G: Forecasts and observations on the log scale. D, H: Corresponding scores. 
+    }\DIFaddend 
+
+\DIFdelbegin %DIFDELCMD < \begin{figure}[h!]
+%DIFDELCMD <     \centering
+%DIFDELCMD <     \includegraphics[width=0.99\textwidth]{output/figures/HUB-model-comparison-epinow.png}
+%DIFDELCMD <     %%%
+%DIFDELCMD < \caption{%
+{%DIFAUXCMD
+\DIFdelFL{Forecasts and scores for two-week-ahead predictions from the epiforecasts-EpiNow2 model \mbox{%DIFAUXCMD
+\citep{epinow2} }\hskip0pt%DIFAUXCMD
+made in Germany. A, E: 50\% and 90\% prediction intervals and observed values for cases and deaths on the natural scale. B, F: Corresponding scores. C, G: Forecasts and observations on the log scale. D, H: Corresponding scores. 
+    }}
+    %DIFAUXCMD
+\DIFdelendFL \DIFaddbeginFL \paragraph{\DIFaddFL{S8 Figure.}}
+\DIFaddendFL \label{fig:HUB-model-comparison-epinow}
+\DIFdelbeginFL %DIFDELCMD < \end{figure}
+%DIFDELCMD < %%%
+\DIFdelend \DIFaddbegin \textbf{\DIFadd{Forecasts and scores for two-week-ahead predictions from the epiforecasts-EpiNow2 model made in Germany.}} 
+\DIFadd{A, E: 50\% and 90\% prediction intervals and observed values for cases and deaths on the natural scale from the EpiNow2 model \mbox{%DIFAUXCMD
+\citep{epinow2}}\hskip0pt%DIFAUXCMD
+. B, F: Corresponding scores. C, G: Forecasts and observations on the log scale. D, H: Corresponding scores. 
+}\DIFaddend 
+
+
+\DIFdelbegin %DIFDELCMD < \begin{figure}[h!]
 %DIFDELCMD <     \centering
 %DIFDELCMD <     \includegraphics[width=0.99\textwidth]{output/figures/HUB-scores-locations-log-variants.png}
 %DIFDELCMD <     %%%
@@ -966,14 +1096,15 @@ $= 0$ & \  & $>100$\\
 \DIFdelFL{Mean WIS in different locations for different transformations applied before scoring. Shown are scores for two-week-ahead forecasts of the EuroCOVIDhub-ensemble. On the natural scale (with no transformation prior applying the WIS), scores correlate strongly with the average number of observed values in a given location. The same is true for scores obtained after applying a square-root transformation, or after applying a log-transformation with a large offset $a$. For illustrative purposes, $a$ was chosen to be 101630 for cases and 530 for deaths, 10 times the respective median observed value. For large values of $a$, $log(x + a)$ grows linearly in $x$, meaning that we expect to observe the same patterns as in the case with no transformation. For decreasing values of $a$, we give more relative weight to scores in small locations.}}
     %DIFAUXCMD
 %DIFDELCMD < \label{fig:HUB-log-different-offsets}
+%DIFDELCMD < \end{figure}
+%DIFDELCMD < 
+
 %DIFDELCMD < %%%
-\DIFdelendFL \end{figure}
-
-
-
-
-\clearpage
-\bibliography{bib/log-or-not-v2.bib, bib/log-or-not.bib, bib/software.bib}
+\DIFdelend \clearpage
+\DIFdelbegin %DIFDELCMD < \bibliography{bib/log-or-not-v2.bib, bib/log-or-not.bib, bib/software.bib}
+%DIFDELCMD < %%%
+\DIFdelend \DIFaddbegin \bibliography{../bib/log-or-not-v2.bib, ../bib/log-or-not.bib, ../bib/software.bib}
+\DIFaddend 
 
 
 \end{document}

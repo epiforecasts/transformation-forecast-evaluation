@@ -48,6 +48,20 @@ plot_fct <- function(data) {
          x = "Observed value")
 }
 
+label_fn <- function(x) {
+  x <- ifelse(x%%1 == 0, 
+              as.integer(x), x)
+  ifelse(x < 1000, 
+         paste(x), 
+         ifelse(x < 1e6, 
+                paste0(x / 1000, "k"),
+                ifelse(x < 1e9, 
+                       paste0(x / 1e6, "m"), 
+                       paste0(x / 1e9, "b"))
+         )
+  )
+}
+
 label_fn_hat <- function(x) {
   ifelse(x%%1 == 0, 
          TeX(paste0(x, "\\hat{y}")), 
@@ -71,10 +85,11 @@ p2 <- p1 +
   theme(legend.position = "bottom")
 
 ggsave("output/figures/different-relative-errors.png", width = 7, height = 3)
+ggsave("second submission after review/figures/Figure1.tiff", width = 7, height = 3, dpi = 300)
 
 
 ## ========================================================================== ##
-## SI Version of Figure 1 (Figure SI.1) 
+## Not used: 
 ## Numerical comparison square-root transformation
 ## ========================================================================== ##
 
@@ -193,10 +208,11 @@ p1 / p2 +
   labs(y = TeX("CRPS (normalised)"))
 
 ggsave("output/figures/SIM-mean-state-size.png", width = 7, height = 4.1)
+ggsave("second submission after review/figures/Figure2.tiff", width = 7, height = 4.1, dpi = 300)
 
 
 ## ========================================================================== ##
-## SI Version of Figure 2 (Figure SI.2)
+## SI Version of Figure 2 (Figure SI.3)
 ## Illustration of the approximation
 ## ========================================================================== ##
 
@@ -222,11 +238,11 @@ scores_fig_2 |>
   expand_limits(y = 0)
 
 ggsave("output/figures/SIM-score-approximation.png", width = 7, height = 8)
-
+ggsave("second submission after review/SI/S3-Figure.tiff", width = 7, height = 4.1, dpi = 300)
 
 
 ## ========================================================================== ##
-## FIGURE 3: llustration of impropriety of log-transformed CRPS. 
+## FIGURE SI.1: llustration of impropriety of log-transformed CRPS. 
 ## ========================================================================== ##
 
 # in this plot the CRPS is approximated by the WIS with 99 quantiles
@@ -266,12 +282,26 @@ summary <- scores |>
   group_by(sigma) |>
   summarise(log_wis = mean(log_wis, na.rm = TRUE), 
             wis_log = mean(log, na.rm = TRUE), 
-            wis = mean(natural, na.rm = TRUE), 
-            geom_wis = exp(mean(log(natural), na.rm = TRUE))) |>
-  pivot_longer(cols = c(wis, log_wis, wis_log, geom_wis), values_to = "score", names_to = "type") |>
+            wis = mean(natural, na.rm = TRUE) #, 
+            # geom_wis = exp(mean(log(natural), na.rm = TRUE))
+            ) |>
+  pivot_longer(cols = c(wis, 
+                        log_wis, 
+                        wis_log #, 
+                        #geom_wis
+                        ), values_to = "score", names_to = "type") |>
   mutate(type = factor(type, 
-                       levels = c("wis", "wis_log", "log_wis", "geom_wis"), 
-                       labels = c("CRPS", "CRPS (log scale)", "log(CRPS)", "geom(wis)")))
+                       levels = c("wis", 
+                                  "wis_log", 
+                                  "log_wis" #, 
+                                  # "geom_wis"
+                                  ), 
+                       labels = c("CRPS", 
+                                  "CRPS (log scale)", 
+                                  "log(CRPS)" #, 
+                                  # "geom(wis)"
+                                  )
+                       ))
 
 
 score_plot <- function(summary) {
@@ -292,11 +322,12 @@ summary |>
 score_plot(summary)
 
 ggsave("output/figures/example-log-first.png", width = 7, height = 2.1)
+ggsave("second submission after review/SI/S1-Figure.tiff", width = 7, height = 2.1, dpi = 300)
 
 
 
 ## ========================================================================== ##
-## Figure 4: Illustration of the effect of adding an offset to the logarithm
+## Figure SI.2: Illustration of the effect of adding an offset to the logarithm
 ## ========================================================================== ##
 
 x <- seq(0.05, 100, 0.05)
@@ -333,6 +364,7 @@ plot_df |>
   labs(y = "log (x + a)", color = "a")
 
 ggsave(filename = "output/figures/illustration-effect-offset-log.png", height = 2.5, width = 7)
+ggsave(filename = "second submission after review/SI/S2-Figure.tiff", height = 2.5, width = 7, dpi = 300)
 
 
 
@@ -439,7 +471,8 @@ p1 + p2 +
 ggsave(filename = "output/figures/illustration-effect-log-ranking-crps.png", 
        width = 7, height = 3)
 
-
+ggsave(filename = "second submission after review/figures/Figure3.tiff", 
+       width = 7, height = 3, dpi = 300)
 
 
 
@@ -503,7 +536,7 @@ hub_data$location |>
 
 
 ## ========================================================================== ##
-## Figure ?: Number of anomalies filtered out
+## Figure SI.5 and SI.6: Number of anomalies filtered out
 ## ========================================================================== ##
 
 n_total_obs <- scores$target_end_date |> unique() |> length()
@@ -538,6 +571,8 @@ anomalies |>
   labs(y = "Number of observations removed as anomaly", x = "Location")
 ggsave(filename = "output/figures/number-anomalies.png", 
        width = 7, height = 4.5)
+ggsave(filename = "second submission after review/SI/S5-Figure.tiff", 
+       width = 7, height = 4.5, dpi = 300)
 
 anomalies |>
   group_by(target_type) |>
@@ -563,25 +598,14 @@ removed_forecasts |>
   labs(y = "Percentage of erroneous foreccasts", x = "Location")
 ggsave(filename = "output/figures/erroneous-forecasts.png", 
        width = 7, height = 4.5)
+ggsave(filename = "second submission after review/SI/S6-Figure.tiff", 
+       width = 7, height = 4.5, dpi = 300)
+
 
 ## ========================================================================== ##
-## Figure 6: Scores for two-week-ahead predictions from the 
+## Figure 4: Scores for two-week-ahead predictions from the 
 ## EuroCOVIDhub-ensemble madein Germany.
 ## ========================================================================== ##
-
-label_fn <- function(x) {
-  x <- ifelse(x%%1 == 0, 
-              as.integer(x), x)
-  ifelse(x < 1000, 
-         paste(x), 
-         ifelse(x < 1e6, 
-                paste0(x / 1000, "k"),
-                ifelse(x < 1e9, 
-                       paste0(x / 1e6, "m"), 
-                       paste0(x / 1e9, "b"))
-         )
-  )
-}
 
 plot_pred_score <- function(hub_data, scores, model,
                             horizon = 2, type = "Cases", 
@@ -711,29 +735,31 @@ DH"
 
 put_plot_together("EuroCOVIDhub-ensemble")
 ggsave(filename = "output/figures/HUB-model-comparison-ensemble.png", width = 10, height = 8.5)
+ggsave(filename = "second submission after review/figures/Figure4.tiff", width = 10, height = 8.5, dpi = 300)
 
 
 ## ========================================================================== ##
-## SI variant of Figure 6 (Figure SI.4)
-## ========================================================================== ##
-
-put_plot_together("epiforecasts-EpiNow2")
-ggsave(filename = "output/figures/HUB-model-comparison-epinow.png", width = 10, height = 8.5)
-
-## ========================================================================== ##
-## SI variant of Figure 6 (Figure SI.5)
+## SI variant of Figure 4 (Figure SI.7)
 ## ========================================================================== ##
 
 put_plot_together("EuroCOVIDhub-baseline", locationname = "DE")
 ggsave(filename = "output/figures/HUB-model-comparison-baseline.png", width = 10, height = 8.5)
+ggsave(filename = "second submission after review/SI/S7-Figure.tiff", width = 10, height = 8.5, dpi = 300)
 
+## ========================================================================== ##
+## SI variant of Figure 4 (Figure SI.8)
+## ========================================================================== ##
+
+put_plot_together("epiforecasts-EpiNow2")
+ggsave(filename = "output/figures/HUB-model-comparison-epinow.png", width = 10, height = 8.5)
+ggsave(filename = "second submission after review/SI/S8-Figure.tiff", width = 10, height = 8.5, dpi = 300)
 
 
 
 
 
 ## ========================================================================== ##
-## Figure 7: Observations and scores across locations and forecast 
+## Figure 5: Observations and scores across locations and forecast 
 ##           horizons for the European COVID-19 Forecast Hub data
 ## ========================================================================== ##
 
@@ -862,20 +888,21 @@ plot_means_obs  + box_plot_obs + plot_mean_scores + box_plot_scores + box_plot_h
   plot_annotation(tag_levels = "A")
 
 ggsave("output/figures/HUB-mean-obs-location.png", width = 10, height = 10)
-
+ggsave(filename = "second submission after review/figures/Figure5.tiff", width = 10, height = 10, dpi = 300)
 
 ## ========================================================================== ##
-## (Variant of Figure 7) Figure SI.6: Mean WIS in different locations 
+## Figure 6: Mean WIS in different locations 
 ## for different transformations applied before scoring
 ## ========================================================================== ##
 
 mean_scores_plot(scores_log_alts)
 
 ggsave("output/figures/HUB-scores-locations-log-variants.png", width = 8, height = 7.5)
+ggsave("second submission after review/figures/Figure6.tiff", width = 8, height = 7.5, dpi = 300)
 
 
 ## ========================================================================== ##
-## Figure 8: Regression analysis
+## Figure 7: Regression analysis
 ## ========================================================================== ##
 
 # run regressions
@@ -1023,7 +1050,7 @@ p_natural / p_sqrt / p_log +
   theme(legend.position = "bottom")
 
 ggsave("output/figures/HUB-transformation-regression.png", width = 7, height = 6.3)
-
+ggsave("second submission after review/figures/Figure7.tiff", width = 7, height = 6.3, dpi = 300)
 
 ## ========================================================================== ##
 ## Table 1: Regression for the relationship of mean and var
@@ -1220,7 +1247,7 @@ p_cor_scores + p_cor_skill +
   theme(legend.position = "bottom")
 
 ggsave("output/figures/HUB-correlations.png", width = 7, height = 2.6)
-
+ggsave("second submission after review/figures/Figure8.tiff", width = 7, height = 2.6, dpi = 300)
 
 
 
@@ -1361,7 +1388,7 @@ ranking_cases[[2]] + ranking_cases[[1]] +
   theme(legend.position = "bottom")
 
 ggsave("output/figures/HUB-pairwise-comparisons.png", width = 11.5, height = 6)
-
+ggsave("second submission after review/figures/Figure9.tiff", width = 11.5, height = 6, dpi = 300)
 
 
 
@@ -1434,7 +1461,7 @@ hub_data |>
                      c(as.character(as.Date("2021-03-08") + 7* 8*(0:20))))
 
 ggsave(filename = "output/figures/number-avail-forecasts.png", height = 4, width = 10)
-
+ggsave("second submission after review/SI/S4-Figure.tiff", width = 10, height = 4, dpi = 300)
 
 
 ## ========================================================================== ##

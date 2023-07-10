@@ -1,7 +1,7 @@
 \documentclass{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL first submission/Manuscript_first_submission.tex           Mon Jun 26 15:38:59 2023
-%DIF ADD second submission after review/Manuscript-without-SI.tex   Sat Jul  8 19:48:04 2023
+%DIF ADD second submission after review/Manuscript-without-SI.tex   Mon Jul 10 11:39:59 2023
 \usepackage[]{graphicx}
 \usepackage[]{xcolor}
 \usepackage{alltt}
@@ -145,8 +145,13 @@ Forecast evaluation \DIFdelbegin \DIFdel{plays an essential role in the developm
 
 \newpage
 
+\DIFaddbegin \section*{\DIFadd{Author summary}}
+\DIFadd{Scores like the Continuous Ranked Probability Score (CRPS) or the Weighted Interval Score (WIS) are commonly used to evaluate epidemiological forecasts and are a measure of absolute distance between forecast and observation. Due to the exponential nature of epidemic processes, evaluating the absolute distance between forecast and observation may not be ideal. We argue that transforming counts before applying the CRPS or WIS can yield more meaningful results. The natural logarithm is a particularly attractive transformation in epidemiological settings. Scores computed on log-transformed values can be interpreted as a probabilistic version of a relative error and reflect how well forecasters predict the time-varying epidemic growth rate. If the data-generating process has a quadratic mean-variance relationship, the logarithmic transformation also leads to expected CRPS values which are independent of the order of magnitude of the predicted quantity. 
+We illustrate these properties using data from the European COVID-19 Forecast Hub and find that scoring transformed counts changes model rankings. Stronger emphasis is given to  situations in which forecasters missed the beginning of upward swings, while failing to predict a downturn following a peak is less severely penalised. We generally recommend including evaluations of transformed counts when assessing forecaster performance. 
+}
 
-% ===========================================================
+
+\DIFaddend % ===========================================================
 \section{Introduction}
 
 Probabilistic forecasts \citep{heldProbabilisticForecastingInfectious2017} play an important role in decision-making in epidemiology and public health \citep{doi:10.2105/AJPH.2022.306831}, as well as other areas as diverse as economics \citep{timmermannForecastingMethodsFinance2018} or meteorology \citep{gneitingWeatherForecastingEnsemble2005}. Forecasts based on epidemiological modelling in particular \DIFdelbegin \DIFdel{has }\DIFdelend \DIFaddbegin \DIFadd{have }\DIFaddend received widespread attention during the COVID-19 pandemic. Evaluations of forecasts can provide feedback for researchers to improve their models and train ensembles. They moreover help decision-makers distinguish good from bad predictions and choose forecasters and models that are best suited to inform future decisions.

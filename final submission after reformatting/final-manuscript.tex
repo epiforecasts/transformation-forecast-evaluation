@@ -379,7 +379,6 @@ As Fig \ref{fig:SAPE} shows, the alignment with the SAPE is in fact the closest 
 
 \begin{figure}[h!]
 \centering
-\includegraphics[width = 1\textwidth]{../output/figures/different-relative-errors.png}
 \caption{Numerical comparison of different measures of relative error: absolute percentage error (APE), relative error (RE), symmetric absolute percentage error (SAPE) and the absolute error applied to log-transformed predictions and observations. We denote the predicted value by $\hat{y}$ and display errors as a function of the ratio of observed and predicted value. A: x-axis shown on a linear scale. B: x-axis shown on a logarithmic scale.}
 \label{fig:SAPE}
 \end{figure}
@@ -461,7 +460,6 @@ To strengthen our intuition on how transforming outcomes prior to applying the C
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.99\textwidth]{../output/figures/SIM-mean-state-size.png}
     \caption{Expected CRPS scores as a function of the mean and variance of the forecast quantity. We computed expected CRPS values  for three different distributions, assuming an ideal forecaster with predictive distribution equal to the true underlying (data-generating) distribution. 
     These expected CRPS values were computed for different predictive means based on 10,000 samples each and are represented by dots. Solid lines show the corresponding approximations of the expected CRPS from equations \eqref{eq:taylor_quadratic} and \eqref{eq:taylor_linear}. \nameref{fig:score-approx} shows the quality of the approximation in more detail. 
     The first distribution (red) is a truncated normal distribution with constant variance (we chose $\sigma = 1$ in order to only obtain positive samples). The second (green) is a negative binomial distribution with variance $\theta = 10$ and variance $\sigma^2 = \mu + 0.1\mu^2$. The third (blue) is a
@@ -478,7 +476,6 @@ Rankings between different forecasters based on the CRPS may change when making 
 
 \begin{figure}[h!]
 \centering
-\includegraphics[width = 1\textwidth]{../output/figures/illustration-effect-log-ranking-crps.png}
 \caption{Illustration of the effect of the log-transformation of the ranking for a single forecast. Shown are CRPS (or WIS, respectively) values as a function of the observed value for two forecasters. Model A issues a geometric distribution (a negative binomial distribution with size parameter $\theta = 1$) with mean $\mu = 10$ and variance $\sigma^2 = \mu + \mu^2 = 110$), while Model B issues a Poisson distribution with mean and variance equal to 10. Zeroes in this illustrative example were handled by adding one before applying the natural logarithm.}
 \label{fig:illustration-ranking}
 \end{figure}
@@ -524,7 +521,6 @@ In addition to the WIS we use pairwise comparisons \cite{cramerEvaluationIndivid
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.99\textwidth]{../output/figures/HUB-model-comparison-ensemble.png}
     \caption{
     Forecasts and scores for two-week-ahead predictions from the EuroCOVIDhub-ensemble made in Germany. Missing values are due to data anomalies that were removed (see section \ref{sec:HUB-setting}. 
     A, E: 50\% and 90\% prediction intervals and observed values for cases and deaths on the natural scale. B, F: Corresponding scores. C, G: Forecasts and observations on the log scale. D, H: Corresponding scores. 
@@ -536,7 +532,6 @@ When comparing examples of forecasts on the natural scale with those on the log 
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.99\textwidth]{../output/figures/HUB-mean-obs-location.png}
     \caption{Observations and scores across locations and forecast horizons for the European COVID-19 Forecast Hub data. Locations are sorted according to the mean observed value in that location. 
     A: Average (across all time points) of observed cases and deaths for different locations. B: Corresponding boxplot (y-axis on log-scale) of all cases and deaths. C: Scores for two-week-ahead forecasts from the EuroCOVIDhub-ensemble (averaged across all forecast dates) for different locations, evaluated on the natural scale as well as after transforming counts by adding one and applying the natural logarithm. D: Corresponding boxplots of all individual scores of the EuroCOVIDhub-ensemble for two-week-ahead predictions. E: Boxplots for the relative change of scores for the EuroCOVIDhub-ensemble across forecast horizons. For any given forecast date and location, forecasts were made for four different forecast horizons, resulting in four scores. All scores were divided by the score for forecast horizon one. To enhance interpretability, the range of visible relative changes in scores (relative to horizon = 1) was restricted to [0.1, 10].}
     \label{fig:HUB-mean-locations}
@@ -549,7 +544,6 @@ To assess the impact of the choice of offset value $a$ we extend the display fro
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.99\textwidth]{../output/figures/HUB-scores-locations-log-variants.png}
     \caption{Mean WIS in different locations for different transformations applied before scoring. Locations are sorted according to the mean observed value in that location. Shown are scores for two-week-ahead forecasts of the EuroCOVIDhub-ensemble. On the natural scale (with no transformation prior to applying the WIS), scores correlate strongly with the average number of observed values in a given location. The same is true for scores obtained after applying a square-root transformation, or after applying a log-transformation with a large offset $a$. For illustrative purposes, $a$ was chosen to be 101630 for cases and 530 for deaths, 10 times the respective median observed value. For large values of $a$, $\log(x + a)$ grows roughly linearly in $x$, meaning that we expect to observe the same patterns as in the case with no transformation. For decreasing values of $a$, we give more relative weight to scores in small locations.}
     \label{fig:HUB-log-different-offsets}
 \end{figure}
@@ -574,7 +568,6 @@ meaning that we estimate a polynomial relationship between the predictive median
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.99\textwidth]{../output/figures/HUB-transformation-regression.png}
     \caption{Relationship between median forecasts and scores. Black dots represent WIS values for two-week ahead predictions of the EuroCOVIDhub-ensemble. Shown in red are the regression lines discussed in Section \ref{sec:HUB-regression} shown in Table \ref{tab:HUB-regression}. A: WIS for two-week-ahead predictions of the EuroCOVIDhub-ensemble against median predicted values. B: Same as A, with scores obtained after applying a square-root-transformation to the data. C: Same as A, with scores obtained after applying a log-transformation to the data.} 
     \label{fig:HUB-regression}
 \end{figure}
@@ -627,7 +620,6 @@ where $F_{\sqrt{\ }}$ is the predictive distribution on the square-root scale. A
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.99\textwidth]{../output/figures/HUB-correlations.png}
     \caption{Correlations of rankings on the natural and logarithmic scale. A: Average Spearman rank correlation of scores for individual forecasts. For every individual target (defined by a combination of forecast date, target type, horizon, location), one score was obtained per model. Then, for every forecast target, the Spearman rank correlation was computed between scores on the natural scale and on the log scale for all the models that had made a forecast for that specific target. These individual rank correlations were then averaged across locations and time and are displayed stratified by horizon and target types, representing average accordance of model ranks for a single forecast target on the natural and on the log scale. B: Correlation between relative skill scores. For every forecast horizon and target type, a separate relative skill score was computed per model using pairwise comparisons, which is a measure of performance of a model relative to the others for a given horizon and target type that accounts for missing values. The plot shows the correlation between the relative skill scores on the natural vs. on the log scale, representing accordance of overall model performance as judged by scores on the natural and on the log scale.}
     \label{fig:HUB-cors}
 \end{figure}
@@ -636,7 +628,6 @@ For \textit{individual} forecasts, rankings between models for single forecasts 
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.99\textwidth]{../output/figures/HUB-pairwise-comparisons.png}
     \caption{Changes in model ratings as measured by relative skill for two-week-ahead predictions for cases (top row) and deaths (bottom row). A: Relative skill scores for case forecasts from different models submitted to the European COVID-19 Forecast Hub computed on the natural scale. B: Change in rankings as determined by relative skill scores when moving from an evaluation on the natural scale to one on the logarithmic scale. Red arrows indicate that the relative skill score deteriorated when moving from the natural to the log scale, green arrows indicate they improved. C: Relative skill scores based on scores on the log scale. D: Difference in relative skill scores computed on the natural and on the logarithmic scale, ordered as in C. E: Relative contributions of the different WIS components (overprediction, underprediction, and dispersion) to overall model scores on the natural and the logarithmic scale. F, G, H, I, J, K: Analogously for deaths.}
     \label{fig:HUB-rank-order}
 \end{figure}

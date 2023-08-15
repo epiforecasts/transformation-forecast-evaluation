@@ -537,7 +537,7 @@ When comparing examples of forecasts on the natural scale with those on the log 
     \label{fig:HUB-mean-locations}
 \end{figure}
 
-Across the dataset, the average number of observed cases and deaths varied considerably by location and target type (see Fig \ref{fig:HUB-mean-locations}A and B). On the natural scale, scores show a pattern quite similar to the observations across targets (see Figure\ref{fig:HUB-mean-locations}D) and locations (see Figure\ref{fig:HUB-mean-locations}C). On the log scale, scores were more evenly distributed between targets (see Figure\ref{fig:HUB-mean-locations}D) and locations (see Figure\ref{fig:HUB-mean-locations}C). Both on the natural scale as well on the log scale, scores increased considerably with increasing forecast horizon (see Fig \ref{fig:HUB-mean-locations}E). This reflects the increasing difficulty of forecasts further into the future and, for the log scale, corresponds with our expectations from Section \ref{sec:methods:growthrate}. 
+Across the dataset, the average number of observed cases and deaths varied considerably by location and target type (see Fig \ref{fig:HUB-mean-locations}A and B). On the natural scale, scores show a pattern quite similar to the observations across targets (see Fig \ref{fig:HUB-mean-locations}D) and locations (see Fig \ref{fig:HUB-mean-locations}C). On the log scale, scores were more evenly distributed between targets (see Fig \ref{fig:HUB-mean-locations}D) and locations (see Fig \ref{fig:HUB-mean-locations}C). Both on the natural scale as well on the log scale, scores increased considerably with increasing forecast horizon (see Fig \ref{fig:HUB-mean-locations}E). This reflects the increasing difficulty of forecasts further into the future and, for the log scale, corresponds with our expectations from Section \ref{sec:methods:growthrate}. 
 
 To assess the impact of the choice of offset value $a$ we extend the display from Fig \ref{fig:HUB-mean-locations}C by results obtained under different specifications. Results are shown in Fig \ref{fig:HUB-log-different-offsets}, where for completeness we also added the square root transformation. As discussed in Section \ref{sec:methods:considerations}, smaller values of $a$ increase the relative weight of smaller locations in the overall evaluation. In the most extreme considered case $a = 0.001$, the smallest locations in fact receive the largest weight both for deaths and cases. For very large values (see the third row of Fig \ref{fig:HUB-log-different-offsets}), the relative weights strongly resemble those of the evaluation on the natural scale. We recommend using displays of this type to get an intuition for the role different locations may play for overall evaluation results.
 
@@ -722,5 +722,5 @@ A, E: 50\% and 90\% prediction intervals and observed values for cases and death
 
 
 \clearpage
-\bibliography{../bib/log-or-not-v2.bib, ../bib/log-or-not.bib, ../bib/software.bib}
+\bibliography{final-manuscript.bib}
 \end{document}

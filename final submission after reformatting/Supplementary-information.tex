@@ -75,7 +75,7 @@ where $w_k$ is a weight for every interval. Usually, $w_k = \frac{\alpha_k}{2}$ 
     \centering
     \includegraphics[width=0.99\textwidth]{../output/figures/illustration-effect-offset-log.png}
     \caption{Illustration of the effect of adding a small quantity to a value before taking the natural logarithm. For increasing x, all lines eventually approach the black line (representing a transformation with no offset applied).
-    For a given solid line, the dashed line of the same colour marks the x-value that  is equal to 5 times the corresponding offset. It can be seen that for $a$ values smaller than one fifth of the transformed quantity, the effect of adding an offset is generally small. When choosing a suitable $a$, the trade-off is between staying close to the interpretation of a pure log-transformation (choosing a small $a$) and not giving excessive weights to small observations (by choosing a larger $a$, see Figure \ref{fig:HUB-log-different-offsets}).}
+    For a given solid line, the dashed line of the same colour marks the x-value that  is equal to 5 times the corresponding offset. It can be seen that for $a$ values smaller than one fifth of the transformed quantity, the effect of adding an offset is generally small. When choosing a suitable $a$, the trade-off is between staying close to the interpretation of a pure log-transformation (choosing a small $a$) and not giving excessive weights to small observations (by choosing a larger $a$, see Figure 6).}
     \label{fig:illustration-effect-log-offset}
 \end{figure}
 
@@ -84,7 +84,7 @@ where $w_k$ is a weight for every interval. Usually, $w_k = \frac{\alpha_k}{2}$ 
 \centering
 \includegraphics[width = 1\textwidth]{../output/figures/SIM-score-approximation.png}
 \caption{
-Visualisation of expected CRPS values against approximated scores using the approximation detailed in Section \ref{sec:methods:rankings} (see also Figure \ref{fig:SIM-wis-state-size-mean}). Expected CRPS scores are shown for three different distributions once on the natural scale (top row) and once scored on the log scale (bottom row).  
+This is using the approximation detailed in the theoretical discussion on model rankings (see also Fig 2). Expected CRPS scores are shown for three different distributions once on the natural scale (top row) and once scored on the log scale (bottom row).
 }
 \label{fig:score-approx}
 \end{figure}

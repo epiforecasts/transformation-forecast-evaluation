@@ -1,5 +1,7 @@
 # Scoring infectious disease forecasts: To log or not
 
+> **Archived.** No longer maintained; last updated February 2024.
+
 ## Repository
 
 * [Manuscript](https://www.overleaf.com/project/61436ea81fed8f4b5e8a8be8)
